@@ -7,6 +7,7 @@ import util.Pair;
 /**
  *
  * @author George Merticariu
+ * @author Dimitar Misev
  */
 public class DomainGenerator {
 
@@ -38,6 +39,19 @@ public class DomainGenerator {
         }
 
         return fileSize;
+    }
+
+    public String getMDArrayDomain() {
+        StringBuilder ret = new StringBuilder();
+        ret.append('[');
+        for (int i = 0; i < noOfDimensions; i++) {
+            if (i > 0) {
+                ret.append(',');
+            }
+            ret.append('d').append(i);
+        }
+        ret.append(']');
+        return ret.toString();
     }
 
 }

@@ -7,12 +7,15 @@ import java.util.List;
 /**
  *
  * @author George Merticariu
+ * @author Dimitar Misev
  */
 public class Benchmark {
 
-    private QueryGenerator queryGenerator;
-    private QueryExecutor queryExecutor;
-    private SystemController systemController;
+    public static final String HOME_DIR = System.getenv("HOME");
+
+    private final QueryGenerator queryGenerator;
+    private final QueryExecutor queryExecutor;
+    private final SystemController systemController;
 
     public Benchmark(QueryGenerator queryGenerator, QueryExecutor queryExecutor, SystemController systemController) {
         this.queryGenerator = queryGenerator;
@@ -22,7 +25,7 @@ public class Benchmark {
 
     public void runBenchmark() throws Exception {
         //TODO-GM: read results file path from config file
-        try (PrintWriter pr = new PrintWriter(new FileWriter("/home/rasdaman/results.csv", true))) {
+        try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
             systemController.restartSystem();
             queryExecutor.createCollection();
 
@@ -37,7 +40,6 @@ public class Benchmark {
             }
         } finally {
             queryExecutor.dropCollection();
-
         }
     }
 

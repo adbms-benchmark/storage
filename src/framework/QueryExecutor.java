@@ -6,9 +6,9 @@ package framework;
  */
 public abstract class QueryExecutor {
 
-    protected Context context;
+    protected ConnectionContext context;
 
-    protected QueryExecutor(Context context) {
+    protected QueryExecutor(ConnectionContext context) {
         this.context = context;
     }
 
