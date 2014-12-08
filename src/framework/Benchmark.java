@@ -1,0 +1,44 @@
+package framework;
+
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.List;
+
+/**
+ *
+ * @author George Merticariu
+ */
+public class Benchmark {
+
+    private QueryGenerator queryGenerator;
+    private QueryExecutor queryExecutor;
+    private SystemController systemController;
+
+    public Benchmark(QueryGenerator queryGenerator, QueryExecutor queryExecutor, SystemController systemController) {
+        this.queryGenerator = queryGenerator;
+        this.queryExecutor = queryExecutor;
+        this.systemController = systemController;
+    }
+
+    public void runBenchmark() throws Exception {
+        //TODO-GM: read results file path from config file
+        try (PrintWriter pr = new PrintWriter(new FileWriter("/home/rasdaman/results.csv", true))) {
+            systemController.restartSystem();
+            queryExecutor.createCollection();
+
+            List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
+            for (String query : benchmarkQueries) {
+                for (int i = 0; i < 5; ++i) {
+                    systemController.restartSystem();
+                    //TODO-GM: add more information about the query (no of dimensions)
+                    pr.println(String.format("\"%s\", \"%s\", \"%d\"", systemController.getSystemName(), query, queryExecutor.executeTimedQuery(query)));
+                }
+                pr.flush();
+            }
+        } finally {
+            queryExecutor.dropCollection();
+
+        }
+    }
+
+}
