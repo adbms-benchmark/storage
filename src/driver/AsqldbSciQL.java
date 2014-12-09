@@ -21,7 +21,7 @@ public class AsqldbSciQL {
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
         AsqldbSystemController sysController = new AsqldbSystemController("conf/system.properties");
-        int noQueries = 5;
+        int noQueries = 3;
 
         for (int noOfDim = 1; noOfDim <= 3; ++noOfDim) {
             try {
