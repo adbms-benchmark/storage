@@ -2,7 +2,7 @@ package framework.asqldb;
 
 
 import data.QueryDomainGenerator;
-import framework.Configuration;
+import framework.BenchmarkContext;
 import framework.QueryGenerator;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -108,10 +108,10 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     }
 
     private static String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}", Configuration.COLLECTION_NAME, convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}", BenchmarkContext.COLLECTION_NAME, convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private static String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT A{1} FROM {0}", Configuration.COLLECTION_NAME, convertToRasdamanDomain(domain));
+        return MessageFormat.format("SELECT A{1} FROM {0}", BenchmarkContext.COLLECTION_NAME, convertToRasdamanDomain(domain));
     }
 }

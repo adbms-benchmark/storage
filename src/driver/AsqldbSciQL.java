@@ -1,7 +1,7 @@
 package driver;
 
 import framework.Benchmark;
-import framework.Configuration;
+import framework.BenchmarkContext;
 import framework.ConnectionContext;
 import framework.asqldb.AsqldbQueryExecutor;
 import framework.asqldb.AsqldbQueryGenerator;
@@ -27,7 +27,7 @@ public class AsqldbSciQL {
                 {
                     AsqldbSystemController s = new AsqldbSystemController();
                     AsqldbQueryExecutor r = new AsqldbQueryExecutor(asqldbContext, s, noOfDim);
-                    AsqldbQueryGenerator q = new AsqldbQueryGenerator(Configuration.COLLECTION_SIZE, noOfDim, Configuration.MAX_SELECT_SIZE, noQueries);
+                    AsqldbQueryGenerator q = new AsqldbQueryGenerator(BenchmarkContext.COLLECTION_SIZE, noOfDim, BenchmarkContext.MAX_SELECT_SIZE, noQueries);
 
                     Benchmark benchmark = new Benchmark(q, r, s);
                     benchmark.runBenchmark();

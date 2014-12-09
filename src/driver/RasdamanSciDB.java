@@ -1,7 +1,7 @@
 package driver;
 
 import framework.Benchmark;
-import framework.Configuration;
+import framework.BenchmarkContext;
 import framework.ConnectionContext;
 import framework.rasdaman.RasdamanQueryExecutor;
 import framework.rasdaman.RasdamanQueryGenerator;
@@ -36,7 +36,7 @@ public class RasdamanSciDB {
             {
                 RasdamanSystemController s = new RasdamanSystemController(new String[]{"/home/rasdaman/install/bin/start_rasdaman.sh"}, new String[]{"/home/rasdaman/install/bin/stop_rasdaman.sh"}, "/home/rasdaman/install/bin/rasdl");
                 RasdamanQueryExecutor r = new RasdamanQueryExecutor(rasdamanContext, s, noOfDim);
-                RasdamanQueryGenerator q = new RasdamanQueryGenerator(Configuration.COLLECTION_SIZE, noOfDim, Configuration.MAX_SELECT_SIZE, noQueries);
+                RasdamanQueryGenerator q = new RasdamanQueryGenerator(BenchmarkContext.COLLECTION_SIZE, noOfDim, BenchmarkContext.MAX_SELECT_SIZE, noQueries);
 
                 Benchmark benchmark = new Benchmark(q, r, s);
                 benchmark.runBenchmark();
@@ -45,7 +45,7 @@ public class RasdamanSciDB {
             System.out.println("SCIDB: " + noOfDim + "D");
             {
                 SciDBQueryExecutor r = new SciDBQueryExecutor(scidibContext, noOfDim);
-                SciDBQueryGenerator q = new SciDBQueryGenerator(Configuration.COLLECTION_SIZE, noOfDim, Configuration.MAX_SELECT_SIZE, noQueries);
+                SciDBQueryGenerator q = new SciDBQueryGenerator(BenchmarkContext.COLLECTION_SIZE, noOfDim, BenchmarkContext.MAX_SELECT_SIZE, noQueries);
                 SciDBSystemController s = new SciDBSystemController(new String[]{"/opt/scidb/14.8/bin/scidb.py", "stopall", "cluster"}, new String[]{"/opt/scidb/14.8/bin/scidb.py", "startall", "cluster"});
 
                 Benchmark benchmark = new Benchmark(q, r, s);

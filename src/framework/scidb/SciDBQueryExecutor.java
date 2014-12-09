@@ -2,7 +2,7 @@ package framework.scidb;
 
 import data.DataGenerator;
 import data.DomainGenerator;
-import framework.Configuration;
+import framework.BenchmarkContext;
 import framework.ConnectionContext;
 import framework.QueryExecutor;
 import framework.SystemController;
@@ -46,10 +46,10 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
     @Override
     public void createCollection() throws Exception {
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(Configuration.COLLECTION_SIZE);
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(BenchmarkContext.COLLECTION_SIZE);
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        double approxChunkSize = Math.pow(Configuration.TILE_SIZE, 1 / ((double) noOfDimensions));
+        double approxChunkSize = Math.pow(BenchmarkContext.TILE_SIZE, 1 / ((double) noOfDimensions));
         int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
 
         dataGenerator = new DataGenerator(fileSize);
@@ -57,9 +57,9 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
-        createArrayQuery.append(Configuration.COLLECTION_NAME);
+        createArrayQuery.append(BenchmarkContext.COLLECTION_NAME);
         createArrayQuery.append(" <");
-        createArrayQuery.append(Configuration.COLLECTION_NAME);
+        createArrayQuery.append(BenchmarkContext.COLLECTION_NAME);
         createArrayQuery.append(":char>");
         createArrayQuery.append('[');
 
@@ -86,13 +86,13 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
         executeTimedQuery(createArrayQuery.toString());
 
-        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", Configuration.COLLECTION_NAME, filePath);
+        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", BenchmarkContext.COLLECTION_NAME, filePath);
         executeTimedQuery(insertDataQuery, "-n");
     }
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", Configuration.COLLECTION_NAME);
+        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", BenchmarkContext.COLLECTION_NAME);
         executeTimedQuery(dropCollectionQuery);
     }
 }

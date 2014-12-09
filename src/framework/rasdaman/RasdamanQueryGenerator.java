@@ -2,7 +2,7 @@ package framework.rasdaman;
 
 
 import data.QueryDomainGenerator;
-import framework.Configuration;
+import framework.BenchmarkContext;
 import framework.QueryGenerator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -74,10 +74,10 @@ public class RasdamanQueryGenerator extends QueryGenerator {
 
 
     private static String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", Configuration.COLLECTION_NAME, convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", BenchmarkContext.COLLECTION_NAME, convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private static String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT {0}{1} FROM {0}", Configuration.COLLECTION_NAME, convertToRasdamanDomain(domain));
+        return MessageFormat.format("SELECT {0}{1} FROM {0}", BenchmarkContext.COLLECTION_NAME, convertToRasdamanDomain(domain));
     }
 }
