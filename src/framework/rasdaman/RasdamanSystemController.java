@@ -39,14 +39,13 @@ public class RasdamanSystemController extends SystemController {
 
     @Override
     public void restartSystem() throws Exception {
-//        if (executeShellCommand(stopSystemCommand) != 0) {
-//            throw new Exception("Failed to stop the system.");
-//        }
-//
-//        if (executeShellCommand(startSystemCommand) != 0) {
-//            throw new Exception("Failed to start the system.");
-//        }
-//        Thread.sleep(2);
+        if (executeShellCommand(stopSystemCommand) != 0) {
+            throw new Exception("Failed to stop the system.");
+        }
+
+        if (executeShellCommand(startSystemCommand) != 0) {
+            throw new Exception("Failed to start the system.");
+        }
     }
 
     public Pair<String, String> createRasdamanType(int noOfDimensions, String typeType) throws Exception {

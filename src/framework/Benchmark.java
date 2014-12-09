@@ -26,7 +26,7 @@ public class Benchmark {
     public void runBenchmark() throws Exception {
         //TODO-GM: read results file path from config file
         try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
-            systemController.restartSystem();
+//            systemController.restartSystem();
             try {
                 queryExecutor.dropCollection();
             } catch (Exception ex) {}
@@ -35,7 +35,7 @@ public class Benchmark {
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
             for (String query : benchmarkQueries) {
                 for (int i = 0; i < 5; ++i) {
-                    systemController.restartSystem();
+//                    systemController.restartSystem();
                     //TODO-GM: add more information about the query (no of dimensions)
                     pr.println(String.format("\"%s\", \"%s\", \"%d\"", systemController.getSystemName(), query, queryExecutor.executeTimedQuery(query)));
                 }
