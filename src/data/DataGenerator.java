@@ -30,7 +30,7 @@ public class DataGenerator {
     private void generate() throws IOException {
         file = File.createTempFile(FILE_PREFIX, null);
         file.deleteOnExit();
-        SystemController.executeShellCommand("dd", "if=/dev/urandom",
-                "of=" + file.getAbsolutePath(), "bs=" + fileSize, "count=1");
+        SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
+                "head", "-c", "" + fileSize, "/dev/urandom");
     }
 }

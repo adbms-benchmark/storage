@@ -59,8 +59,15 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
         // @TODO - support tiling and GMArray parameters in ASQLDB
         String rasqlColl = "PUBLIC_" + benchContext.getCollName() + "_A";
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d",
-                rasqlColl, chunkSize, chunkSize, tileSize);
+        String tilingDomain = "";
+        for (int i = 0; i < noOfDimensions; i++) {
+            if (i > 0) {
+                tilingDomain += ",";
+            }
+            tilingDomain += "0:" + chunkSize;
+        }
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [%s] TILE SIZE %d",
+                rasqlColl, tilingDomain, tileSize);
 
         RasGMArray gmarray = AsqldbQueryGenerator.convertToRasGMArray(domainBoundaries, filePath);
         Integer oid = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(insertQuery, true, true, gmarray));

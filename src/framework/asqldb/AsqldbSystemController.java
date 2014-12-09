@@ -1,6 +1,7 @@
 package framework.asqldb;
 
 import framework.rasdaman.RasdamanSystemController;
+import java.io.IOException;
 import util.Pair;
 
 /**
@@ -8,6 +9,10 @@ import util.Pair;
  * @author Dimitar Misev
  */
 public class AsqldbSystemController extends RasdamanSystemController {
+
+    public AsqldbSystemController(String propertiesPath) throws IOException {
+        super(propertiesPath);
+    }
 
     @Override
     public Pair<String, String> createRasdamanType(int noOfDimensions, String typeType) throws Exception {

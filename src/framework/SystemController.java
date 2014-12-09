@@ -1,6 +1,7 @@
 package framework;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -8,11 +9,15 @@ import java.util.Scanner;
  *
  * @author George Merticariu
  */
-public abstract class SystemController {
+public abstract class SystemController extends Context {
 
     protected String[] startSystemCommand;
     protected String[] stopSystemCommand;
     protected String systemName;
+
+    public SystemController(String propertiesPath) throws FileNotFoundException, IOException {
+        super(propertiesPath);
+    }
 
     protected SystemController(String[] startSystemCommand, String[] stopSystemCommand, String systemName) {
         this.startSystemCommand = startSystemCommand;
@@ -23,10 +28,14 @@ public abstract class SystemController {
     public abstract void restartSystem() throws Exception;
 
     public static int executeShellCommand(String... command) {
+        return executeShellCommandRedirect("/dev/null", command);
+    }
+
+    public static int executeShellCommandRedirect(String output, String... command) {
 
         int exitCode = -1;
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File("/dev/null"));
+            ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(output));
             Process p = processBuilder.start();
 
             p.waitFor();

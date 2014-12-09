@@ -2,8 +2,10 @@ package framework.rasdaman;
 
 import framework.SystemController;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
+import util.IO;
 import util.Pair;
 
 /**
@@ -13,16 +15,20 @@ import util.Pair;
  */
 public class RasdamanSystemController extends SystemController {
 
-    public final static String rasdamanBinDir = System.getenv("RMANHOME") + "/bin/";
+    public static final String KEY_RASDAMAN_HOME = "rasdaman.home";
 
     protected String rasdlBinary;
     protected String rasqlBinary;
+    protected String rasdamanHome;
 
-    public RasdamanSystemController() {
-        this(new String[]{rasdamanBinDir + "start_rasdaman.sh"},
-                new String[]{rasdamanBinDir + "stop_rasdaman.sh"},
-                rasdamanBinDir + "rasdl");
-        this.rasqlBinary = rasdamanBinDir + "rasql";
+    public RasdamanSystemController(String propertiesPath) throws IOException {
+        super(propertiesPath);
+        this.rasdamanHome = getValue(KEY_RASDAMAN_HOME);
+        String rasdamanBinDir = IO.concatPaths(rasdamanHome, "bin");
+        this.startSystemCommand = new String[]{rasdamanBinDir + "/start_rasdaman.sh"};
+        this.stopSystemCommand = new String[]{rasdamanBinDir + "/stop_rasdaman.sh"};
+        this.rasqlBinary = rasdamanBinDir + "/rasql";
+        this.rasdlBinary = rasdamanBinDir + "/rasdl";
     }
 
     //TODO-GM: change order of the parameters
@@ -50,7 +56,6 @@ public class RasdamanSystemController extends SystemController {
         String mddTypeDefinition = MessageFormat.format("typedef marray <{0}, {1}> {2};", typeType, noOfDimensions, mddTypeName);
         String setTypeDefinition = MessageFormat.format("typedef set<{0}> {1};", mddTypeName, setTypeName);
 
-
         File typeFile = File.createTempFile("rasdaman_type", null);
         typeFile.deleteOnExit();
 
@@ -75,7 +80,6 @@ public class RasdamanSystemController extends SystemController {
         if (executeShellCommand(rasdlBinary, "--delmddtype", mddTypeName) != 0) {
             System.out.printf("Failed to delete mdd type");
         }
-
 
     }
 
