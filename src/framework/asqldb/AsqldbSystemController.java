@@ -12,6 +12,7 @@ public class AsqldbSystemController extends RasdamanSystemController {
 
     public AsqldbSystemController(String propertiesPath) throws IOException {
         super(propertiesPath);
+        systemName = "ASQLDB";
     }
 
     @Override

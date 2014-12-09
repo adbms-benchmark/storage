@@ -6,6 +6,10 @@ import framework.ConnectionContext;
 import framework.asqldb.AsqldbQueryExecutor;
 import framework.asqldb.AsqldbQueryGenerator;
 import framework.asqldb.AsqldbSystemController;
+import framework.sciql.SciQLConnection;
+import framework.sciql.SciQLQueryExecutor;
+import framework.sciql.SciQLQueryGenerator;
+import framework.sciql.SciQLSystemController;
 import org.asqldb.util.AsqldbConnection;
 
 /**
@@ -20,22 +24,39 @@ public class AsqldbSciQL {
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
-        AsqldbSystemController sysController = new AsqldbSystemController("conf/system.properties");
+
+        AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties");
+        SciQLSystemController sciqlSysController = new SciQLSystemController("conf/system.properties");
+
+        AsqldbConnection.open(asqldbContext.getUrl());
+        SciQLConnection.open(sciqlContext);
+
         int noQueries = 3;
 
-        for (int noOfDim = 1; noOfDim <= 3; ++noOfDim) {
-            try {
-                System.out.println("ASQLDB: " + noOfDim + "D");
+        try {
+            for (int noOfDim = 1; noOfDim <= 3; ++noOfDim) {
                 {
-                    AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, sysController, benchContext, noOfDim);
+                    System.out.println("ASQLDB: " + noOfDim + "D");
+
+                    AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
                     AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
 
-                    Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, sysController);
+                    Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
                     benchmark.runBenchmark();
                 }
-            } finally {
-                AsqldbConnection.close();
+                {
+                    System.out.println("SciQL: " + noOfDim + "D");
+
+                    SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlContext, sciqlSysController, benchContext, noOfDim);
+                    SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
+
+                    Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, sciqlSysController);
+                    benchmark.runBenchmark();
+                }
             }
+        } finally {
+            SciQLConnection.close();
+            AsqldbConnection.close();
         }
 
     }

@@ -54,4 +54,18 @@ public class DomainGenerator {
         return ret.toString();
     }
 
+    public String getSciQLDomain(List<Pair<Long, Long>> domainBoundaries) {
+        StringBuilder ret = new StringBuilder();
+        ret.append('(');
+        int i = 0;
+        for (Pair<Long, Long> domainBoundary : domainBoundaries) {
+            ret.append('d').append(i).append(" INT DIMENSION [")
+                    .append(domainBoundary.getFirst()).append(':')
+                    .append(domainBoundary.getSecond()).append("],");
+            ++i;
+        }
+        ret.append(" v TINYINT DEFAULT 0)");
+        return ret.toString();
+    }
+
 }
