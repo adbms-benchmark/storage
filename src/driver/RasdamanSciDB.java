@@ -24,6 +24,7 @@ public class RasdamanSciDB {
 
         ConnectionContext rasdamanContext = new ConnectionContext("rasadmin", "rasadmin", "", 35000, "RASBASE");
         ConnectionContext scidibContext = new ConnectionContext("", "", "", 35000, "");
+        BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
         int noQueries = 10;
 
 
@@ -35,8 +36,8 @@ public class RasdamanSciDB {
             System.out.println("RASDAMAN: " + noOfDim + "D");
             {
                 RasdamanSystemController s = new RasdamanSystemController(new String[]{"/home/rasdaman/install/bin/start_rasdaman.sh"}, new String[]{"/home/rasdaman/install/bin/stop_rasdaman.sh"}, "/home/rasdaman/install/bin/rasdl");
-                RasdamanQueryExecutor r = new RasdamanQueryExecutor(rasdamanContext, s, noOfDim);
-                RasdamanQueryGenerator q = new RasdamanQueryGenerator(BenchmarkContext.COLLECTION_SIZE, noOfDim, BenchmarkContext.MAX_SELECT_SIZE, noQueries);
+                RasdamanQueryExecutor r = new RasdamanQueryExecutor(rasdamanContext, s, benchContext, noOfDim);
+                RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext, noOfDim, noQueries);
 
                 Benchmark benchmark = new Benchmark(q, r, s);
                 benchmark.runBenchmark();
@@ -44,8 +45,8 @@ public class RasdamanSciDB {
 
             System.out.println("SCIDB: " + noOfDim + "D");
             {
-                SciDBQueryExecutor r = new SciDBQueryExecutor(scidibContext, noOfDim);
-                SciDBQueryGenerator q = new SciDBQueryGenerator(BenchmarkContext.COLLECTION_SIZE, noOfDim, BenchmarkContext.MAX_SELECT_SIZE, noQueries);
+                SciDBQueryExecutor r = new SciDBQueryExecutor(scidibContext, benchContext, noOfDim);
+                SciDBQueryGenerator q = new SciDBQueryGenerator(benchContext, noOfDim, noQueries);
                 SciDBSystemController s = new SciDBSystemController(new String[]{"/opt/scidb/14.8/bin/scidb.py", "stopall", "cluster"}, new String[]{"/opt/scidb/14.8/bin/scidb.py", "startall", "cluster"});
 
                 Benchmark benchmark = new Benchmark(q, r, s);

@@ -22,13 +22,14 @@ public class RasdamanQueryExecutor extends QueryExecutor {
     private DomainGenerator domainGenerator;
     private RasdamanSystemController rasdamanSystemController;
     private int noOfDimensions;
+    private BenchmarkContext benchContext;
 
-    public RasdamanQueryExecutor(ConnectionContext context, RasdamanSystemController rasdamanSystemController, int noOfDimensions) {
+    public RasdamanQueryExecutor(ConnectionContext context, RasdamanSystemController rasdamanSystemController, BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         domainGenerator = new DomainGenerator(noOfDimensions);
         this.rasdamanSystemController = rasdamanSystemController;
         this.noOfDimensions = noOfDimensions;
-
+        this.benchContext = benchContext;
     }
 
     @Override
@@ -51,10 +52,10 @@ public class RasdamanQueryExecutor extends QueryExecutor {
 
     @Override
     public void createCollection() throws Exception {
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(BenchmarkContext.COLLECTION_SIZE);
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        double approxChunkSize = Math.pow(BenchmarkContext.TILE_SIZE, 1 / ((double) noOfDimensions));
+        double approxChunkSize = Math.pow(benchContext.getCollTileSize(), 1 / ((double) noOfDimensions));
         int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
         long tileSize = (long) Math.pow(chunkSize, noOfDimensions);
 
@@ -63,12 +64,12 @@ public class RasdamanQueryExecutor extends QueryExecutor {
 
         Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
 
-        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", BenchmarkContext.COLLECTION_NAME, aChar.getSecond());
+        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName(), aChar.getSecond());
         executeTimedQuery(createCollectionQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()});
 
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d", BenchmarkContext.COLLECTION_NAME, chunkSize, chunkSize, tileSize);
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d", benchContext.getCollName(), chunkSize, chunkSize, tileSize);
         executeTimedQuery(insertQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword(),
@@ -79,7 +80,7 @@ public class RasdamanQueryExecutor extends QueryExecutor {
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", BenchmarkContext.COLLECTION_NAME);
+        String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchContext.getCollName());
         executeTimedQuery(dropCollectionQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()

@@ -1,5 +1,6 @@
 package data;
 
+import framework.BenchmarkContext;
 import java.util.ArrayList;
 import java.util.List;
 import util.Pair;
@@ -7,26 +8,25 @@ import util.Pair;
 /**
  *
  * @author George Merticariu
+ * @author Dimitar Misev
  */
 public class QueryDomainGenerator {
 
-    private int noOfDimensions;
-    private long maxSelectSize;
-    private long collectionSize;
-    private int noOfQueries;
+    private final BenchmarkContext benchContext;
+    private final int noOfDimensions;
+    private final int noOfQueries;
 
-    public QueryDomainGenerator(long collectionSize, int noOfDimensions, long maxSelectSize, int noOfQueries) {
-        this.collectionSize = collectionSize;
+    public QueryDomainGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
         this.noOfDimensions = noOfDimensions;
-        this.maxSelectSize = maxSelectSize;
         this.noOfQueries = noOfQueries;
+        this.benchContext = benchContext;
     }
 
     public List<List<Pair<Long, Long>>> getSizeQueryDomain() {
 
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
-        double selectStep = (Math.pow(maxSelectSize, 1 / ((double) noOfDimensions)) / ((double) noOfQueries));
+        double selectStep = (Math.pow(benchContext.getMaxQuerySelectSize(), 1 / ((double) noOfDimensions)) / ((double) noOfQueries));
         double axisSize = selectStep;
 
         for (int queryIndex = 0; queryIndex < noOfQueries; ++queryIndex) {
@@ -44,8 +44,8 @@ public class QueryDomainGenerator {
     public List<List<Pair<Long, Long>>> getPositionQueryDomain() {
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
-        double collectionAxisSize = Math.pow(collectionSize, 1 / (double) noOfDimensions);
-        double selectAxisSize = Math.pow(maxSelectSize, 1 / (double) noOfDimensions);
+        double collectionAxisSize = Math.pow(benchContext.getCollSize(), 1 / (double) noOfDimensions);
+        double selectAxisSize = Math.pow(benchContext.getMaxQuerySelectSize(), 1 / (double) noOfDimensions);
 
         double selectStep = (collectionAxisSize - selectAxisSize) / ((double) noOfQueries);
         double lowerAxisSize = 0;
@@ -70,7 +70,7 @@ public class QueryDomainGenerator {
         if (noOfDimensions < 2) {
             return result;
         }
-        double selectAxisSize = Math.pow(maxSelectSize, 1 / (double) noOfDimensions);
+        double selectAxisSize = Math.pow(benchContext.getMaxQuerySelectSize(), 1 / (double) noOfDimensions);
 
         double step = selectAxisSize / ((double) noOfQueries);
         double firstAxisSize = step;
@@ -80,7 +80,7 @@ public class QueryDomainGenerator {
             for (int i = 2; i < noOfDimensions; ++i) {
                 restAxisSize *= selectAxisSize;
             }
-            double secondAxisSize = maxSelectSize / restAxisSize;
+            double secondAxisSize = benchContext.getMaxQuerySelectSize() / restAxisSize;
 
             List<Pair<Long, Long>> domain = new ArrayList<>();
             domain.add(Pair.of(0l, (long) (Math.ceil(firstAxisSize) - 1l)));
@@ -100,9 +100,9 @@ public class QueryDomainGenerator {
     public List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> getMultiAccessQueryDomain() {
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> result = new ArrayList<>();
 
-        long maxChunkSelectSize = maxSelectSize / 2;
+        long maxChunkSelectSize = benchContext.getMaxQuerySelectSize() / 2;
 
-        double collectionAxisSize = Math.pow(collectionSize, 1 / (double) noOfDimensions);
+        double collectionAxisSize = Math.pow(benchContext.getCollSize(), 1 / (double) noOfDimensions);
         double selectAxisSize = Math.pow(maxChunkSelectSize, 1 / (double) noOfDimensions);
 
         double selectStep = (collectionAxisSize - selectAxisSize) / ((double) noOfQueries);

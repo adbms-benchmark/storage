@@ -15,10 +15,12 @@ import util.Pair;
  */
 public class RasdamanQueryGenerator extends QueryGenerator {
 
-    private QueryDomainGenerator queryDomainGenerator;
+    private final QueryDomainGenerator queryDomainGenerator;
+    private final BenchmarkContext benchContext;
 
-    public RasdamanQueryGenerator(long collectionSize, int noOfDimensions, long maxSelectSize, int noOfQueries) {
-        queryDomainGenerator = new QueryDomainGenerator(collectionSize, noOfDimensions, maxSelectSize, noOfQueries);
+    public RasdamanQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
+        queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
+        this.benchContext = benchContext;
     }
 
     @Override
@@ -73,11 +75,11 @@ public class RasdamanQueryGenerator extends QueryGenerator {
     }
 
 
-    private static String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", BenchmarkContext.COLLECTION_NAME, convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+    private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
+        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", benchContext.getCollName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
-    private static String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT {0}{1} FROM {0}", BenchmarkContext.COLLECTION_NAME, convertToRasdamanDomain(domain));
+    private String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
+        return MessageFormat.format("SELECT {0}{1} FROM {0}", benchContext.getCollName(), convertToRasdamanDomain(domain));
     }
 }

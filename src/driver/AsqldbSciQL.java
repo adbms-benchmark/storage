@@ -16,27 +16,26 @@ public class AsqldbSciQL {
 
     public static void main(String... args) throws Exception {
 
-        ConnectionContext asqldbContext = new ConnectionContext("SA", "", "jdbc:hsqldb:file:/var/hsqldb/benchmark;shutdown=true", -1, "benchmark");
-        ConnectionContext sciqlContext = new ConnectionContext("", "", "", 35000, "");
+        ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
+        ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
+        BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
         int noQueries = 10;
 
-        try {
-            for (int noOfDim = 1; noOfDim <= 3; ++noOfDim) {
-
+        for (int noOfDim = 1; noOfDim <= 3; ++noOfDim) {
+            try {
                 System.out.println("ASQLDB: " + noOfDim + "D");
                 {
                     AsqldbSystemController s = new AsqldbSystemController();
-                    AsqldbQueryExecutor r = new AsqldbQueryExecutor(asqldbContext, s, noOfDim);
-                    AsqldbQueryGenerator q = new AsqldbQueryGenerator(BenchmarkContext.COLLECTION_SIZE, noOfDim, BenchmarkContext.MAX_SELECT_SIZE, noQueries);
+                    AsqldbQueryExecutor r = new AsqldbQueryExecutor(asqldbContext, s, benchContext, noOfDim);
+                    AsqldbQueryGenerator q = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
 
                     Benchmark benchmark = new Benchmark(q, r, s);
                     benchmark.runBenchmark();
                 }
+            } finally {
+                AsqldbConnection.close();
             }
-        } finally {
-            AsqldbConnection.close();
         }
 
     }
 }
-

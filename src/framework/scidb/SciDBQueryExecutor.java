@@ -20,11 +20,13 @@ public class SciDBQueryExecutor extends QueryExecutor {
     private DomainGenerator domainGenerator;
     private DataGenerator dataGenerator;
     private int noOfDimensions;
+    private BenchmarkContext benchContext;
 
-    public SciDBQueryExecutor(ConnectionContext context, int noOfDimensions) {
+    public SciDBQueryExecutor(ConnectionContext context, BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         domainGenerator = new DomainGenerator(noOfDimensions);
         this.noOfDimensions = noOfDimensions;
+        this.benchContext = benchContext;
     }
 
     @Override
@@ -46,10 +48,10 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
     @Override
     public void createCollection() throws Exception {
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(BenchmarkContext.COLLECTION_SIZE);
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        double approxChunkSize = Math.pow(BenchmarkContext.TILE_SIZE, 1 / ((double) noOfDimensions));
+        double approxChunkSize = Math.pow(benchContext.getCollTileSize(), 1 / ((double) noOfDimensions));
         int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
 
         dataGenerator = new DataGenerator(fileSize);
@@ -57,9 +59,9 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
-        createArrayQuery.append(BenchmarkContext.COLLECTION_NAME);
+        createArrayQuery.append(benchContext.getCollName());
         createArrayQuery.append(" <");
-        createArrayQuery.append(BenchmarkContext.COLLECTION_NAME);
+        createArrayQuery.append(benchContext.getCollName());
         createArrayQuery.append(":char>");
         createArrayQuery.append('[');
 
@@ -86,13 +88,13 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
         executeTimedQuery(createArrayQuery.toString());
 
-        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", BenchmarkContext.COLLECTION_NAME, filePath);
+        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", benchContext.getCollName(), filePath);
         executeTimedQuery(insertDataQuery, "-n");
     }
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", BenchmarkContext.COLLECTION_NAME);
+        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getCollName());
         executeTimedQuery(dropCollectionQuery);
     }
 }

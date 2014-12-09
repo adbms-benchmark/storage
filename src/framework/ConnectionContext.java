@@ -1,22 +1,19 @@
 package framework;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Properties;
 
 /**
  *
  * @author George Merticariu
  * @author Dimitar Misev
  */
-public class ConnectionContext {
+public class ConnectionContext extends Context {
     
-    private final Properties properties;
     private final String user;
     private final String password;
     private final String url;
-    private final int port;
+    private final long port;
     private final String databaseName;
     
     public static final String KEY_USER = "conn.user";
@@ -26,28 +23,21 @@ public class ConnectionContext {
     public static final String KEY_DBNAME = "conn.dbname";
     
     public ConnectionContext(String propertiesPath) throws FileNotFoundException, IOException {
-        properties = new Properties();
-        properties.load(new FileInputStream(propertiesPath));
-        this.user = properties.getProperty(KEY_USER);
-        this.password = properties.getProperty(KEY_PASSWORD);
-        this.url = properties.getProperty(KEY_URL);
-        this.databaseName = properties.getProperty(KEY_DBNAME);
-        int p = 35000;
-        try {
-            p = Integer.parseInt(properties.getProperty(KEY_PORT));
-        } catch (Exception ex) {
-        } finally {
-            port = p;
-        }
+        super(propertiesPath);
+        this.user = getValue(KEY_USER);
+        this.password = getValue(KEY_PASSWORD);
+        this.url = getValue(KEY_URL);
+        this.databaseName = getValue(KEY_DBNAME);
+        this.port = getValueLong(KEY_PORT);
     }
 
     public ConnectionContext(String user, String password, String url, int port, String databaseName) {
+        super();
         this.user = user;
         this.password = password;
         this.url = url;
         this.port = port;
         this.databaseName = databaseName;
-        this.properties = null;
     }
 
     public String getUser() {
@@ -62,7 +52,7 @@ public class ConnectionContext {
         return url;
     }
 
-    public int getPort() {
+    public long getPort() {
         return port;
     }
 

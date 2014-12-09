@@ -22,12 +22,15 @@ public class AsqldbQueryExecutor extends QueryExecutor {
     private DataGenerator dataGenerator;
     private final DomainGenerator domainGenerator;
     private final AsqldbSystemController systemController;
+    private final BenchmarkContext benchContext;
     private final int noOfDimensions;
 
-    public AsqldbQueryExecutor(ConnectionContext context, AsqldbSystemController systemController, int noOfDimensions) {
+    public AsqldbQueryExecutor(ConnectionContext context, AsqldbSystemController systemController,
+            BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         this.domainGenerator = new DomainGenerator(noOfDimensions);
         this.systemController = systemController;
+        this.benchContext = benchContext;
         this.noOfDimensions = noOfDimensions;
         AsqldbConnection.open(context.getUrl());
     }
@@ -42,33 +45,33 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
     @Override
     public void createCollection() throws Exception {
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(BenchmarkContext.COLLECTION_SIZE);
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        double approxChunkSize = Math.pow(BenchmarkContext.TILE_SIZE, 1 / ((double) noOfDimensions));
+        double approxChunkSize = Math.pow(benchContext.getCollTileSize(), 1 / ((double) noOfDimensions));
         int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
         long tileSize = (long) Math.pow(chunkSize, noOfDimensions);
 
         dataGenerator = new DataGenerator(fileSize);
         String filePath = dataGenerator.getFilePath();
 
-        executeTimedQuery("CREATE TABLE " + BenchmarkContext.COLLECTION_NAME + " (a CHAR MDARRAY " + domainGenerator.getMDArrayDomain() + ")");
+        executeTimedQuery("CREATE TABLE " + benchContext.getCollName() + " (a CHAR MDARRAY " + domainGenerator.getMDArrayDomain() + ")");
 
         // @TODO - support tiling and GMArray parameters in ASQLDB
-        String rasqlColl = "PUBLIC_" + BenchmarkContext.COLLECTION_NAME + "_A";
+        String rasqlColl = "PUBLIC_" + benchContext.getCollName() + "_A";
         String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d",
                 rasqlColl, chunkSize, chunkSize, tileSize);
 
         RasGMArray gmarray = AsqldbQueryGenerator.convertToRasGMArray(domainBoundaries, filePath);
         Integer oid = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(insertQuery, true, true, gmarray));
 
-        AsqldbConnection.executeQuery("insert into " + BenchmarkContext.COLLECTION_NAME + " values (" + oid + ")");
+        AsqldbConnection.executeQuery("insert into " + benchContext.getCollName() + " values (" + oid + ")");
         AsqldbConnection.commit();
     }
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP TABLE {0}", BenchmarkContext.COLLECTION_NAME);
+        String dropCollectionQuery = MessageFormat.format("DROP TABLE {0}", benchContext.getCollName());
         try {
             AsqldbConnection.executeQuery(dropCollectionQuery);
         } catch (Exception ex) {
