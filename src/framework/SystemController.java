@@ -14,15 +14,18 @@ public abstract class SystemController extends Context {
     protected String[] startSystemCommand;
     protected String[] stopSystemCommand;
     protected String systemName;
+    protected ConnectionContext connContext;
 
-    public SystemController(String propertiesPath) throws FileNotFoundException, IOException {
+    public SystemController(String propertiesPath, ConnectionContext connContext) throws FileNotFoundException, IOException {
         super(propertiesPath);
+        this.connContext = connContext;
     }
 
     protected SystemController(String[] startSystemCommand, String[] stopSystemCommand, String systemName) {
         this.startSystemCommand = startSystemCommand;
         this.stopSystemCommand = stopSystemCommand;
         this.systemName = systemName;
+        this.connContext = null;
     }
 
     public abstract void restartSystem() throws Exception;
@@ -37,9 +40,7 @@ public abstract class SystemController extends Context {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(output));
             Process p = processBuilder.start();
-
-            p.waitFor();
-            exitCode = p.exitValue();
+            exitCode = p.waitFor();
             if (exitCode != 0) {
                 //TODO-GM: change error reporting to log file
                 try (Scanner scan = new Scanner(p.getErrorStream())) {

@@ -1,5 +1,6 @@
 package framework.rasdaman;
 
+import framework.ConnectionContext;
 import framework.SystemController;
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +22,8 @@ public class RasdamanSystemController extends SystemController {
     protected String rasqlBinary;
     protected String rasdamanHome;
 
-    public RasdamanSystemController(String propertiesPath) throws IOException {
-        super(propertiesPath);
+    public RasdamanSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
+        super(propertiesPath, connContext);
         this.rasdamanHome = getValue(KEY_RASDAMAN_HOME);
         String rasdamanBinDir = IO.concatPaths(rasdamanHome, "bin");
         this.startSystemCommand = new String[]{rasdamanBinDir + "/start_rasdaman.sh"};

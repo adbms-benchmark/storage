@@ -1,7 +1,9 @@
 package framework.asqldb;
 
+import framework.ConnectionContext;
 import framework.rasdaman.RasdamanSystemController;
 import java.io.IOException;
+import org.asqldb.util.AsqldbConnection;
 import util.Pair;
 
 /**
@@ -10,8 +12,8 @@ import util.Pair;
  */
 public class AsqldbSystemController extends RasdamanSystemController {
 
-    public AsqldbSystemController(String propertiesPath) throws IOException {
-        super(propertiesPath);
+    public AsqldbSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
+        super(propertiesPath, connContext);
         systemName = "ASQLDB";
     }
 
@@ -27,7 +29,9 @@ public class AsqldbSystemController extends RasdamanSystemController {
 
     @Override
     public void restartSystem() throws Exception {
+//        AsqldbConnection.close();
         // nop
+//        AsqldbConnection.open(connContext.getUrl());
     }
 
 }

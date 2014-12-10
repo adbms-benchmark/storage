@@ -1,5 +1,6 @@
 package framework.sciql;
 
+import framework.ConnectionContext;
 import framework.SystemController;
 import java.io.IOException;
 import util.IO;
@@ -16,8 +17,8 @@ public class SciQLSystemController extends SystemController {
     protected String sciqlHome;
     protected String sciqlDbfarm;
 
-    public SciQLSystemController(String propertiesPath) throws IOException {
-        super(propertiesPath);
+    public SciQLSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
+        super(propertiesPath, connContext);
         this.systemName = "SciQL";
         this.sciqlHome = getValue(KEY_SCIQL_HOME);
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
@@ -28,12 +29,14 @@ public class SciQLSystemController extends SystemController {
 
     @Override
     public void restartSystem() throws Exception {
+        SciQLConnection.close();
         if (executeShellCommand(stopSystemCommand) != 0) {
-            throw new Exception("Failed to stop the system.");
+            // ignore, it may be already stopped
         }
-
+        Thread.sleep(10000);
         if (executeShellCommand(startSystemCommand) != 0) {
             throw new Exception("Failed to start the system.");
         }
+        SciQLConnection.open(connContext);
     }
 }

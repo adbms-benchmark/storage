@@ -24,8 +24,8 @@ public class AsqldbSciQL {
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
-        AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties");
-        SciQLSystemController sciqlSysController = new SciQLSystemController("conf/system.properties");
+        AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties", asqldbContext);
+        SciQLSystemController sciqlSysController = new SciQLSystemController("conf/system.properties", sciqlContext);
         
         System.out.println("---------------------------------------------------");
         System.out.println("Benchmark configuration");
@@ -37,9 +37,8 @@ public class AsqldbSciQL {
         System.out.println("---------------------------------------------------");
 
         AsqldbConnection.open(asqldbContext.getUrl());
-        SciQLConnection.open(sciqlContext);
 
-        int noQueries = 3;
+        int noQueries = 1;
 
         try {
             for (int noOfDim = 1; noOfDim <= 3; ++noOfDim) {
