@@ -59,4 +59,10 @@ public class ConnectionContext extends Context {
     public String getDatabaseName() {
         return databaseName;
     }
+
+    @Override
+    public String toString() {
+        return "Connection:" + "\n user=" + user + "\n password=" + password + 
+                "\n url=" + url + "\n port=" + port + "\n databaseName=" + databaseName;
+    }
 }

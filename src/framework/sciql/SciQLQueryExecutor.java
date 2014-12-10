@@ -50,6 +50,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         String createArray = "CREATE ARRAY " + benchContext.getCollName() + domainGenerator.getSciQLDomain(domainBoundaries);
         executeTimedQuery(createArray);
 
+        
     }
 
     @Override

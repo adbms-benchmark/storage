@@ -9,5 +9,15 @@
             <file>file:/home/dimitar/projects/arraybench/src/framework/sciql/SciQLConnection.java</file>
             <file>file:/home/dimitar/projects/arraybench/src/framework/sciql/SciQLQueryExecutor.java</file>
         </group>
+        <group name="petascope">
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/asqldb/AsqldbQueryExecutor.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/asqldb/AsqldbSystemController.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/QueryExecutor.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/data/DataGenerator.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/driver/AsqldbSciQL.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/Benchmark.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/SystemController.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/rasdaman/RasdamanSystemController.java</file>
+        </group>
     </open-files>
 </project-private>

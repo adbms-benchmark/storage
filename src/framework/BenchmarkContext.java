@@ -43,5 +43,11 @@ public class BenchmarkContext extends Context {
     public String getCollName() {
         return collName;
     }
+
+    @Override
+    public String toString() {
+        return "Benchmark context:" + "\n collSize=" + collSize + 
+                "\n maxQuerySelectSize=" + maxQuerySelectSize + "\n collTileSize=" + collTileSize + "\n collName=" + collName;
+    }
     
 }

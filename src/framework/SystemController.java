@@ -59,4 +59,10 @@ public abstract class SystemController extends Context {
     public String getSystemName() {
         return systemName;
     }
+
+    @Override
+    public String toString() {
+        return systemName + "System Controller:" + "\n startSystemCommand=" + startSystemCommand + 
+                "\n stopSystemCommand=" + stopSystemCommand;
+    }
 }

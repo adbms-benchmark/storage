@@ -24,9 +24,17 @@ public class AsqldbSciQL {
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
-
         AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties");
         SciQLSystemController sciqlSysController = new SciQLSystemController("conf/system.properties");
+        
+        System.out.println("---------------------------------------------------");
+        System.out.println("Benchmark configuration");
+        System.out.println("ASQLDB " + asqldbContext);
+        System.out.println("SciQL " + asqldbContext);
+        System.out.println(benchContext);
+        System.out.println(asqldbSysController);
+        System.out.println(sciqlSysController);
+        System.out.println("---------------------------------------------------");
 
         AsqldbConnection.open(asqldbContext.getUrl());
         SciQLConnection.open(sciqlContext);
