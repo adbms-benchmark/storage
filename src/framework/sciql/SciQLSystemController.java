@@ -18,6 +18,7 @@ public class SciQLSystemController extends SystemController {
 
     public SciQLSystemController(String propertiesPath) throws IOException {
         super(propertiesPath);
+        this.systemName = "SciQL";
         this.sciqlHome = getValue(KEY_SCIQL_HOME);
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
         String sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
