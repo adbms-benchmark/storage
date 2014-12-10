@@ -24,7 +24,11 @@ public abstract class Context {
     }
     
     public String getValue(final String key) {
-        return properties.getProperty(key);
+        String ret = properties.getProperty(key);
+        if (ret == null) {
+            ret = "";
+        }
+        return ret;
     }
     
     public long getValueLong(final String key) {

@@ -30,7 +30,7 @@ public class AsqldbSciQL {
         System.out.println("---------------------------------------------------");
         System.out.println("Benchmark configuration");
         System.out.println("ASQLDB " + asqldbContext);
-        System.out.println("SciQL " + asqldbContext);
+        System.out.println("SciQL " + sciqlContext);
         System.out.println(benchContext);
         System.out.println(asqldbSysController);
         System.out.println(sciqlSysController);
