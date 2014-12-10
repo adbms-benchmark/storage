@@ -32,7 +32,7 @@ public class Benchmark {
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
             for (String query : benchmarkQueries) {
                 for (int i = 0; i < 5; ++i) {
-//                    systemController.restartSystem();
+                    systemController.restartSystem();
                     //TODO-GM: add more information about the query (no of dimensions)
                     pr.println(String.format("\"%s\", \"%s\", \"%d\"", systemController.getSystemName(), query, queryExecutor.executeTimedQuery(query)));
                 }
