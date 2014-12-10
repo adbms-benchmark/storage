@@ -17,7 +17,7 @@ public class ConnectionContext extends Context {
     private final String databaseName;
     
     public static final String KEY_USER = "conn.user";
-    public static final String KEY_PASSWORD = "conn.password";
+    public static final String KEY_PASSWORD = "conn.pass";
     public static final String KEY_URL = "conn.url";
     public static final String KEY_PORT = "conn.port";
     public static final String KEY_DBNAME = "conn.dbname";
