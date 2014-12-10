@@ -74,6 +74,31 @@ public class SciQLConnection {
     }
 
     /**
+     * Execute the given query, return true if passed, false otherwise.
+     */
+    public static boolean executeUpdateQuery(final String query) {
+        System.out.print("  executing query: " + query);
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println(" ... failed.");
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+        System.out.println(" ... ok.");
+        return true;
+    }
+
+    /**
      * Execute the given query.
      *
      * @return the first column of the first returned row, as an object.
@@ -118,39 +143,6 @@ public class SciQLConnection {
         }
         System.out.println(" ... ok.");
         return ret;
-    }
-
-    /**
-     * Execute the given query, return true if passed, false otherwise.
-     */
-    public static boolean executeUpdateQuery(final String query, final InputStream is) {
-        System.out.print("  executing update query: " + query);
-        if (is == null) {
-            System.out.println(" - failed reading test data.");
-            return false;
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(query);
-            stmt.setBlob(1, is);
-            int rows = stmt.executeUpdate();
-            if (rows <= 0) {
-                System.out.println(" ... failed.");
-            }
-        } catch (SQLException e) {
-            System.out.println(" ... failed.");
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
-        System.out.println(" ... ok.");
-        return true;
     }
 
     public static void commit() {

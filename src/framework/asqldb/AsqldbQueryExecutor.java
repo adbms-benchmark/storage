@@ -81,7 +81,7 @@ public class AsqldbQueryExecutor extends QueryExecutor {
         String dropCollectionQuery = MessageFormat.format("DROP TABLE {0}", benchContext.getCollName());
         try {
             AsqldbConnection.executeQuery(dropCollectionQuery);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
         }
     }
 }

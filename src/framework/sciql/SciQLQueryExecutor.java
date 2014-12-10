@@ -48,16 +48,14 @@ public class SciQLQueryExecutor extends QueryExecutor {
         long tileSize = (long) Math.pow(chunkSize, noOfDimensions);
 
         String createArray = "CREATE ARRAY " + benchContext.getCollName() + domainGenerator.getSciQLDomain(domainBoundaries);
-        executeTimedQuery(createArray);
-
-        
+        SciQLConnection.executeUpdateQuery(createArray);
     }
 
     @Override
     public void dropCollection() {
         String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getCollName());
         try {
-            SciQLConnection.executeQuery(dropCollectionQuery);
+            SciQLConnection.executeUpdateQuery(dropCollectionQuery);
         } catch (Exception ex) {
         }
     }

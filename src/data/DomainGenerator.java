@@ -64,7 +64,7 @@ public class DomainGenerator {
                     .append(domainBoundary.getSecond()).append("],");
             ++i;
         }
-        ret.append(" v TINYINT DEFAULT 0)");
+        ret.append(" v TINYINT DEFAULT 5)");
         return ret.toString();
     }
 
