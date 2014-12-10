@@ -22,8 +22,8 @@ public class SciQLSystemController extends SystemController {
         this.sciqlHome = getValue(KEY_SCIQL_HOME);
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
         String sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
-        this.startSystemCommand = new String[]{sciqlBinDir + "/monetdbd start " + sciqlDbfarm};
-        this.stopSystemCommand = new String[]{sciqlBinDir + "/monetdbd stop " + sciqlDbfarm};
+        this.startSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "start", sciqlDbfarm};
+        this.stopSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "stop", sciqlDbfarm};
     }
 
     @Override
