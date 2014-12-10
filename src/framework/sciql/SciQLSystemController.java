@@ -28,12 +28,12 @@ public class SciQLSystemController extends SystemController {
 
     @Override
     public void restartSystem() throws Exception {
-//        if (executeShellCommand(stopSystemCommand) != 0) {
-//            throw new Exception("Failed to stop the system.");
-//        }
-//
-//        if (executeShellCommand(startSystemCommand) != 0) {
-//            throw new Exception("Failed to start the system.");
-//        }
+        if (executeShellCommand(stopSystemCommand) != 0) {
+            throw new Exception("Failed to stop the system.");
+        }
+
+        if (executeShellCommand(startSystemCommand) != 0) {
+            throw new Exception("Failed to start the system.");
+        }
     }
 }

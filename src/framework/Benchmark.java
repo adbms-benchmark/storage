@@ -26,8 +26,7 @@ public class Benchmark {
     public void runBenchmark() throws Exception {
         //TODO-GM: read results file path from config file
         try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
-//            systemController.restartSystem();
-            queryExecutor.dropCollection();
+            systemController.restartSystem();
             queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();

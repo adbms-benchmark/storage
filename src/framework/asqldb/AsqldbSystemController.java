@@ -25,4 +25,9 @@ public class AsqldbSystemController extends RasdamanSystemController {
         throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
     }
 
+    @Override
+    public void restartSystem() throws Exception {
+        // nop
+    }
+
 }
