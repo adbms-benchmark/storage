@@ -32,6 +32,20 @@ public class DomainGenerator {
         return result;
     }
 
+    public List<Pair<Long, Long>> getDomainBoundaries2D(long approxFileSize) {
+        int dims = 2;
+        double approxAxisSize = Math.pow(approxFileSize, 1 / ((double) dims));
+
+        long axisSize = ((long) Math.ceil(approxAxisSize)) - 1l;
+
+        List<Pair<Long, Long>> result = new ArrayList<>();
+        for (int i = 0; i < dims; ++i) {
+            result.add(Pair.of(DEFAULT_DOMAIN_LOWER_BOUND, axisSize));
+        }
+
+        return result;
+    }
+
     public long getFileSize(List<Pair<Long, Long>> domain) {
         long fileSize = 1l;
         for (Pair<Long, Long> axisBoundaries : domain) {

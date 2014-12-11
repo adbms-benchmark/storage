@@ -12,6 +12,7 @@ import java.util.List;
 public class Benchmark {
 
     public static final String HOME_DIR = System.getenv("HOME");
+    public static final int REPEAT_NO = 2;
 
     private final QueryGenerator queryGenerator;
     private final QueryExecutor queryExecutor;
@@ -31,11 +32,16 @@ public class Benchmark {
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
             for (String query : benchmarkQueries) {
-                for (int i = 0; i < 5; ++i) {
+                pr.print(String.format("\"%s\", \"%s\", ", systemController.getSystemName(), query));
+                long total = 0;
+                for (int i = 0; i < REPEAT_NO; ++i) {
                     systemController.restartSystem();
                     //TODO-GM: add more information about the query (no of dimensions)
-                    pr.println(String.format("\"%s\", \"%s\", \"%d\"", systemController.getSystemName(), query, queryExecutor.executeTimedQuery(query)));
+                    long time = queryExecutor.executeTimedQuery(query);
+                    total += time;
+                    pr.print(time + ", ");
                 }
+                pr.println(total / REPEAT_NO);
                 pr.flush();
             }
         } finally {

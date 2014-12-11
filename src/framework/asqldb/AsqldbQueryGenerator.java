@@ -30,31 +30,8 @@ public class AsqldbQueryGenerator extends QueryGenerator {
 
     @Override
     public List<String> getBenchmarkQueries() {
-
         List<String> queries = new ArrayList<>();
-
-        List<List<Pair<Long, Long>>> sizeQueryDomain = queryDomainGenerator.getSizeQueryDomain();
-        List<List<Pair<Long, Long>>> positionQueryDomain = queryDomainGenerator.getPositionQueryDomain();
-        List<List<Pair<Long, Long>>> shapeQueryDomain = queryDomainGenerator.getShapeQueryDomain();
-        List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
-
-//        for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-//            queries.add(generateRasdamanQuery(queryDomain));
-//        }
-//
-//        for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-//            queries.add(generateRasdamanQuery(queryDomain));
-//        }
-//
-//        for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-//            queries.add(generateRasdamanQuery(queryDomain));
-//        }
-
-        for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
-            queries.add(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()));
-        }
-
-
+        queries.add("select avg_cells(c.a) from " + benchContext.getCollName() + " as c");
         return queries;
     }
 
@@ -80,7 +57,8 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     }
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}",
+//        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}",
+        return MessageFormat.format("SELECT avg_cells(A{1}) + avg_cells(A{2}) FROM {0}",
                 benchContext.getCollName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 

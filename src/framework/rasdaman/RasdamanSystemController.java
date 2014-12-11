@@ -84,4 +84,8 @@ public class RasdamanSystemController extends SystemController {
 
     }
 
+    public String getRasqlBinary() {
+        return rasqlBinary;
+    }
+
 }

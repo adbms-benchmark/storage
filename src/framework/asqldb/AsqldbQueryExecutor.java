@@ -5,19 +5,18 @@ import data.DomainGenerator;
 import framework.BenchmarkContext;
 import framework.ConnectionContext;
 import framework.QueryExecutor;
-import java.text.MessageFormat;
-import java.util.List;
-import org.asqldb.ras.RasUtil;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import org.asqldb.util.AsqldbConnection;
 import org.asqldb.util.TimerUtil;
-import rasj.RasGMArray;
-import util.Pair;
 
 /**
  *
  * @author Dimitar Misev
  */
 public class AsqldbQueryExecutor extends QueryExecutor {
+
+    public static final String TMP_TIFF_FILE = "/tmp/tiff2d.tif";
 
     private DataGenerator dataGenerator;
     private final DomainGenerator domainGenerator;
@@ -37,52 +36,33 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
     @Override
     public long executeTimedQuery(String query, String... args) {
+        TimerUtil.clearTimers();
         TimerUtil.startTimer("asqldb query");
         AsqldbConnection.executeQuery(query);
         long result = TimerUtil.getElapsedMilli("asqldb query");
+        System.out.println("time: " + result + " ms");
         return result;
     }
 
     @Override
     public void createCollection() throws Exception {
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
-        long fileSize = domainGenerator.getFileSize(domainBoundaries);
-
-        double approxChunkSize = Math.pow(benchContext.getCollTileSize(), 1 / ((double) noOfDimensions));
-        int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
-        long tileSize = (long) Math.pow(chunkSize, noOfDimensions);
-
-        dataGenerator = new DataGenerator(fileSize);
-        String filePath = dataGenerator.getFilePath();
-
-        executeTimedQuery("CREATE TABLE " + benchContext.getCollName() + " (a CHAR MDARRAY " + domainGenerator.getMDArrayDomain() + ")");
-
-        // @TODO - support tiling and GMArray parameters in ASQLDB
-        String rasqlColl = "PUBLIC_" + benchContext.getCollName() + "_A";
-        String tilingDomain = "";
-        for (int i = 0; i < noOfDimensions; i++) {
-            if (i > 0) {
-                tilingDomain += ",";
-            }
-            tilingDomain += "0:" + chunkSize;
+        try {
+            executeTimedQuery("CREATE TABLE " + benchContext.getCollName() + " (a CHAR MDARRAY " + domainGenerator.getMDArrayDomain() + ")");
+            InputStream fin = new FileInputStream(benchContext.getDataFile());
+            AsqldbConnection.executeUpdateQuery("insert into " + benchContext.getCollName() + " values (mdarray_decode(?))", fin);
+            AsqldbConnection.commit();
+        } catch (Exception ex) {
+            dropCollection();
+            throw ex;
         }
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [%s] TILE SIZE %d",
-                rasqlColl, tilingDomain, tileSize);
-
-        RasGMArray gmarray = AsqldbQueryGenerator.convertToRasGMArray(domainBoundaries, filePath);
-        Integer oid = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(insertQuery, true, true, gmarray));
-
-        AsqldbConnection.executeQuery("insert into " + benchContext.getCollName() + " values (" + oid + ")");
-        AsqldbConnection.commit();
     }
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP TABLE {0}", benchContext.getCollName());
         try {
-            AsqldbConnection.executeQuery(dropCollectionQuery);
+            AsqldbConnection.executeQuery("DROP TABLE " + benchContext.getCollName());
             AsqldbConnection.commit();
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
         }
     }
 }
