@@ -33,10 +33,11 @@ public class SciQLSystemController extends SystemController {
         if (executeShellCommand(stopSystemCommand) != 0) {
             // ignore, it may be already stopped
         }
-        Thread.sleep(10000);
+        Thread.sleep(8000);
         if (executeShellCommand(startSystemCommand) != 0) {
             throw new Exception("Failed to start the system.");
         }
+        Thread.sleep(1000);
         SciQLConnection.open(connContext);
     }
 }
