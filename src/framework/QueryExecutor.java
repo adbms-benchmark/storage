@@ -18,4 +18,9 @@ public abstract class QueryExecutor {
 
     public abstract void dropCollection();
 
+    protected String report(String systemName, String query, int dataSize, long time) {
+        return systemName + ",\"" + query + "\","
+                + dataSize + "," + time;
+    }
+
 }

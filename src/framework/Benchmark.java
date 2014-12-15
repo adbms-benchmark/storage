@@ -27,15 +27,15 @@ public class Benchmark {
     public void runBenchmark() throws Exception {
         //TODO-GM: read results file path from config file
         try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
-            systemController.restartSystem();
-            queryExecutor.createCollection();
+//            systemController.restartSystem();
+//            queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
             for (String query : benchmarkQueries) {
                 pr.print(String.format("\"%s\", \"%s\", ", systemController.getSystemName(), query));
                 long total = 0;
                 for (int i = 0; i < REPEAT_NO; ++i) {
-                    systemController.restartSystem();
+//                    systemController.restartSystem();
                     //TODO-GM: add more information about the query (no of dimensions)
                     long time = queryExecutor.executeTimedQuery(query);
                     total += time;
@@ -45,7 +45,7 @@ public class Benchmark {
                 pr.flush();
             }
         } finally {
-            queryExecutor.dropCollection();
+//            queryExecutor.dropCollection();
         }
     }
 

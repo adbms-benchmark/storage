@@ -24,7 +24,6 @@ public class SciQLQueryGenerator extends QueryGenerator {
     @Override
     public List<String> getBenchmarkQueries() {
         List<String> queries = new ArrayList<>();
-        queries.add("select avg(c.intensity) from rs.image1 as c");
         return queries;
     }
 

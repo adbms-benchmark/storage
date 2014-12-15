@@ -76,10 +76,10 @@ public class RasdamanQueryGenerator extends QueryGenerator {
 
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", benchContext.getCollName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", benchContext.getCollName1(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT {0}{1} FROM {0}", benchContext.getCollName(), convertToRasdamanDomain(domain));
+        return MessageFormat.format("SELECT {0}{1} FROM {0}", benchContext.getCollName1(), convertToRasdamanDomain(domain));
     }
 }

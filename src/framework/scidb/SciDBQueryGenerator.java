@@ -52,11 +52,11 @@ public class SciDBQueryGenerator extends QueryGenerator {
     }
 
     private String generateSciDBQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT {0} FROM {0} WHERE {1}", benchContext.getCollName(), convertToSciDBDomain(domain));
+        return MessageFormat.format("SELECT {0} FROM {0} WHERE {1}", benchContext.getCollName1(), convertToSciDBDomain(domain));
     }
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count({0}) FROM {0} WHERE {1} ", benchContext.getCollName(), convertToSciDBDomain(domain1, domain2));
+        return MessageFormat.format("SELECT count({0}) FROM {0} WHERE {1} ", benchContext.getCollName1(), convertToSciDBDomain(domain1, domain2));
     }
 
     public static String convertToSciDBDomain(List<Pair<Long, Long>> domain) {

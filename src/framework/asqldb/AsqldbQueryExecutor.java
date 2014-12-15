@@ -2,13 +2,18 @@ package framework.asqldb;
 
 import data.DataGenerator;
 import data.DomainGenerator;
+import static framework.Benchmark.HOME_DIR;
 import framework.BenchmarkContext;
 import framework.ConnectionContext;
 import framework.QueryExecutor;
+import framework.TableContext;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import org.asqldb.util.AsqldbConnection;
 import org.asqldb.util.TimerUtil;
+import util.IO;
 
 /**
  *
@@ -40,27 +45,63 @@ public class AsqldbQueryExecutor extends QueryExecutor {
         TimerUtil.startTimer("asqldb query");
         AsqldbConnection.executeQuery(query);
         long result = TimerUtil.getElapsedMilli("asqldb query");
+        TimerUtil.clearTimers();
+        System.out.println("time: " + result + " ms");
+        return result;
+    }
+
+    public long executeTimedQueryUpdate(String query, InputStream in) {
+        TimerUtil.clearTimers();
+        TimerUtil.startTimer("asqldb query update");
+        AsqldbConnection.executeUpdateQuery(query, in);
+        long result = TimerUtil.getElapsedMilli("asqldb query update");
+        TimerUtil.clearTimers();
         System.out.println("time: " + result + " ms");
         return result;
     }
 
     @Override
     public void createCollection() throws Exception {
-        try {
-            executeTimedQuery("CREATE TABLE " + benchContext.getCollName() + " (a CHAR MDARRAY " + domainGenerator.getMDArrayDomain() + ")");
-            InputStream fin = new FileInputStream(benchContext.getDataFile());
-            AsqldbConnection.executeUpdateQuery("insert into " + benchContext.getCollName() + " values (mdarray_decode(?))", fin);
-            AsqldbConnection.commit();
+        String benchmarkFilename = HOME_DIR + "/benchmark_insert.csv";
+        IO.deleteFile(benchmarkFilename);
+
+        try (PrintWriter pr = new PrintWriter(new FileWriter(benchmarkFilename, true))) {
+
+            pr.println("system_name,query,data_size,time_in_ms");
+            pr.flush();
+            for (TableContext tableContext : BenchmarkContext.dataSizes) {
+                executeTimedQuery("CREATE TABLE " + tableContext.asqldbTable1 + " (a CHAR MDARRAY [x,y])");
+                executeTimedQuery("CREATE TABLE " + tableContext.asqldbTable2 + " (a CHAR MDARRAY [x,y])");
+
+                String query1 = "insert into " + tableContext.asqldbTable1 + " values (mdarray_decode(?))";
+                String query2 = "insert into " + tableContext.asqldbTable2 + " values (mdarray_decode(?))";
+                String fileName1 = benchContext.getDataDir() + tableContext.fileName1;
+                String fileName2 = benchContext.getDataDir() + tableContext.fileName2;
+                InputStream fin1 = new FileInputStream(fileName1);
+                InputStream fin2 = new FileInputStream(fileName2);
+
+                pr.println(report(systemController.getSystemName(), query1, tableContext.dataSize,
+                        executeTimedQueryUpdate(query1, fin1)));
+                pr.println(report(systemController.getSystemName(), query2, tableContext.dataSize,
+                        executeTimedQueryUpdate(query2, fin2)));
+                pr.flush();
+            }
+
         } catch (Exception ex) {
             dropCollection();
             throw ex;
+        } finally {
+            AsqldbConnection.commit();
         }
     }
 
     @Override
     public void dropCollection() {
         try {
-            AsqldbConnection.executeQuery("DROP TABLE " + benchContext.getCollName());
+            for (TableContext tableContext : BenchmarkContext.dataSizes) {
+                executeTimedQuery("DROP TABLE " + tableContext.asqldbTable1);
+                executeTimedQuery("DROP TABLE " + tableContext.asqldbTable2);
+            }
             AsqldbConnection.commit();
         } catch (Exception ex) {
         }

@@ -2,9 +2,13 @@ package framework.sciql;
 
 import data.DataGenerator;
 import data.DomainGenerator;
+import static framework.Benchmark.HOME_DIR;
 import framework.BenchmarkContext;
 import framework.ConnectionContext;
 import framework.QueryExecutor;
+import framework.TableContext;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import org.asqldb.util.TimerUtil;
 
 /**
@@ -34,19 +38,47 @@ public class SciQLQueryExecutor extends QueryExecutor {
         TimerUtil.startTimer("sciql query");
         SciQLConnection.executeQuery(query);
         long result = TimerUtil.getElapsedMilli("sciql query");
+        TimerUtil.clearTimers();
+        System.out.println("time: " + result + " ms");
+        return result;
+    }
+
+    public long executeTimedQueryUpdate(String query) {
+        TimerUtil.clearTimers();
+        TimerUtil.startTimer("sciql query update");
+        SciQLConnection.executeUpdateQuery(query);
+        long result = TimerUtil.getElapsedMilli("sciql query update");
+        TimerUtil.clearTimers();
         System.out.println("time: " + result + " ms");
         return result;
     }
 
     @Override
     public void createCollection() throws Exception {
-        try {
-            SciQLConnection.executeUpdateQuery("CALL rs.attach('" + benchContext.getDataFile() + "')");
-            SciQLConnection.executeUpdateQuery("CALL rs.import(1)");
+        String benchmarkFilename = HOME_DIR + "/benchmark_insert.csv";
+
+        try (PrintWriter pr = new PrintWriter(new FileWriter(benchmarkFilename, true))) {
+
+            for (TableContext tableContext : BenchmarkContext.dataSizes) {
+
+                String fileName1 = benchContext.getDataDir() + tableContext.fileName1;
+                executeTimedQueryUpdate("CALL rs.attach('" + fileName1 + "')");
+                String query1 = "CALL rs.import(" + tableContext.index1 + ")";
+                pr.println(report(systemController.getSystemName(), query1, tableContext.dataSize,
+                        executeTimedQueryUpdate(query1)));
+
+                String fileName2 = benchContext.getDataDir() + tableContext.fileName2;
+                executeTimedQueryUpdate("CALL rs.attach('" + fileName2 + "')");
+                String query2 = "CALL rs.import(" + tableContext.index2 + ")";
+                pr.println(report(systemController.getSystemName(), query2, tableContext.dataSize,
+                        executeTimedQueryUpdate(query2)));
+
+                pr.flush();
+            }
+
         } catch (Exception ex) {
             dropCollection();
             throw ex;
-        } finally {
         }
     }
 
@@ -55,7 +87,16 @@ public class SciQLQueryExecutor extends QueryExecutor {
         try {
             SciQLConnection.executeUpdateQuery("DELETE FROM rs.files");
             SciQLConnection.executeUpdateQuery("DELETE FROM rs.catalog");
-            SciQLConnection.executeUpdateQuery("DROP ARRAY rs.image1");
+            for (TableContext tableContext : BenchmarkContext.dataSizes) {
+                try {
+                    SciQLConnection.executeUpdateQuery("DROP ARRAY " + tableContext.sciqlTable1);
+                } catch (Exception ex) {
+                }
+                try {
+                    SciQLConnection.executeUpdateQuery("DROP ARRAY " + tableContext.sciqlTable2);
+                } catch (Exception ex) {
+                }
+            }
         } catch (Exception ex) {
         }
     }

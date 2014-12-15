@@ -28,4 +28,9 @@ public class IO {
         }
         return ret;
     }
+
+    public static boolean deleteFile(String fileName) {
+        File f = new File(fileName);
+        return f.delete();
+    }
 }

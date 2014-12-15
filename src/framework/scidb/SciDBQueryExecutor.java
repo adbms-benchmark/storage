@@ -59,9 +59,9 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
-        createArrayQuery.append(benchContext.getCollName());
+        createArrayQuery.append(benchContext.getCollName1());
         createArrayQuery.append(" <");
-        createArrayQuery.append(benchContext.getCollName());
+        createArrayQuery.append(benchContext.getCollName1());
         createArrayQuery.append(":char>");
         createArrayQuery.append('[');
 
@@ -88,13 +88,13 @@ public class SciDBQueryExecutor extends QueryExecutor {
 
         executeTimedQuery(createArrayQuery.toString());
 
-        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", benchContext.getCollName(), filePath);
+        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", benchContext.getCollName1(), filePath);
         executeTimedQuery(insertDataQuery, "-n");
     }
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getCollName());
+        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getCollName1());
         executeTimedQuery(dropCollectionQuery);
     }
 }

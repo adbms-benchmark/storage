@@ -31,7 +31,6 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     @Override
     public List<String> getBenchmarkQueries() {
         List<String> queries = new ArrayList<>();
-        queries.add("select avg_cells(c.a) from " + benchContext.getCollName() + " as c");
         return queries;
     }
 
@@ -59,12 +58,12 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
 //        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}",
         return MessageFormat.format("SELECT avg_cells(A{1}) + avg_cells(A{2}) FROM {0}",
-                benchContext.getCollName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+                benchContext.getCollName1(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
         return MessageFormat.format("SELECT A{1} FROM {0}",
-                benchContext.getCollName(), convertToRasdamanDomain(domain));
+                benchContext.getCollName1(), convertToRasdamanDomain(domain));
     }
 
     public static String convertToRasdamanMddType(int noOfDimensions) {

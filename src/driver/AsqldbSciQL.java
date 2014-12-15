@@ -3,8 +3,6 @@ package driver;
 import framework.Benchmark;
 import framework.BenchmarkContext;
 import framework.ConnectionContext;
-import framework.asqldb.AsqldbQueryExecutor;
-import framework.asqldb.AsqldbQueryGenerator;
 import framework.asqldb.AsqldbSystemController;
 import framework.sciql.SciQLConnection;
 import framework.sciql.SciQLQueryExecutor;
@@ -29,27 +27,31 @@ public class AsqldbSciQL {
 
         System.out.println("---------------------------------------------------");
         System.out.println("Benchmark configuration");
+        System.out.println("");
         System.out.println("ASQLDB " + asqldbContext);
         System.out.println("SciQL " + sciqlContext);
+        System.out.println("");
         System.out.println(benchContext);
+        System.out.println("");
         System.out.println(asqldbSysController);
         System.out.println(sciqlSysController);
         System.out.println("---------------------------------------------------");
 
         AsqldbConnection.open(asqldbContext.getUrl());
+        SciQLConnection.open(sciqlContext);
 
         int noQueries = 1;
         int noOfDim = 2;
 
         try {
             {
-                System.out.println("ASQLDB");
-
-                AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
-                AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
-
-                Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
-                benchmark.runBenchmark();
+//                System.out.println("ASQLDB");
+//
+//                AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
+//                AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
+//
+//                Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
+//                benchmark.runBenchmark();
             }
             {
                 System.out.println("SciQL");

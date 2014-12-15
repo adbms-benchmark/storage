@@ -64,12 +64,12 @@ public class RasdamanQueryExecutor extends QueryExecutor {
 
         Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
 
-        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName(), aChar.getSecond());
+        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName1(), aChar.getSecond());
         executeTimedQuery(createCollectionQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()});
 
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d", benchContext.getCollName(), chunkSize, chunkSize, tileSize);
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d", benchContext.getCollName1(), chunkSize, chunkSize, tileSize);
         executeTimedQuery(insertQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword(),
@@ -80,7 +80,7 @@ public class RasdamanQueryExecutor extends QueryExecutor {
 
     @Override
     public void dropCollection() {
-        String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchContext.getCollName());
+        String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchContext.getCollName1());
         executeTimedQuery(dropCollectionQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()
