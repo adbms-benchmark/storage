@@ -8,6 +8,8 @@ public class TableContext {
 
     public final String asqldbTable1;
     public final String asqldbTable2;
+    public final String rasqlTable1;
+    public final String rasqlTable2;
     public final String sciqlTable1;
     public final String sciqlTable2;
     public final String fileName1;
@@ -24,6 +26,8 @@ public class TableContext {
         dataSizeString = getDataSizeString();
         asqldbTable1 = getAsqldbTable(index1);
         asqldbTable2 = getAsqldbTable(index2);
+        rasqlTable1 = ("PUBLIC_" + asqldbTable1 + "_A").toUpperCase();
+        rasqlTable2 = ("PUBLIC_" + asqldbTable2 + "_A").toUpperCase();
         sciqlTable1 = getSciqlTable(index1);
         sciqlTable2 = getSciqlTable(index2);
         fileName1 = getFileName(1);

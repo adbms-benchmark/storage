@@ -28,7 +28,7 @@ public class Benchmark {
         //TODO-GM: read results file path from config file
         try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
 //            systemController.restartSystem();
-//            queryExecutor.createCollection();
+            queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
             for (String query : benchmarkQueries) {

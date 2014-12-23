@@ -12,8 +12,9 @@
         </group>
         <group name="rasdaman">
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/asqldb/AsqldbQueryExecutor.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/sciql/SciQLConnection.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/sciql/SciQLQueryExecutor.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/BenchmarkContext.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/asqldb/AsqldbQueryGenerator.java</file>
+            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/sciql/SciQLQueryGenerator.java</file>
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/QueryExecutor.java</file>
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/driver/AsqldbSciQL.java</file>
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/Benchmark.java</file>

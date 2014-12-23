@@ -4,6 +4,7 @@ package framework.asqldb;
 import data.QueryDomainGenerator;
 import framework.BenchmarkContext;
 import framework.QueryGenerator;
+import framework.TableContext;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -31,6 +32,11 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     @Override
     public List<String> getBenchmarkQueries() {
         List<String> queries = new ArrayList<>();
+        for (TableContext tableContext : BenchmarkContext.dataSizes) {
+            String query = "select count_cells(a >= 30 and b < 30) from " + tableContext.asqldbTable1 + " as a, "
+                    + tableContext.asqldbTable2 + " as b";
+            queries.add(query);
+        }
         return queries;
     }
 

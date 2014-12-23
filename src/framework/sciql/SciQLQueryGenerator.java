@@ -3,6 +3,7 @@ package framework.sciql;
 import data.QueryDomainGenerator;
 import framework.BenchmarkContext;
 import framework.QueryGenerator;
+import framework.TableContext;
 import java.util.ArrayList;
 import java.util.List;
 import util.Pair;
@@ -24,6 +25,11 @@ public class SciQLQueryGenerator extends QueryGenerator {
     @Override
     public List<String> getBenchmarkQueries() {
         List<String> queries = new ArrayList<>();
+        for (TableContext tableContext : BenchmarkContext.dataSizes) {
+            String query = "select count(*) from " + tableContext.sciqlTable1 + " as a, "
+                    + tableContext.sciqlTable2 + " as b where a.x = b.x and a.y = b.y and a.intensity >= 30 and b.intensity < 30";
+            queries.add(query);
+        }
         return queries;
     }
 

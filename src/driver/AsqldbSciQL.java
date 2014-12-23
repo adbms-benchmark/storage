@@ -3,6 +3,8 @@ package driver;
 import framework.Benchmark;
 import framework.BenchmarkContext;
 import framework.ConnectionContext;
+import framework.asqldb.AsqldbQueryExecutor;
+import framework.asqldb.AsqldbQueryGenerator;
 import framework.asqldb.AsqldbSystemController;
 import framework.sciql.SciQLConnection;
 import framework.sciql.SciQLQueryExecutor;
@@ -45,13 +47,13 @@ public class AsqldbSciQL {
 
         try {
             {
-//                System.out.println("ASQLDB");
-//
-//                AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
-//                AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
-//
-//                Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
-//                benchmark.runBenchmark();
+                System.out.println("ASQLDB");
+
+                AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
+                AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
+
+                Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
+                benchmark.runBenchmark();
             }
             {
                 System.out.println("SciQL");
