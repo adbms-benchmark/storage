@@ -1,8 +1,8 @@
 package driver;
 
 import framework.Benchmark;
-import framework.BenchmarkContext;
-import framework.ConnectionContext;
+import framework.context.BenchmarkContext;
+import framework.context.ConnectionContext;
 import framework.asqldb.AsqldbQueryExecutor;
 import framework.asqldb.AsqldbQueryGenerator;
 import framework.asqldb.AsqldbSystemController;

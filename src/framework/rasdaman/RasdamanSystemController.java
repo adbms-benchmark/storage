@@ -1,6 +1,6 @@
 package framework.rasdaman;
 
-import framework.ConnectionContext;
+import framework.context.ConnectionContext;
 import framework.SystemController;
 import java.io.File;
 import java.io.IOException;

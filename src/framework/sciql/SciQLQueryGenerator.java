@@ -1,9 +1,9 @@
 package framework.sciql;
 
 import data.QueryDomainGenerator;
-import framework.BenchmarkContext;
+import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
-import framework.TableContext;
+import framework.context.TableContext;
 import java.util.ArrayList;
 import java.util.List;
 import util.Pair;

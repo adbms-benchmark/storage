@@ -4,11 +4,11 @@ package framework;
  *
  * @author George Merticariu
  */
-public abstract class QueryExecutor {
+public abstract class QueryExecutor<T> {
 
-    protected ConnectionContext context;
+    protected T context;
 
-    protected QueryExecutor(ConnectionContext context) {
+    protected QueryExecutor(T context) {
         this.context = context;
     }
 

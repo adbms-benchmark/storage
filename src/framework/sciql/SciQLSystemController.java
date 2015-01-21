@@ -1,6 +1,6 @@
 package framework.sciql;
 
-import framework.ConnectionContext;
+import framework.context.ConnectionContext;
 import framework.SystemController;
 import java.io.IOException;
 import util.IO;

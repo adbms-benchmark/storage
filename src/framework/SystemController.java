@@ -1,5 +1,8 @@
 package framework;
 
+import framework.context.ConnectionContext;
+import framework.context.Context;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,7 +38,6 @@ public abstract class SystemController extends Context {
     }
 
     public static int executeShellCommandRedirect(String output, String... command) {
-
         int exitCode = -1;
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(output));

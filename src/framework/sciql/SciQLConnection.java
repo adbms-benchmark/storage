@@ -1,6 +1,6 @@
 package framework.sciql;
 
-import framework.ConnectionContext;
+import framework.context.ConnectionContext;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;

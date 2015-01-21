@@ -1,15 +1,16 @@
 package framework.scidb;
 
 import data.QueryDomainGenerator;
-import framework.BenchmarkContext;
+import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+
 import util.Pair;
 
 /**
- *
  * @author George Merticariu
  */
 public class SciDBQueryGenerator extends QueryGenerator {
@@ -32,17 +33,17 @@ public class SciDBQueryGenerator extends QueryGenerator {
         List<List<Pair<Long, Long>>> shapeQueryDomain = queryDomainGenerator.getShapeQueryDomain();
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
 
-//        for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-//            queries.add(generateSciDBQuery(queryDomain));
-//        }
-//
-//        for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-//            queries.add(generateSciDBQuery(queryDomain));
-//        }
-//
-//        for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-//            queries.add(generateSciDBQuery(queryDomain));
-//        }
+        for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
+            queries.add(generateSciDBQuery(queryDomain));
+        }
+
+        for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
+            queries.add(generateSciDBQuery(queryDomain));
+        }
+
+        for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
+            queries.add(generateSciDBQuery(queryDomain));
+        }
 
         for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
             queries.add(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()));

@@ -11,7 +11,6 @@ import java.io.IOException;
  */
 public class DataGenerator {
     public static final String FILE_PREFIX = "benchmark_data";
-    private static final int CHUNK_SIZE = 1024 * 1024;
 
     private final long fileSize;
     private File file;

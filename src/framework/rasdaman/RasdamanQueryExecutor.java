@@ -2,21 +2,22 @@ package framework.rasdaman;
 
 import data.DataGenerator;
 import data.DomainGenerator;
-import framework.BenchmarkContext;
-import framework.ConnectionContext;
+import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import framework.context.RasdamanContext;
 import util.Pair;
 
 /**
  *
  * @author George Merticariu
  */
-public class RasdamanQueryExecutor extends QueryExecutor {
+public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
     private DataGenerator dataGenerator;
     private DomainGenerator domainGenerator;
@@ -24,7 +25,7 @@ public class RasdamanQueryExecutor extends QueryExecutor {
     private int noOfDimensions;
     private BenchmarkContext benchContext;
 
-    public RasdamanQueryExecutor(ConnectionContext context, RasdamanSystemController rasdamanSystemController, BenchmarkContext benchContext, int noOfDimensions) {
+    public RasdamanQueryExecutor(RasdamanContext context, RasdamanSystemController rasdamanSystemController, BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         domainGenerator = new DomainGenerator(noOfDimensions);
         this.rasdamanSystemController = rasdamanSystemController;

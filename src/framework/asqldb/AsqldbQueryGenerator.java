@@ -2,9 +2,9 @@ package framework.asqldb;
 
 
 import data.QueryDomainGenerator;
-import framework.BenchmarkContext;
+import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
-import framework.TableContext;
+import framework.context.TableContext;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;

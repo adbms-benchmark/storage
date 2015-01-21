@@ -1,9 +1,9 @@
 package framework.asqldb;
 
-import framework.ConnectionContext;
+import framework.context.ConnectionContext;
 import framework.rasdaman.RasdamanSystemController;
 import java.io.IOException;
-import org.asqldb.util.AsqldbConnection;
+
 import util.Pair;
 
 /**

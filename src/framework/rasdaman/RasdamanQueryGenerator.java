@@ -2,7 +2,7 @@ package framework.rasdaman;
 
 
 import data.QueryDomainGenerator;
-import framework.BenchmarkContext;
+import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
 import java.text.MessageFormat;
 import java.util.ArrayList;

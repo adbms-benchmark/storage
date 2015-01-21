@@ -1,6 +1,5 @@
-package framework;
+package framework.context;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -22,7 +21,7 @@ public class ConnectionContext extends Context {
     public static final String KEY_PORT = "conn.port";
     public static final String KEY_DBNAME = "conn.dbname";
     
-    public ConnectionContext(String propertiesPath) throws FileNotFoundException, IOException {
+    public ConnectionContext(String propertiesPath) throws IOException {
         super(propertiesPath);
         this.user = getValue(KEY_USER);
         this.password = getValue(KEY_PASSWORD);

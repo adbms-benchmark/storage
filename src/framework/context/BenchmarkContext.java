@@ -1,4 +1,6 @@
-package framework;
+package framework.context;
+
+import framework.context.TableContext;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,12 +27,17 @@ public class BenchmarkContext extends Context {
     private final String collName1;
     private final String collName2;
     private final String dataDir;
+
+    private final int maxQueryRerty;
+    private final int maxQueryExecutionTime;
     
     public static final String KEY_COLL_SIZE = "coll.size";
     public static final String KEY_COLL_NAME1 = "coll.name1";
     public static final String KEY_COLL_NAME2 = "coll.name2";
     public static final String KEY_COLL_TILE_SIZE = "coll.tile_size";
     public static final String KEY_QUERY_SELECT_SIZE = "query.select_size";
+    public static final String KEY_QUERY_MAX_RETRY = "query.max.retry";
+    public static final String KEY_QUERY_MAX_EXECUTION_TIME = "query.max.execution_time";
     public static final String KEY_DATA_DIR = "data.dir";
 
     public BenchmarkContext(String propertiesPath) throws FileNotFoundException, IOException {
@@ -41,6 +48,8 @@ public class BenchmarkContext extends Context {
         maxQuerySelectSize = getValueLong(KEY_QUERY_SELECT_SIZE);
         collTileSize = getValueLong(KEY_COLL_TILE_SIZE);
         dataDir = getValue(KEY_DATA_DIR);
+        maxQueryRerty = getValueInteger(KEY_QUERY_MAX_RETRY);
+        maxQueryExecutionTime = getValueInteger(KEY_QUERY_MAX_EXECUTION_TIME);
     }
 
     public long getCollSize() {
@@ -67,6 +76,24 @@ public class BenchmarkContext extends Context {
         return dataDir;
     }
 
+    /**
+     * Gets the maximum query retry. If the query execution fails, it will be retried.
+     * @return Integer value, representing how many times the query should be retried before
+     * discarded.
+     */
+    public int getMaxQueryRerty() {
+        return maxQueryRerty;
+    }
+
+    /**
+     * Get the maximum query execution time. If a query runs longer than this period, its execution
+     * is terminated.
+     * @return Integer value representing the maximum query execution time in seconds.
+     */
+    public int getMaxQueryExecutionTime() {
+        return maxQueryExecutionTime;
+    }
+
     @Override
     public String toString() {
         return "Benchmark context:"
@@ -74,7 +101,9 @@ public class BenchmarkContext extends Context {
                 + "\n collSize=" + collSize
                 + "\n dataFile=" + dataDir
                 + "\n maxQuerySelectSize=" + maxQuerySelectSize
-                + "\n collTileSize=" + collTileSize;
+                + "\n collTileSize=" + collTileSize
+                + "\n maxQueryRetry=" + maxQueryRerty
+                + "\n maxQueryExecutionTime=" + maxQueryExecutionTime;
     }
     
 }

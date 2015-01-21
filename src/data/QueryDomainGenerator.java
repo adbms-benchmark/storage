@@ -1,6 +1,6 @@
 package data;
 
-import framework.BenchmarkContext;
+import framework.context.BenchmarkContext;
 import java.util.ArrayList;
 import java.util.List;
 import util.Pair;

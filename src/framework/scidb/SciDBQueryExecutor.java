@@ -2,27 +2,28 @@ package framework.scidb;
 
 import data.DataGenerator;
 import data.DomainGenerator;
-import framework.BenchmarkContext;
-import framework.ConnectionContext;
+import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import framework.context.SciDBContext;
 import util.Pair;
 
 /**
  *
  * @author George Merticariu
  */
-public class SciDBQueryExecutor extends QueryExecutor {
+public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
     private DomainGenerator domainGenerator;
     private DataGenerator dataGenerator;
     private int noOfDimensions;
     private BenchmarkContext benchContext;
 
-    public SciDBQueryExecutor(ConnectionContext context, BenchmarkContext benchContext, int noOfDimensions) {
+    public SciDBQueryExecutor(SciDBContext context, BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         domainGenerator = new DomainGenerator(noOfDimensions);
         this.noOfDimensions = noOfDimensions;
@@ -32,7 +33,7 @@ public class SciDBQueryExecutor extends QueryExecutor {
     @Override
     public long executeTimedQuery(String query, String... args) {
         List<String> commandList = new ArrayList<>();
-        commandList.add("/opt/scidb/14.8/bin/iquery");
+        commandList.add(context.getExecuteQueryBin());
         commandList.add("-q");
         commandList.add(query);
         commandList.add("-p");
