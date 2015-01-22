@@ -4,22 +4,24 @@ import util.StopWatch;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class ProcessExecutor {
     private static final String DEV_NULL = "/dev/null";
+    private static final int EXIT_SUCCESS = 0;
 
-    private long maxExecutionTime;
+    private long maxExecutionTime = -1;
     private Process process;
-    private int exitStatus;
-    private long executionTime;
+    private int exitStatus = -1;
+    private long executionTime = -1;
     private String[] command;
-    private boolean interrupted;
-    private boolean executeWithTimeLimit;
+    private boolean interrupted = false;
+    private boolean executeWithTimeLimit = false;
+    private String error = "";
 
     public ProcessExecutor(String... command) {
-        this.executeWithTimeLimit = false;
         this.command = command;
     }
 
@@ -28,12 +30,10 @@ public class ProcessExecutor {
 
         this.maxExecutionTime = ((long) executionTimeLimit) * 1000l;
         this.executeWithTimeLimit = true;
-
-        this.interrupted = false;
     }
 
-    public void execute() throws IOException, InterruptedException {
-        ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(DEV_NULL));
+    public void executeRedirect(String filePath) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(filePath));
 
         Timer timer = new Timer();
         if (executeWithTimeLimit) {
@@ -47,10 +47,25 @@ public class ProcessExecutor {
         executionTime = executionTimer.getElapsedTime();
         exitStatus = process.exitValue();
 
+        StringBuilder error = new StringBuilder();
+
         if (executeWithTimeLimit && !interrupted) {
             timer.cancel();
         }
 
+        if (!interrupted && exitStatus != EXIT_SUCCESS) {
+            try (Scanner scan = new Scanner(process.getErrorStream())) {
+                while (scan.hasNextLine()) {
+                    error.append(scan.nextLine());
+                    error.append("\n");
+                }
+                this.error = error.toString();
+            }
+        }
+    }
+
+    public void execute() throws IOException, InterruptedException {
+        executeRedirect(DEV_NULL);
     }
 
     public int getExitStatus() {
@@ -63,6 +78,10 @@ public class ProcessExecutor {
 
     public boolean isInterrupted() {
         return interrupted;
+    }
+
+    public String getError() {
+        return error;
     }
 
     private class TerminateProcessJob extends TimerTask {

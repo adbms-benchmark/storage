@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Scanner;
 
 /**
- *
  * @author George Merticariu
  */
 public abstract class SystemController extends Context {
@@ -38,31 +37,19 @@ public abstract class SystemController extends Context {
     }
 
     public static int executeShellCommandRedirect(String output, String... command) {
-        int exitCode = -1;
+        ProcessExecutor processExecutor = new ProcessExecutor(command);
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(output));
-            Process p = processBuilder.start();
-            exitCode = p.waitFor();
-            if (exitCode != 0) {
-                //TODO-GM: change error reporting to log file
-                try (Scanner scan = new Scanner(p.getErrorStream())) {
-                    while (scan.hasNextLine()) {
-                        System.out.println(scan.nextLine());
-                    }
-                }
-            }
+            processExecutor.executeRedirect(output);
         } catch (IOException | InterruptedException e) {
-            //TODO-GM: log to file
             e.printStackTrace();
         }
-
-        return exitCode;
+        return processExecutor.getExitStatus();
     }
 
     public String getSystemName() {
         return systemName;
     }
-    
+
     private String arrayToString(String[] array) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
@@ -76,7 +63,7 @@ public abstract class SystemController extends Context {
 
     @Override
     public String toString() {
-        return systemName + "System Controller:" + "\n startSystemCommand=" + arrayToString(startSystemCommand) + 
+        return systemName + "System Controller:" + "\n startSystemCommand=" + arrayToString(startSystemCommand) +
                 "\n stopSystemCommand=" + arrayToString(stopSystemCommand);
     }
 }
