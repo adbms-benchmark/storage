@@ -24,44 +24,50 @@ public class Benchmark {
         this.systemController = systemController;
     }
 
-    public void runBenchmark() throws Exception {
+    public void runBenchmark(int noOfDim, long collectionSize, long maxSelectSize) throws Exception {
         //TODO-GM: read results file path from config file
-        try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results-test-2.csv", true))) {
+        try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
             systemController.restartSystem();
-            queryExecutor.createCollection();
+//            queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
 
             for (String query : benchmarkQueries) {
-                pr.print(String.format("\"%s\", \"%s\", ", systemController.getSystemName(), query));
+                System.out.printf("Executing query: \"%s\"\n", query);
+
+                pr.print(String.format("\"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ", systemController.getSystemName(), query, noOfDim, collectionSize, maxSelectSize));
                 long total = 0;
+                int repeatNo = 0;
                 for (int repeatIndex = 0; repeatIndex < REPEAT_NO; ++repeatIndex) {
-                    systemController.restartSystem();
                     //TODO-GM: add more information about the query (no of dimensions)
                     boolean failed = true;
                     long time = -1;
 
                     for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
                         try {
+                            systemController.restartSystem();
                             time = queryExecutor.executeTimedQuery(query);
                             failed = false;
                         } catch (Exception ex) {
-                            System.out.printf("Query \"%s\" failed. Retrying...", query, retryIndex + 1);
+                            System.out.printf("Query \"%s\" failed. Retrying...\n", query, retryIndex + 1);
                         }
                     }
 
                     if (!failed) {
                         total += time;
+                        repeatNo++;
                         pr.print(time + ", ");
                     } else {
-                        System.out.printf("Query \"%s\" failed. Skipping...", query);
+                        System.out.printf("Query \"%s\" failed. Skipping...\n", query);
                     }
                 }
-                pr.println(total / REPEAT_NO);
+                System.out.printf("Executed in %d ms.\n\n", (total/repeatNo));
+
+                pr.println(total / repeatNo);
                 pr.flush();
             }
         } finally {
-            queryExecutor.dropCollection();
+//            queryExecutor.dropCollection();
         }
     }
 

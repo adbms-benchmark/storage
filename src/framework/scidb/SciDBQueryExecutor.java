@@ -5,6 +5,7 @@ import data.DomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import framework.context.SciDBContext;
 import util.Pair;
 
 /**
- *
  * @author George Merticariu
  */
 public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
@@ -31,7 +31,7 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
     }
 
     @Override
-    public long executeTimedQuery(String query, String... args) {
+    public long executeTimedQuery(String query, String... args) throws Exception {
         List<String> commandList = new ArrayList<>();
         commandList.add(context.getExecuteQueryBin());
         commandList.add("-q");
@@ -41,8 +41,12 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
         Collections.addAll(commandList, args);
 
         long startTime = System.currentTimeMillis();
-        SystemController.executeShellCommand(commandList.toArray(new String[]{}));
+        int status = SystemController.executeShellCommand(commandList.toArray(new String[]{}));
         long result = System.currentTimeMillis() - startTime;
+
+        if (status != 0) {
+            throw new Exception(String.format("Query execution failed with status %d", status));
+        }
 
         return result;
     }
@@ -94,7 +98,7 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
     }
 
     @Override
-    public void dropCollection() {
+    public void dropCollection() throws Exception {
         String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getCollName1());
         executeTimedQuery(dropCollectionQuery);
     }

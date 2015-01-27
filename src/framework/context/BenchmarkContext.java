@@ -21,10 +21,10 @@ public class BenchmarkContext extends Context {
         new TableContext(5, 500)
     };
     
-    private final long collSize;
-    private final long maxQuerySelectSize;
+    private long collSize;
+    private long maxQuerySelectSize;
     private final long collTileSize;
-    private final String collName1;
+    private String collName1;
     private final String collName2;
     private final String dataDir;
 
@@ -99,6 +99,18 @@ public class BenchmarkContext extends Context {
      */
     public int getMaxQueryExecutionTime() {
         return maxQueryExecutionTime;
+    }
+
+    public void setMaxQuerySelectSize(long maxQuerySelectSize) {
+        this.maxQuerySelectSize = maxQuerySelectSize;
+    }
+
+    public void setCollName1(String collName1) {
+        this.collName1 = collName1;
+    }
+
+    public void setCollSize(long collSize) {
+        this.collSize = collSize;
     }
 
     @Override

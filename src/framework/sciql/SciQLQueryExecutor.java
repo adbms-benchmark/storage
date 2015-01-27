@@ -4,6 +4,7 @@ import data.DataGenerator;
 import data.DomainGenerator;
 import framework.ProcessExecutor;
 import framework.QueryExecutor;
+
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import java.io.BufferedWriter;
@@ -11,12 +12,12 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+
 import org.asqldb.util.TimerUtil;
 import util.IO;
 import util.Pair;
 
 /**
- *
  * @author Dimitar Misev
  */
 public class SciQLQueryExecutor extends QueryExecutor {
@@ -28,7 +29,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private final int noOfDimensions;
 
     public SciQLQueryExecutor(ConnectionContext context, SciQLSystemController systemController,
-            BenchmarkContext benchContext, int noOfDimensions) {
+                              BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         this.domainGenerator = new DomainGenerator(noOfDimensions);
         this.systemController = systemController;
@@ -37,7 +38,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
     }
 
     @Override
-    public long executeTimedQuery(String query, String... args) {
+    public long executeTimedQuery(String query, String... args) throws Exception {
         TimerUtil.clearTimers();
         TimerUtil.startTimer("sciql query");
         SciQLConnection.executeQuery(query);

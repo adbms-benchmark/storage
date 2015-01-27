@@ -53,7 +53,7 @@ public class AsqldbSciQL {
                 AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
 
                 Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
-                benchmark.runBenchmark();
+//                benchmark.runBenchmark();
             }
             {
                 System.out.println("SciQL");
@@ -62,7 +62,7 @@ public class AsqldbSciQL {
                 SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
 
                 Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, sciqlSysController);
-                benchmark.runBenchmark();
+//                benchmark.runBenchmark();
             }
         } finally {
             SciQLConnection.close();

@@ -25,11 +25,11 @@ public class RasdamanContext extends ConnectionContext {
         String stopCommand = getValue(STOP_COMMAND_KEY);
         String rasdlBin = getValue(RASDL_BIN_KEY);
 
-        this.rasdlBin = binDir + rasdlBin;
+        this.rasdlBin = String.format("%s/%s", binDir, rasdlBin);
 
         this.executeQueryBin = String.format("%s/%s", binDir, executeQueryPath);
-        this.startCommand = new String[]{startCommand};
-        this.stopCommand = new String[]{stopCommand};
+        this.startCommand = new String[]{String.format("%s/%s", binDir, startCommand)};
+        this.stopCommand = new String[]{String.format("%s/%s", binDir, stopCommand)};
     }
 
     public String[] getStartCommand() {

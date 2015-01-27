@@ -12,11 +12,11 @@ public abstract class QueryExecutor<T> {
         this.context = context;
     }
 
-    public abstract long executeTimedQuery(String query, String... args);
+    public abstract long executeTimedQuery(String query, String... args) throws Exception;
 
     public abstract void createCollection() throws Exception;
 
-    public abstract void dropCollection();
+    public abstract void dropCollection() throws Exception;
 
     protected String report(String systemName, String query, int dataSize, long time) {
         return systemName + ",\"" + query + "\","

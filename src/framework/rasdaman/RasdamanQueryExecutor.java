@@ -5,6 +5,7 @@ import data.DomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import framework.context.RasdamanContext;
 import util.Pair;
 
 /**
- *
  * @author George Merticariu
  */
 public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
@@ -34,19 +34,21 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
     }
 
     @Override
-    public long executeTimedQuery(String query, String... args) {
+    public long executeTimedQuery(String query, String... args) throws Exception {
         List<String> commandList = new ArrayList<>();
         //TODO-GM: read rasql path from config file
-        commandList.add("/home/rasdaman/install/bin/rasql");
+        commandList.add(context.getExecuteQueryBin());
         commandList.add("-q");
         commandList.add(query);
-        commandList.add("--out");
-        commandList.add("string");
         Collections.addAll(commandList, args);
 
         long startTime = System.currentTimeMillis();
-        SystemController.executeShellCommand(commandList.toArray(new String[]{}));
+        int status = SystemController.executeShellCommand(commandList.toArray(new String[]{}));
         long result = System.currentTimeMillis() - startTime;
+
+        if (status != 0) {
+            throw new Exception(String.format("Query execution failed with status %d", status));
+        }
 
         return result;
     }
@@ -63,6 +65,11 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         dataGenerator = new DataGenerator(fileSize);
         String filePath = dataGenerator.getFilePath();
 
+        List<Pair<Long, Long>> tileStructureDomain = new ArrayList<>();
+        for (int i = 0; i < noOfDimensions; i++) {
+            tileStructureDomain.add(Pair.of(0l, ((long) chunkSize)));
+        }
+
         Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
 
         String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName1(), aChar.getSecond());
@@ -70,7 +77,8 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()});
 
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d", benchContext.getCollName1(), chunkSize, chunkSize, tileSize);
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
+
         executeTimedQuery(insertQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword(),
@@ -80,7 +88,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
     }
 
     @Override
-    public void dropCollection() {
+    public void dropCollection() throws Exception {
         String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchContext.getCollName1());
         executeTimedQuery(dropCollectionQuery, new String[]{
                 "--user", context.getUser(),

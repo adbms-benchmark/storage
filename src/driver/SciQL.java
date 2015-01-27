@@ -30,7 +30,7 @@ public class SciQL {
                 SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
                 Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
-                benchmark.runBenchmark();
+                benchmark.runBenchmark(noOfDim, benchContext.getCollSize(), benchContext.getMaxQuerySelectSize());
             }
         }
 
