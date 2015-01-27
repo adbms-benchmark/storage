@@ -56,10 +56,6 @@ public class ProcessExecutor {
 
         StringBuilder error = new StringBuilder();
 
-        if (executeWithTimeLimit && !interrupted) {
-            timer.cancel();
-        }
-
         if (!interrupted && exitStatus != EXIT_SUCCESS) {
             try (Scanner scan = new Scanner(process.getErrorStream())) {
                 while (scan.hasNextLine()) {
@@ -69,6 +65,9 @@ public class ProcessExecutor {
                 this.error = error.toString();
             }
         }
+
+        timer.cancel();
+
     }
 
     public void execute() throws IOException, InterruptedException {
