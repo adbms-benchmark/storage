@@ -8,9 +8,11 @@ import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import org.asqldb.util.TimerUtil;
 import util.IO;
@@ -21,11 +23,18 @@ import util.Pair;
  */
 public class SciQLQueryExecutor extends QueryExecutor {
 
+    public static final long SIZE_100MB = 104857600l;
+
     private DataGenerator dataGenerator;
     private final DomainGenerator domainGenerator;
     private final SciQLSystemController systemController;
     private final BenchmarkContext benchContext;
     private final int noOfDimensions;
+    //
+    private final List<SciQLInputData> inputs;
+    private SciQLInputData input;
+    private byte[] data;
+    private int dataIndex;
 
     public SciQLQueryExecutor(ConnectionContext context, SciQLSystemController systemController,
             BenchmarkContext benchContext, int noOfDimensions) {
@@ -34,6 +43,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         this.systemController = systemController;
         this.benchContext = benchContext;
         this.noOfDimensions = noOfDimensions;
+        this.inputs = new ArrayList<>();
     }
 
     @Override
@@ -79,9 +89,6 @@ public class SciQLQueryExecutor extends QueryExecutor {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        dataGenerator = new DataGenerator(fileSize);
-        String filePath = dataGenerator.getFilePath();
-
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
         createArrayQuery.append(collName);
@@ -104,130 +111,84 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
         executeTimedQueryUpdate(createArrayQuery.toString());
 
-        String outFilePath = IO.concatPaths(benchContext.getDataDir(), collName + ".sql");
+        String outFilePath = IO.concatPaths(benchContext.getDataDir(), collName + "-1.sql");
         File outFile = new File(outFilePath);
         if (!outFile.exists()) {
             System.out.print("generating data... ");
-            byte[] data = IO.readFile(filePath);
 
-            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outFilePath), Charset.defaultCharset())) {
-                writer.write("COPY " + fileSize + " RECORDS INTO \"sys\".\"" + collName + "\" FROM stdin USING DELIMITERS '\t','\\n','\"';");
-                writer.newLine();
-                if (noOfDimensions == 1) {
-                    Pair<Long, Long> d1 = domainBoundaries.get(0);
-                    int j = 0;
-                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                        StringBuilder b = new StringBuilder();
-                        b.append(i1).append(' ')
-                                .append(data[j++]);
-                        writer.write(b.toString());
-                        writer.newLine();
+            updateWriters(fileSize);
+            input = new SciQLInputData(null, 0, -1, -1, "");
+
+            int j = 0;
+            if (noOfDimensions == 1) {
+                Pair<Long, Long> d1 = domainBoundaries.get(0);
+                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                    write(j++, i1);
+                }
+            } else if (noOfDimensions == 2) {
+                Pair<Long, Long> d1 = domainBoundaries.get(0);
+                Pair<Long, Long> d2 = domainBoundaries.get(1);
+                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                        write(j++, i1, i2);
                     }
-                } else if (noOfDimensions == 2) {
-                    Pair<Long, Long> d1 = domainBoundaries.get(0);
-                    Pair<Long, Long> d2 = domainBoundaries.get(1);
-                    int j = 0;
-                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                            StringBuilder b = new StringBuilder();
-                            b.append(i1).append(' ')
-                                    .append(i2).append(' ')
-                                    .append(data[j++]);
-                            writer.write(b.toString());
-                            writer.newLine();
+                }
+            } else if (noOfDimensions == 3) {
+                Pair<Long, Long> d1 = domainBoundaries.get(0);
+                Pair<Long, Long> d2 = domainBoundaries.get(1);
+                Pair<Long, Long> d3 = domainBoundaries.get(2);
+                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                            write(j++, i1, i2, i3);
                         }
                     }
-                } else if (noOfDimensions == 3) {
-                    Pair<Long, Long> d1 = domainBoundaries.get(0);
-                    Pair<Long, Long> d2 = domainBoundaries.get(1);
-                    Pair<Long, Long> d3 = domainBoundaries.get(2);
-                    int j = 0;
-                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                                StringBuilder b = new StringBuilder();
-                                b.append(i1).append(' ')
-                                        .append(i2).append(' ')
-                                        .append(i3).append(' ')
-                                        .append(data[j++]);
-                                writer.write(b.toString());
-                                writer.newLine();
+                }
+            } else if (noOfDimensions == 4) {
+                Pair<Long, Long> d1 = domainBoundaries.get(0);
+                Pair<Long, Long> d2 = domainBoundaries.get(1);
+                Pair<Long, Long> d3 = domainBoundaries.get(2);
+                Pair<Long, Long> d4 = domainBoundaries.get(3);
+                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                            for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
+                                write(j++, i1, i2, i3, i4);
                             }
                         }
                     }
-                } else if (noOfDimensions == 4) {
-                    Pair<Long, Long> d1 = domainBoundaries.get(0);
-                    Pair<Long, Long> d2 = domainBoundaries.get(1);
-                    Pair<Long, Long> d3 = domainBoundaries.get(2);
-                    Pair<Long, Long> d4 = domainBoundaries.get(3);
-                    int j = 0;
-                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                                for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
-                                    StringBuilder b = new StringBuilder();
-                                    b.append(i1).append(' ')
-                                            .append(i2).append(' ')
-                                            .append(i3).append(' ')
-                                            .append(i4).append(' ')
-                                            .append(data[j++]);
-                                    writer.write(b.toString());
-                                    writer.newLine();
+                }
+            } else if (noOfDimensions == 5) {
+                Pair<Long, Long> d1 = domainBoundaries.get(0);
+                Pair<Long, Long> d2 = domainBoundaries.get(1);
+                Pair<Long, Long> d3 = domainBoundaries.get(2);
+                Pair<Long, Long> d4 = domainBoundaries.get(3);
+                Pair<Long, Long> d5 = domainBoundaries.get(4);
+                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                            for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
+                                for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
+                                    write(j++, i1, i2, i3, i4, i5);
                                 }
                             }
                         }
                     }
-                } else if (noOfDimensions == 5) {
-                    Pair<Long, Long> d1 = domainBoundaries.get(0);
-                    Pair<Long, Long> d2 = domainBoundaries.get(1);
-                    Pair<Long, Long> d3 = domainBoundaries.get(2);
-                    Pair<Long, Long> d4 = domainBoundaries.get(3);
-                    Pair<Long, Long> d5 = domainBoundaries.get(4);
-                    int j = 0;
-                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                                for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
-                                    for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
-                                        StringBuilder b = new StringBuilder();
-                                        b.append(i1).append(' ')
-                                                .append(i2).append(' ')
-                                                .append(i3).append(' ')
-                                                .append(i4).append(' ')
-                                                .append(i5).append(' ')
-                                                .append(data[j++]);
-                                        writer.write(b.toString());
-                                        writer.newLine();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (noOfDimensions == 6) {
-                    Pair<Long, Long> d1 = domainBoundaries.get(0);
-                    Pair<Long, Long> d2 = domainBoundaries.get(1);
-                    Pair<Long, Long> d3 = domainBoundaries.get(2);
-                    Pair<Long, Long> d4 = domainBoundaries.get(3);
-                    Pair<Long, Long> d5 = domainBoundaries.get(4);
-                    Pair<Long, Long> d6 = domainBoundaries.get(5);
-                    int j = 0;
-                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                                for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
-                                    for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
-                                        for (long i6 = d6.getFirst(); i6 <= d6.getSecond(); i6++) {
-                                            StringBuilder b = new StringBuilder();
-                                            b.append(i1).append(' ')
-                                                    .append(i2).append(' ')
-                                                    .append(i3).append(' ')
-                                                    .append(i4).append(' ')
-                                                    .append(i5).append(' ')
-                                                    .append(i6).append(' ')
-                                                    .append(data[j++]);
-                                            writer.write(b.toString());
-                                            writer.newLine();
-                                        }
+                }
+            } else if (noOfDimensions == 6) {
+                Pair<Long, Long> d1 = domainBoundaries.get(0);
+                Pair<Long, Long> d2 = domainBoundaries.get(1);
+                Pair<Long, Long> d3 = domainBoundaries.get(2);
+                Pair<Long, Long> d4 = domainBoundaries.get(3);
+                Pair<Long, Long> d5 = domainBoundaries.get(4);
+                Pair<Long, Long> d6 = domainBoundaries.get(5);
+                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                            for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
+                                for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
+                                    for (long i6 = d6.getFirst(); i6 <= d6.getSecond(); i6++) {
+                                        write(j++, i1, i2, i3, i4, i5, i6);
                                     }
                                 }
                             }
@@ -236,19 +197,112 @@ public class SciQLQueryExecutor extends QueryExecutor {
                 }
             }
             System.out.println("ok.");
+        } else {
+            updateWriters(fileSize);
         }
 
         TimerUtil.clearTimers();
         TimerUtil.startTimer("sciql query update");
-        ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
-        executor.executeRedirectInput(outFilePath);
+        for (SciQLInputData in : inputs) {
+            ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
+            executor.executeRedirectInput(in.file);
+        }
         long result = TimerUtil.getElapsedMilli("sciql query update");
         TimerUtil.clearTimers();
         System.out.println("time: " + result + " ms");
     }
 
+    private void write(int j, long... indexes) throws IOException {
+        if (j > input.to) {
+            input = getWriter(j);
+            dataGenerator = new DataGenerator(input.size);
+            String filePath = dataGenerator.getFilePath();
+            data = IO.readFile(filePath);
+            dataIndex = 0;
+        }
+
+        StringBuilder b = new StringBuilder();
+        for (long index : indexes) {
+            b.append(index).append(' ');
+        }
+        b.append(data[dataIndex++]);
+        input.writer.write(b.toString());
+        input.writer.newLine();
+    }
+
+    private void updateWriters(long fileSize) throws IOException {
+        inputs.clear();
+        long partsNo = fileSize / SIZE_100MB;
+        if (partsNo == 0) {
+            String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getCollName1() + "-1.sql");
+            File check = new File(partFileName);
+            BufferedWriter writer = null;
+            if (!check.exists()) {
+                writer = Files.newBufferedWriter(Paths.get(partFileName), Charset.defaultCharset());
+                writer.write("COPY " + fileSize + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1() + "\" FROM stdin USING DELIMITERS '\t','\\n','\"';");
+                writer.newLine();
+            }
+            SciQLInputData input = new SciQLInputData(writer, 0, fileSize - 1, fileSize, partFileName);
+            inputs.add(input);
+        } else {
+            for (int i = 1; i <= partsNo; i++) {
+                String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getCollName1() + "-" + i + ".sql");
+                File check = new File(partFileName);
+                BufferedWriter writer = null;
+                if (!check.exists()) {
+                    writer = Files.newBufferedWriter(Paths.get(partFileName), Charset.defaultCharset());
+                    writer.write("COPY " + SIZE_100MB + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1() + "\" FROM stdin USING DELIMITERS '\t','\\n','\"';");
+                    writer.newLine();
+                }
+                long from = (i - 1) * SIZE_100MB;
+                long to = from + SIZE_100MB - 1;
+                SciQLInputData input = new SciQLInputData(writer, from, to, SIZE_100MB, partFileName);
+                inputs.add(input);
+            }
+        }
+    }
+
+    private void closeWriters() throws IOException {
+        for (SciQLInputData input : inputs) {
+            if (input.writer != null) {
+                input.close();
+            }
+        }
+    }
+
+    private SciQLInputData getWriter(long size) {
+        long partNo = size / SIZE_100MB;
+        return inputs.get((int) partNo);
+    }
+
     @Override
     public void dropCollection() {
 
+    }
+}
+
+class SciQLInputData {
+
+    public final BufferedWriter writer;
+    public final long from;
+    public final long to;
+    public final long size;
+    public final String file;
+
+    public SciQLInputData(BufferedWriter writer, long from, long to, long size, String file) {
+        this.writer = writer;
+        this.from = from;
+        this.to = to;
+        this.size = size;
+        this.file = file;
+    }
+
+    public void close() throws IOException {
+        writer.close();
+    }
+
+    @Override
+    public String toString() {
+        return "SciQLInputData{" + "from=" + from + ", to=" + to + ", size=" + size + ", file=" + file + '}';
     }
 }
