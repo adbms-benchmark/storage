@@ -39,7 +39,7 @@ public abstract class SystemController extends Context {
     public static int executeShellCommandRedirect(String output, String... command) {
         ProcessExecutor processExecutor = new ProcessExecutor(command);
         try {
-            processExecutor.executeRedirect(output);
+            processExecutor.executeRedirectOutput(output);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

@@ -3,16 +3,13 @@ package framework.sciql;
 import data.DataGenerator;
 import data.DomainGenerator;
 import framework.ProcessExecutor;
+import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
-import framework.QueryExecutor;
-import framework.context.TableContext;
 import java.io.BufferedWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.List;
 import org.asqldb.util.TimerUtil;
 import util.IO;
@@ -73,18 +70,18 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
+        String collName = benchContext.getCollName1();
 
         dataGenerator = new DataGenerator(fileSize);
         String filePath = dataGenerator.getFilePath();
 
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
-        String collName = benchContext.getCollName(fileSize, noOfDimensions);
         createArrayQuery.append(collName);
         createArrayQuery.append(" (");
 
         for (int i = 0; i < domainBoundaries.size(); i++) {
-            createArrayQuery.append(" d");
+            createArrayQuery.append(" axis");
             createArrayQuery.append(i);
             createArrayQuery.append(" INT DIMENSION [");
             Pair<Long, Long> axisDomain = domainBoundaries.get(i);
@@ -241,7 +238,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         TimerUtil.clearTimers();
         TimerUtil.startTimer("sciql query update");
         ProcessExecutor executor = new ProcessExecutor("mclient", "-d", "benchmark");
-        executor.executeRedirect(outFilePath);
+        executor.executeRedirectInput(outFilePath);
         long result = TimerUtil.getElapsedMilli("sciql query update");
         TimerUtil.clearTimers();
         System.out.println("time: " + result + " ms");

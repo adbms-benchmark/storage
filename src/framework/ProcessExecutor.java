@@ -1,12 +1,11 @@
 package framework;
 
-import util.StopWatch;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
+import util.StopWatch;
 
 public class ProcessExecutor {
     private static final String DEV_NULL = "/dev/null";
@@ -32,9 +31,17 @@ public class ProcessExecutor {
         this.executeWithTimeLimit = true;
     }
 
-    public void executeRedirect(String filePath) throws IOException, InterruptedException {
+    public void executeRedirectOutput(String filePath) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder(command).redirectOutput(new File(filePath));
+        execute(processBuilder);
+    }
 
+    public void executeRedirectInput(String filePath) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder(command).redirectInput(new File(filePath));
+        execute(processBuilder);
+    }
+
+    private void execute(ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Timer timer = new Timer();
         if (executeWithTimeLimit) {
             timer.schedule(new TerminateProcessJob(), maxExecutionTime);
@@ -65,7 +72,7 @@ public class ProcessExecutor {
     }
 
     public void execute() throws IOException, InterruptedException {
-        executeRedirect(DEV_NULL);
+        executeRedirectOutput(DEV_NULL);
     }
 
     public int getExitStatus() {

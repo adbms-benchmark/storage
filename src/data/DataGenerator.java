@@ -32,4 +32,11 @@ public class DataGenerator {
         SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
                 "head", "-c", "" + fileSize, "/dev/urandom");
     }
+
+    private void generate(String dataDir) throws IOException {
+        file = File.createTempFile(FILE_PREFIX, null);
+        file.deleteOnExit();
+        SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
+                "head", "-c", "" + fileSize, "/dev/urandom");
+    }
 }

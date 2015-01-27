@@ -1,7 +1,7 @@
 package framework.sciql;
 
-import framework.context.ConnectionContext;
 import framework.SystemController;
+import framework.context.ConnectionContext;
 import java.io.IOException;
 import util.IO;
 
@@ -29,15 +29,15 @@ public class SciQLSystemController extends SystemController {
 
     @Override
     public void restartSystem() throws Exception {
-        SciQLConnection.close();
-        if (executeShellCommand(stopSystemCommand) != 0) {
-            // ignore, it may be already stopped
-        }
-        Thread.sleep(8000);
-        if (executeShellCommand(startSystemCommand) != 0) {
-            throw new Exception("Failed to start the system.");
-        }
-        Thread.sleep(1000);
-        SciQLConnection.open(connContext);
+//        SciQLConnection.close();
+//        if (executeShellCommand(stopSystemCommand) != 0) {
+//            // ignore, it may be already stopped
+//        }
+//        Thread.sleep(8000);
+//        if (executeShellCommand(startSystemCommand) != 0) {
+//            throw new Exception("Failed to start the system.");
+//        }
+//        Thread.sleep(1000);
+//        SciQLConnection.open(connContext);
     }
 }

@@ -2,8 +2,8 @@ package framework.rasdaman;
 
 
 import data.QueryDomainGenerator;
-import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
+import framework.context.BenchmarkContext;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,17 +33,17 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         List<List<Pair<Long, Long>>> shapeQueryDomain = queryDomainGenerator.getShapeQueryDomain();
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
 
-//        for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-//            queries.add(generateRasdamanQuery(queryDomain));
-//        }
-//
-//        for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-//            queries.add(generateRasdamanQuery(queryDomain));
-//        }
-//
-//        for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-//            queries.add(generateRasdamanQuery(queryDomain));
-//        }
+        for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
+            queries.add(generateRasdamanQuery(queryDomain));
+        }
+
+        for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
+            queries.add(generateRasdamanQuery(queryDomain));
+        }
+
+        for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
+            queries.add(generateRasdamanQuery(queryDomain));
+        }
 
         for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
             queries.add(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()));
