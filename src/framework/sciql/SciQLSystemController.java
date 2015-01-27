@@ -37,14 +37,14 @@ public class SciQLSystemController extends SystemController {
     public void restartSystem() throws Exception {
         SciQLConnection.close();
 
-//        if (executeShellCommand(stopSystemCommand) != 0) {
-//            // ignore, it may be already stopped
-//        }
-//        waitUntilLockRemoved();
-//
-//        if (executeShellCommand(startSystemCommand) != 0) {
-//            throw new Exception("Failed starting monetdb.");
-//        }
+        if (executeShellCommand(stopSystemCommand) != 0) {
+            // ignore, it may be already stopped
+        }
+        waitUntilLockRemoved();
+
+        if (executeShellCommand(startSystemCommand) != 0) {
+            throw new Exception("Failed starting monetdb.");
+        }
 
         SciQLConnection.open(connContext);
     }

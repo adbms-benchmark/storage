@@ -16,12 +16,12 @@ public class SciQL {
 
     public static void main(String... args) throws Exception {
         Map<Long, String> collectionSizes = new TreeMap<>();
-        collectionSizes.put(1024l, "1Kb");
-        collectionSizes.put(102400l, "100Kb");
+//        collectionSizes.put(1024l, "1Kb");
+//        collectionSizes.put(102400l, "100Kb");
         collectionSizes.put(1048576l, "1Mb");
-        collectionSizes.put(104857600l, "100Mb");
-        collectionSizes.put(1073741824l, "1Gb");
-        collectionSizes.put(10737418240l, "10Gb");
+//        collectionSizes.put(104857600l, "100Mb");
+//        collectionSizes.put(1073741824l, "1Gb");
+//        collectionSizes.put(10737418240l, "10Gb");
 
         ConnectionContext sciqlConnection = new ConnectionContext("/conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext("/conf/benchmark.properties");

@@ -32,7 +32,7 @@ public class Benchmark {
             queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
-            pr.println("System name, Query, Number of dimensions, Collection size, Maximum selection size, Execution time");
+            pr.println("System name, Query, Number of dimensions, Collection size, Maximum selection size, Execution time 1 (ms), Execution time 2 (ms), Avg Execution time (ms)");
 
             for (String query : benchmarkQueries) {
                 System.out.printf("Executing query: \"%s\"\n", query);

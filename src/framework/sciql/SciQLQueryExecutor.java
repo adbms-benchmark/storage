@@ -200,6 +200,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         } else {
             updateWriters(fileSize);
         }
+        closeWriters();
 
         TimerUtil.clearTimers();
         TimerUtil.startTimer("sciql query update");
