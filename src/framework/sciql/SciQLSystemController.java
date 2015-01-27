@@ -2,6 +2,7 @@ package framework.sciql;
 
 import framework.SystemController;
 import framework.context.ConnectionContext;
+import java.io.File;
 import java.io.IOException;
 import util.IO;
 
@@ -18,6 +19,7 @@ public class SciQLSystemController extends SystemController {
     protected String sciqlDbfarm;
     protected String sciqlBinDir;
     protected String sciqlMclientPath;
+    protected String merovingianLockFile;
 
     public SciQLSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
         super(propertiesPath, connContext);
@@ -28,20 +30,35 @@ public class SciQLSystemController extends SystemController {
         this.sciqlMclientPath = IO.concatPaths(sciqlBinDir, "mclient");
         this.startSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "start", sciqlDbfarm};
         this.stopSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "stop", sciqlDbfarm};
+        this.merovingianLockFile = IO.concatPaths(sciqlDbfarm, ".merovingian_lock");
     }
 
     @Override
     public void restartSystem() throws Exception {
         SciQLConnection.close();
-//        if (executeShellCommand(stopSystemCommand) != 0) {
-//            // ignore, it may be already stopped
-//        }
-//        Thread.sleep(8000);
-//        if (executeShellCommand(startSystemCommand) != 0) {
-//            throw new Exception("Failed to start the system.");
-//        }
-//        Thread.sleep(1000);
+
+        if (executeShellCommand(stopSystemCommand) != 0) {
+            // ignore, it may be already stopped
+        }
+        waitUntilLockRemoved();
+
+        if (executeShellCommand(startSystemCommand) != 0) {
+            throw new Exception("Failed starting monetdb.");
+        }
+
         SciQLConnection.open(connContext);
+    }
+
+    private void waitUntilLockRemoved() throws Exception {
+        File lock = new File(merovingianLockFile);
+        int count = 0;
+        while (lock.exists()) {
+            Thread.sleep(500);
+            ++count;
+            if (count > 60) {
+                throw new Exception("Failed restarting monetdb after 30s.");
+            }
+        }
     }
 
     public String getSciqlHome() {
