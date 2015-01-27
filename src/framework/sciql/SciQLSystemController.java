@@ -4,6 +4,7 @@ import framework.SystemController;
 import framework.context.ConnectionContext;
 import java.io.File;
 import java.io.IOException;
+import org.asqldb.util.TimerUtil;
 import util.IO;
 
 /**
@@ -35,6 +36,9 @@ public class SciQLSystemController extends SystemController {
 
     @Override
     public void restartSystem() throws Exception {
+        TimerUtil.clearTimers();
+        TimerUtil.startTimer("time");
+        System.out.print("restarting monetdb... ");
         SciQLConnection.close();
 
         if (executeShellCommand(stopSystemCommand) != 0) {
@@ -47,6 +51,8 @@ public class SciQLSystemController extends SystemController {
         }
 
         SciQLConnection.open(connContext);
+        String res = TimerUtil.stopTimer("time");
+        System.out.println("ok, " + res + ".");
     }
 
     private void waitUntilLockRemoved() throws Exception {

@@ -11,7 +11,7 @@ import java.util.List;
 public class Benchmark {
 
     public static final String HOME_DIR = System.getenv("HOME");
-    public static final int REPEAT_NO = 2;
+    public static int REPEAT_NO = 2;
     public static final int MAX_RETRY = 3;
 
     private final QueryGenerator queryGenerator;
@@ -26,13 +26,18 @@ public class Benchmark {
 
     public void runBenchmark(int noOfDim, long collectionSize, long maxSelectSize) throws Exception {
         String fileName = HOME_DIR + "/" + systemController.getSystemName() + "_benchmark_results.csv";
+        if (systemController.getSystemName().equals("SciQL")) {
+            REPEAT_NO = 1;
+        } else {
+            REPEAT_NO = 2;
+        }
         try (PrintWriter pr = new PrintWriter(new FileWriter(fileName, true))) {
             systemController.restartSystem();
             // the query executor should check whether a collection is already created
             queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
-            pr.println("System name, Query, Number of dimensions, Collection size, Maximum selection size, Execution time 1 (ms), Execution time 2 (ms), Avg Execution time (ms)");
+            pr.println("System name, Query, Number of dimensions, Collection size, Maximum selection size, Avg execution time (ms)");
 
             for (String query : benchmarkQueries) {
                 System.out.printf("Executing query: \"%s\"\n", query);
@@ -57,7 +62,7 @@ public class Benchmark {
                     if (!failed) {
                         total += time;
                         repeatNo++;
-                        pr.print(time + ", ");
+//                        pr.print(time + ", ");
                     } else {
                         System.out.printf("Query \"%s\" failed. Skipping...\n", query);
                     }
