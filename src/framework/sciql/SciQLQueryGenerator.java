@@ -51,7 +51,7 @@ public class SciQLQueryGenerator extends QueryGenerator {
     }
 
     private String generateSciQLQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT {0} FROM {0} WHERE {1}", benchContext.getCollName1(), convertToSciQLDomain(domain));
+        return MessageFormat.format("SELECT * FROM {0} WHERE {1}", benchContext.getCollName1(), convertToSciQLDomain(domain));
     }
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {

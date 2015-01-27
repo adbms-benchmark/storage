@@ -50,13 +50,13 @@ public class SciQLConnection {
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean executeQuery(final String query) {
-        System.out.print("  executing query: " + query);
+//        System.out.print("  executing query: " + query);
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             final ResultSet rs = stmt.executeQuery(query);
         } catch (SQLException e) {
-            System.out.println(" ... failed.");
+//            System.out.println(" ... failed.");
             e.printStackTrace();
             return false;
         } finally {
@@ -67,8 +67,32 @@ public class SciQLConnection {
                 }
             }
         }
-        System.out.println(" ... ok.");
+//        System.out.println(" ... ok.");
         return true;
+    }
+
+    /**
+     * Execute the given query, return true if passed, false otherwise.
+     */
+    public static boolean tableExists(final String table) {
+        Statement stmt = null;
+        final String query = "select count(tables.name) from tables where name = '" + table.toLowerCase() + "';";
+        try {
+            stmt = connection.createStatement();
+            final ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            int res = rs.getInt(1);
+            return res > 0;
+        } catch (SQLException e) {
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+        return false;
     }
 
     /**

@@ -16,20 +16,23 @@ public class SciQLSystemController extends SystemController {
 
     protected String sciqlHome;
     protected String sciqlDbfarm;
+    protected String sciqlBinDir;
+    protected String sciqlMclientPath;
 
     public SciQLSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
         super(propertiesPath, connContext);
         this.systemName = "SciQL";
         this.sciqlHome = getValue(KEY_SCIQL_HOME);
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
-        String sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
+        this.sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
+        this.sciqlMclientPath = IO.concatPaths(sciqlBinDir, "mclient");
         this.startSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "start", sciqlDbfarm};
         this.stopSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "stop", sciqlDbfarm};
     }
 
     @Override
     public void restartSystem() throws Exception {
-//        SciQLConnection.close();
+        SciQLConnection.close();
 //        if (executeShellCommand(stopSystemCommand) != 0) {
 //            // ignore, it may be already stopped
 //        }
@@ -38,6 +41,18 @@ public class SciQLSystemController extends SystemController {
 //            throw new Exception("Failed to start the system.");
 //        }
 //        Thread.sleep(1000);
-//        SciQLConnection.open(connContext);
+        SciQLConnection.open(connContext);
+    }
+
+    public String getSciqlHome() {
+        return sciqlHome;
+    }
+
+    public String getSciqlDbfarm() {
+        return sciqlDbfarm;
+    }
+
+    public String getMclientPath() {
+        return sciqlMclientPath;
     }
 }

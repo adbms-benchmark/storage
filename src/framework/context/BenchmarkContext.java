@@ -1,7 +1,5 @@
 package framework.context;
 
-import framework.context.TableContext;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -62,13 +60,6 @@ public class BenchmarkContext extends Context {
 
     public long getCollTileSize() {
         return collTileSize;
-    }
-    
-    public String getCollName(long fileSize, int noOfDimensions) {
-        StringBuilder createArrayQuery = new StringBuilder("");
-        createArrayQuery.append(getCollName1()).append("_").append(fileSize).append("B_");
-        createArrayQuery.append("_").append(noOfDimensions).append("D");
-        return createArrayQuery.toString();
     }
 
     public String getCollName1() {

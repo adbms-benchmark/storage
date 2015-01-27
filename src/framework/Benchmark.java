@@ -25,21 +25,22 @@ public class Benchmark {
     }
 
     public void runBenchmark(int noOfDim, long collectionSize, long maxSelectSize) throws Exception {
-        //TODO-GM: read results file path from config file
-        try (PrintWriter pr = new PrintWriter(new FileWriter(HOME_DIR + "/results.csv", true))) {
+        String fileName = HOME_DIR + "/" + systemController.getSystemName() + "_benchmark_results.csv";
+        try (PrintWriter pr = new PrintWriter(new FileWriter(fileName, true))) {
             systemController.restartSystem();
-//            queryExecutor.createCollection();
+            // the query executor should check whether a collection is already created
+            queryExecutor.createCollection();
 
             List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
+            pr.println("System name, Query, Number of dimensions, Collection size, Maximum selection size, Execution time");
 
             for (String query : benchmarkQueries) {
                 System.out.printf("Executing query: \"%s\"\n", query);
 
-                pr.print(String.format("\"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ", systemController.getSystemName(), query, noOfDim, collectionSize, maxSelectSize));
+                pr.print(String.format("%s, \"%s\", %d, %d, %d, ", systemController.getSystemName(), query, noOfDim, collectionSize, maxSelectSize));
                 long total = 0;
                 int repeatNo = 0;
                 for (int repeatIndex = 0; repeatIndex < REPEAT_NO; ++repeatIndex) {
-                    //TODO-GM: add more information about the query (no of dimensions)
                     boolean failed = true;
                     long time = -1;
 
@@ -61,9 +62,13 @@ public class Benchmark {
                         System.out.printf("Query \"%s\" failed. Skipping...\n", query);
                     }
                 }
-                System.out.printf("Executed in %d ms.\n\n", (total/repeatNo));
+                if (repeatNo == 0) {
+                    ++repeatNo;
+                }
+                long avg = total / repeatNo;
+                System.out.printf("Executed in %d ms.\n\n", avg);
 
-                pr.println(total / repeatNo);
+                pr.println(avg);
                 pr.flush();
             }
         } finally {
