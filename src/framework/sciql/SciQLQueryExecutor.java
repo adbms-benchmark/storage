@@ -208,6 +208,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
             ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
             executor.executeRedirectInput(in.file);
         }
+        executeTimedQueryUpdate("DELETE FROM " + benchContext.getCollName1().toLowerCase() + " WHERE v is NULL");
         long result = TimerUtil.getElapsedMilli("sciql query update");
         TimerUtil.clearTimers();
         System.out.println("time: " + result + " ms");
@@ -219,6 +220,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
             dataGenerator = new DataGenerator(input.size);
             String filePath = dataGenerator.getFilePath();
             data = IO.readFile(filePath);
+            System.out.println("read file of size " + data.length);
             dataIndex = 0;
         }
 
@@ -226,7 +228,9 @@ public class SciQLQueryExecutor extends QueryExecutor {
         for (long index : indexes) {
             b.append(index).append(' ');
         }
-        b.append(data[dataIndex++]);
+        byte val = data[dataIndex++];
+        if (val == -128) val = -127;
+        b.append(val);
         input.writer.write(b.toString());
         input.writer.newLine();
     }
@@ -234,30 +238,39 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private void updateWriters(long fileSize) throws IOException {
         inputs.clear();
         long partsNo = fileSize / SIZE_100MB;
+        System.out.println("updating writers, file size " + fileSize);
         if (partsNo == 0) {
+            System.out.println("single part");
             String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getCollName1() + "-1.sql");
             File check = new File(partFileName);
             BufferedWriter writer = null;
             if (!check.exists()) {
                 writer = Files.newBufferedWriter(Paths.get(partFileName), Charset.defaultCharset());
-                writer.write("COPY " + fileSize + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1() + "\" FROM stdin USING DELIMITERS '\t','\\n','\"';");
+                writer.write("COPY " + fileSize + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1().toLowerCase() + "\" FROM stdin USING DELIMITERS ' ','\\n','\"';");
                 writer.newLine();
             }
             SciQLInputData input = new SciQLInputData(writer, 0, fileSize - 1, fileSize, partFileName);
             inputs.add(input);
         } else {
+            System.out.println(partsNo + " number of files");
             for (int i = 1; i <= partsNo; i++) {
                 String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getCollName1() + "-" + i + ".sql");
                 File check = new File(partFileName);
                 BufferedWriter writer = null;
                 if (!check.exists()) {
                     writer = Files.newBufferedWriter(Paths.get(partFileName), Charset.defaultCharset());
-                    writer.write("COPY " + SIZE_100MB + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1() + "\" FROM stdin USING DELIMITERS '\t','\\n','\"';");
+                    writer.write("COPY " + SIZE_100MB + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1().toLowerCase() + "\" FROM stdin USING DELIMITERS ' ','\\n','\"';");
                     writer.newLine();
                 }
                 long from = (i - 1) * SIZE_100MB;
                 long to = from + SIZE_100MB - 1;
-                SciQLInputData input = new SciQLInputData(writer, from, to, SIZE_100MB, partFileName);
+                long size = SIZE_100MB;
+                if (i == partsNo && (fileSize % SIZE_100MB) > 0) {
+                    to = fileSize - 1;
+                    size += (fileSize % SIZE_100MB);
+                }
+                SciQLInputData input = new SciQLInputData(writer, from, to, size, partFileName);
+                System.out.println("new input: " + input);
                 inputs.add(input);
             }
         }
@@ -273,6 +286,8 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
     private SciQLInputData getWriter(long size) {
         long partNo = size / SIZE_100MB;
+        if (partNo == inputs.size())
+            --partNo;
         return inputs.get((int) partNo);
     }
 

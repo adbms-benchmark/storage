@@ -49,6 +49,7 @@ public class SciQLSystemController extends SystemController {
         if (executeShellCommand(startSystemCommand) != 0) {
             throw new Exception("Failed starting monetdb.");
         }
+        Thread.sleep(1000);
 
         SciQLConnection.open(connContext);
         String res = TimerUtil.stopTimer("time");

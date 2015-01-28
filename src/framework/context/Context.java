@@ -3,6 +3,7 @@ package framework.context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.io.FileInputStream;
 
 /**
  * @author Dimitar Misev
@@ -20,7 +21,8 @@ public abstract class Context {
 
     public Context(String propertiesPath) throws IOException {
         this();
-        InputStream propertiesFileAsStream = Context.class.getResourceAsStream(propertiesPath);
+        //InputStream propertiesFileAsStream = Context.class.getResourceAsStream(propertiesPath);
+        InputStream propertiesFileAsStream = new FileInputStream(propertiesPath);
         properties.load(propertiesFileAsStream);
     }
 
