@@ -2,7 +2,7 @@ package framework.asqldb;
 
 import data.DataGenerator;
 import data.DomainGenerator;
-import static framework.Benchmark.HOME_DIR;
+import static util.IO.HOME_DIR;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import framework.QueryExecutor;

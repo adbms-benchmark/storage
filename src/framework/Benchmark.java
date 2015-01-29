@@ -1,6 +1,7 @@
 package framework;
 
 import data.BenchmarkQuery;
+import util.IO;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +15,6 @@ import java.util.List;
  */
 public class Benchmark {
 
-    public static final String HOME_DIR = System.getenv("HOME");
     public static final int REPEAT_NO = 5;
     public static final int MAX_RETRY = 3;
 
@@ -29,10 +29,7 @@ public class Benchmark {
     }
 
     public void runBenchmark(long collectionSize, long maxSelectSize) throws Exception {
-        String resultsDirPath = HOME_DIR + "/results/";
-        File resultsDir = new File(resultsDirPath);
-        resultsDir.mkdirs();
-
+        File resultsDir = IO.getResultsDir();
         File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
             systemController.restartSystem();
@@ -55,7 +52,7 @@ public class Benchmark {
                             time = queryExecutor.executeTimedQuery(query.getQueryString());
                             failed = false;
                         } catch (Exception ex) {
-                            System.out.printf("Query \"%s\" failed on try %d. Retrying...\n", query, retryIndex + 1);
+                            System.out.printf("Query \"%s\" failed on try %d. Retrying...\n", query.getQueryString(), retryIndex + 1);
                         }
                     }
                     queryExecutionTimes.add(time);

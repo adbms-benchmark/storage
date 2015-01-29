@@ -6,6 +6,7 @@ import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import framework.context.RasdamanContext;
 import util.DomainUtil;
+import util.IO;
 import util.Pair;
 
 /**
@@ -79,12 +81,25 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
         System.out.println("Executing insert query: " + insertQuery);
-        executeTimedQuery(insertQuery, new String[]{
+        long insertTime = executeTimedQuery(insertQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword(),
                 "--mddtype", aChar.getFirst(),
                 "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
                 "--file", filePath});
+
+        File resultsDir = IO.getResultsDir();
+        File insertResultFile = new File(resultsDir.getAbsolutePath(), "rasdaman_insert_results.csv");
+
+
+        long oneGB = 1024l * 1024l * 1024l;
+        if (benchContext.getCollSize() > oneGB) {
+            benchContext.setCollSize(oneGB);
+            int slices = (int) (benchContext.getCollSize() / (oneGB));
+            insertTime = updateCollection(slices);
+        }
+
+        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize, chunkSize + 1l, noOfDimensions, insertTime));
     }
 
     /**
@@ -93,9 +108,9 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
      * @param slices
      * @throws Exception
      */
-    public void updateCollection(int slices) throws Exception {
+    public long updateCollection(int slices) throws Exception {
         Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
-
+        long executionTime = 1;
         switch (noOfDimensions) {
             case 1: {
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
@@ -121,7 +136,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                     while (!success) {
                         try {
-                            executeTimedQuery(updateQuery, new String[]{
+                            executionTime = executeTimedQuery(updateQuery, new String[]{
                                     "--user", context.getUser(),
                                     "--passwd", context.getPassword(),
                                     "--mddtype", aChar.getFirst(),
@@ -134,6 +149,8 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                         }
                     }
                 }
+
+                executionTime = (long) (executionTime * Math.pow(slicesPerDim, noOfDimensions));
                 break;
             }
             case 2: {
@@ -165,7 +182,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                         while (!success) {
                             try {
-                                executeTimedQuery(updateQuery, new String[]{
+                                executionTime = executeTimedQuery(updateQuery, new String[]{
                                         "--user", context.getUser(),
                                         "--passwd", context.getPassword(),
                                         "--mddtype", aChar.getFirst(),
@@ -181,7 +198,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
 
                 }
-
+                executionTime = (long) (executionTime * Math.pow(slicesPerDim, noOfDimensions));
 
                 break;
             }
@@ -221,7 +238,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                             while (!success) {
                                 try {
-                                    executeTimedQuery(updateQuery, new String[]{
+                                    executionTime = executeTimedQuery(updateQuery, new String[]{
                                             "--user", context.getUser(),
                                             "--passwd", context.getPassword(),
                                             "--mddtype", aChar.getFirst(),
@@ -235,7 +252,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                         }
                     }
                 }
-
+                executionTime = (long) (executionTime * Math.pow(slicesPerDim, noOfDimensions));
                 break;
             }
             case 4: {
@@ -279,7 +296,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                                 while (!success) {
                                     try {
-                                        executeTimedQuery(updateQuery, new String[]{
+                                        executionTime = executeTimedQuery(updateQuery, new String[]{
                                                 "--user", context.getUser(),
                                                 "--passwd", context.getPassword(),
                                                 "--mddtype", aChar.getFirst(),
@@ -294,7 +311,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                         }
                     }
                 }
-
+                executionTime = (long) (executionTime * Math.pow(slicesPerDim, noOfDimensions));
                 break;
             }
             case 5: {
@@ -345,7 +362,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                     System.out.println("Performing insert: " + insertNo);
                                     while (!success) {
                                         try {
-                                            executeTimedQuery(updateQuery, new String[]{
+                                            executionTime = executeTimedQuery(updateQuery, new String[]{
                                                     "--user", context.getUser(),
                                                     "--passwd", context.getPassword(),
                                                     "--mddtype", aChar.getFirst(),
@@ -363,6 +380,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                         }
                     }
                 }
+                executionTime = (long) (executionTime * Math.pow(slicesPerDim, noOfDimensions));
                 break;
             }
             case 6: {
@@ -418,7 +436,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                         System.out.println("Performing insert: " + insertNo);
                                         while (!success) {
                                             try {
-                                                executeTimedQuery(updateQuery, new String[]{
+                                                executionTime = executeTimedQuery(updateQuery, new String[]{
                                                         "--user", context.getUser(),
                                                         "--passwd", context.getPassword(),
                                                         "--mddtype", aChar.getFirst(),
@@ -436,11 +454,12 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                         }
                     }
                 }
+                executionTime = (long) (executionTime * Math.pow(slicesPerDim, noOfDimensions));
                 break;
             }
 
         }
-
+        return executionTime;
     }
 
     @Override

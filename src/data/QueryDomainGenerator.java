@@ -46,8 +46,7 @@ public class QueryDomainGenerator {
     public List<List<Pair<Long, Long>>> getPositionQueryDomain() {
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
-        //TODO-GM: remove -1 when a new dataset is created (scidb asks for the chunk size which for [0:<upper_bound>] is <upper_bound> + 1
-        long tileDimensionUpperBound = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize()) - 1l;
+        long tileDimensionUpperBound = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long tileDimensionInsideTilePosition = tileDimensionUpperBound / 2;
 
         for (int i = 0; i < noOfDimensions + 1; ++i) {

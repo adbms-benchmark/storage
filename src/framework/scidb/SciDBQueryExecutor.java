@@ -6,6 +6,7 @@ import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import framework.context.SciDBContext;
 import util.DomainUtil;
+import util.IO;
 import util.Pair;
 
 /**
@@ -94,7 +96,13 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
         executeTimedQuery(createArrayQuery.toString());
 
         String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", benchContext.getCollName1(), filePath);
-        executeTimedQuery(insertDataQuery, "-n");
+        long insertTime = executeTimedQuery(insertDataQuery, "-n");
+
+        File resultsDir = IO.getResultsDir();
+        File insertResultFile = new File(resultsDir.getAbsolutePath(), "SciDB_insert_results.csv");
+
+        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize, chunkSize, noOfDimensions, insertTime));
+
     }
 
     @Override
