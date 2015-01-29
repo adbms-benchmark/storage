@@ -77,6 +77,7 @@ public class BenchmarkMain {
                             RasdamanQueryExecutor r = new RasdamanQueryExecutor(scidbContext, s, benchContext, noOfDim);
                             RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext, noOfDim, noQueries);
 
+                            s.restartSystem();
                             r.createCollection();
 //                            Benchmark benchmark = new Benchmark(q, r, s);
 //                            benchmark.runBenchmark(collectionSize, maxSelectSize);
@@ -120,6 +121,7 @@ public class BenchmarkMain {
                             SciDBAQLQueryGenerator q = new SciDBAQLQueryGenerator(benchContext, noOfDim, noQueries);
                             SciDBSystemController s = new SciDBSystemController(scidbContext.getStartCommand(), scidbContext.getStopCommand());
 
+                            s.restartSystem();
                             r.createCollection();
 //                            Benchmark benchmark = new Benchmark(q, r, s);
 //                            benchmark.runBenchmark(collectionSize, maxSelectSize);
@@ -138,7 +140,7 @@ public class BenchmarkMain {
                 collectionSizes.put(1048576l, "1Mb");
                 collectionSizes.put(104857600l, "100Mb");
                 collectionSizes.put(1073741824l, "1Gb");
-                collectionSizes.put(10737418240l, "10Gb");
+//                collectionSizes.put(10737418240l, "10Gb");
 
                 ConnectionContext sciqlConnection = new ConnectionContext("/conf/sciql.properties");
                 BenchmarkContext benchContext = new BenchmarkContext("/conf/benchmark.properties");
@@ -159,6 +161,7 @@ public class BenchmarkMain {
                         SciQLSystemController systemController = new SciQLSystemController("/conf/system.properties", sciqlConnection);
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
+                        systemController.restartSystem();
                         queryExecutor.createCollection();
 //                        Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
 //                        benchmark.runBenchmark(benchContext.getCollSize(), benchContext.getMaxQuerySelectSize());
