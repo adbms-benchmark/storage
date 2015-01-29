@@ -2,17 +2,15 @@ package framework.rasdaman;
 
 import data.DataGenerator;
 import data.DomainGenerator;
-import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.SystemController;
-
+import framework.context.BenchmarkContext;
+import framework.context.RasdamanContext;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import framework.context.RasdamanContext;
 import util.DomainUtil;
 import util.IO;
 import util.Pair;
@@ -50,7 +48,14 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         long result = System.currentTimeMillis() - startTime;
 
         if (status != 0) {
-            throw new Exception(String.format("Query execution failed with status %d", status));
+            System.out.println("failed, restarting system..,");
+            rasdamanSystemController.restartSystem();
+            startTime = System.currentTimeMillis();
+            status = SystemController.executeShellCommand(commandList.toArray(new String[]{}));
+            result = System.currentTimeMillis() - startTime;
+            if (status != 0) {
+                throw new Exception(String.format("Query execution failed with status %d", status));
+            }
         }
 
         return result;
