@@ -21,6 +21,7 @@ public class BenchmarkContext extends Context {
     private long collSize;
     private long maxQuerySelectSize;
     private final long collTileSize;
+    private final int queryNumber;
     private String collName1;
     private final String collName2;
     private final String dataDir;
@@ -36,6 +37,7 @@ public class BenchmarkContext extends Context {
     public static final String KEY_QUERY_MAX_RETRY = "query.max.retry";
     public static final String KEY_QUERY_MAX_EXECUTION_TIME = "query.max.execution_time";
     public static final String KEY_DATA_DIR = "data.dir";
+    public static final String KEY_QUERY_NUMBER = "query.number";
 
     public BenchmarkContext(String propertiesPath) throws FileNotFoundException, IOException {
         super(propertiesPath);
@@ -47,6 +49,7 @@ public class BenchmarkContext extends Context {
         dataDir = getValue(KEY_DATA_DIR);
         maxQueryRerty = getValueInteger(KEY_QUERY_MAX_RETRY);
         maxQueryExecutionTime = getValueInteger(KEY_QUERY_MAX_EXECUTION_TIME);
+        queryNumber = getValueInteger(KEY_QUERY_NUMBER);
     }
 
     public long getCollSize() {
@@ -105,6 +108,10 @@ public class BenchmarkContext extends Context {
         this.collSize = collSize;
     }
 
+    public int getQueryNumber() {
+        return queryNumber;
+    }
+
     @Override
     public String toString() {
         return "Benchmark context:"
@@ -114,6 +121,7 @@ public class BenchmarkContext extends Context {
                 + "\n maxQuerySelectSize=" + maxQuerySelectSize
                 + "\n collTileSize=" + collTileSize
                 + "\n maxQueryRetry=" + maxQueryRerty
+                + "\n queryNumber=" + queryNumber
                 + "\n maxQueryExecutionTime=" + maxQueryExecutionTime;
     }
 

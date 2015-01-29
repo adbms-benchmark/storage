@@ -42,13 +42,13 @@ public class BenchmarkMain {
             printUsage(args);
             return;
         }
+        BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
+        int noQueries = 6;
 
         switch (args[0]) {
             case "rasdaman": {
 
                 RasdamanContext scidbContext = new RasdamanContext("conf/rasdaman.properties");
-                BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
-                int noQueries = 10;
 
                 Map<Long, String> collectionSizes = new TreeMap<>();
                 collectionSizes.put(1024l, "1Kb");
@@ -91,8 +91,6 @@ public class BenchmarkMain {
             case "SciDB": {
 
                 SciDBContext scidbContext = new SciDBContext("conf/scidb.properties");
-                BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
-                int noQueries = 10;
 
                 Map<Long, String> collectionSizes = new TreeMap<>();
                 collectionSizes.put(1024l, "1Kb");
@@ -142,8 +140,6 @@ public class BenchmarkMain {
 //                collectionSizes.put(10737418240l, "10Gb");
 
                 ConnectionContext sciqlConnection = new ConnectionContext("conf/sciql.properties");
-                BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
-                int noQueries = 10;
 
                 for (int noOfDim = 6; noOfDim <= 6; ++noOfDim) {
                     for (Map.Entry<Long, String> longStringEntry : collectionSizes.entrySet()) {
