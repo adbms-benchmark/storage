@@ -79,7 +79,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()});
 
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
         System.out.println("Executing insert query: " + insertQuery);
         long insertTime = executeTimedQuery(insertQuery, new String[]{
                 "--user", context.getUser(),
