@@ -47,17 +47,17 @@ public class BenchmarkMain {
         switch (args[0]) {
             case "rasdaman": {
 
-                RasdamanContext scidbContext = new RasdamanContext("/conf/rasdaman.properties");
-                BenchmarkContext benchContext = new BenchmarkContext("/conf/benchmark.properties");
+                RasdamanContext scidbContext = new RasdamanContext("conf/rasdaman.properties");
+                BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
                 int noQueries = 10;
 
                 Map<Long, String> collectionSizes = new TreeMap<>();
-                collectionSizes.put(10485760l, "10Mb");
+//                collectionSizes.put(10485760l, "10Mb");
 //                collectionSizes.put(104857600l, "100Mb");
 //                collectionSizes.put(1073741824l, "1Gb");
-//                collectionSizes.put(10737418240l, "10Gb");
+                collectionSizes.put(10737418240l, "10Gb");
 
-                for (int noOfDim = 1; noOfDim <= 6; ++noOfDim) {
+                for (int noOfDim = 6; noOfDim <= 6; ++noOfDim) {
 
                     System.out.println("Rasdaman Benchmarking: " + noOfDim + "D");
                     {

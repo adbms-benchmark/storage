@@ -27,8 +27,9 @@ public class DataGenerator {
     }
 
     private void generate() throws IOException {
-        file = File.createTempFile(FILE_PREFIX, null);
-        file.deleteOnExit();
+        file = new File("/e/data/" + fileSize);
+        if (file.exists())
+            return;
         SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
                 "head", "-c", "" + fileSize, "/dev/urandom");
     }
