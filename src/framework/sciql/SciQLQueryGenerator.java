@@ -1,5 +1,6 @@
 package framework.sciql;
 
+import data.BenchmarkQuery;
 import data.QueryDomainGenerator;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
@@ -20,11 +21,12 @@ public class SciQLQueryGenerator extends QueryGenerator {
     public SciQLQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
         this.queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
         this.benchContext = benchContext;
+        this.noOfDimensions = noOfDimensions;
     }
 
     @Override
-    public List<String> getBenchmarkQueries() {
-        List<String> queries = new ArrayList<>();
+    public List<BenchmarkQuery> getBenchmarkQueries() {
+        List<BenchmarkQuery> queries = new ArrayList<>();
 
         List<List<Pair<Long, Long>>> sizeQueryDomain = queryDomainGenerator.getSizeQueryDomain();
         List<List<Pair<Long, Long>>> positionQueryDomain = queryDomainGenerator.getPositionQueryDomain();
@@ -32,19 +34,19 @@ public class SciQLQueryGenerator extends QueryGenerator {
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
 
         for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-            queries.add(generateSciQLQuery(queryDomain));
+            queries.add(BenchmarkQuery.size(generateSciQLQuery(queryDomain), noOfDimensions));
         }
 
         for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-            queries.add(generateSciQLQuery(queryDomain));
+            queries.add(BenchmarkQuery.position(generateSciQLQuery(queryDomain), noOfDimensions));
         }
 
         for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-            queries.add(generateSciQLQuery(queryDomain));
+            queries.add(BenchmarkQuery.shape(generateSciQLQuery(queryDomain), noOfDimensions));
         }
 
         for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
-            queries.add(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()));
+            queries.add(BenchmarkQuery.multipleSelect(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()), noOfDimensions));
         }
 
         return queries;

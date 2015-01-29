@@ -57,17 +57,17 @@ public class RasdamanSystemController extends SystemController {
         String mddTypeDefinition = MessageFormat.format("typedef marray <{0}, {1}> {2};", typeType, noOfDimensions, mddTypeName);
         String setTypeDefinition = MessageFormat.format("typedef set<{0}> {1};", mddTypeName, setTypeName);
 
-//        File typeFile = File.createTempFile("rasdaman_type", null);
-//        typeFile.deleteOnExit();
-//
-//        try (PrintWriter pr = new PrintWriter(typeFile)) {
-//            pr.println(mddTypeDefinition);
-//            pr.println(setTypeDefinition);
-//        }
+        File typeFile = File.createTempFile("rasdaman_type", null);
+        typeFile.deleteOnExit();
 
-//        if (executeShellCommand(rasdlBinary, "--insert", "--read", typeFile.getAbsolutePath()) != 0) {
-////            throw new Exception("Failed to create rasdaman type.");
-//        }
+        try (PrintWriter pr = new PrintWriter(typeFile)) {
+            pr.println(mddTypeDefinition);
+            pr.println(setTypeDefinition);
+        }
+
+        if (executeShellCommand(rasdlBinary, "--insert", "--read", typeFile.getAbsolutePath()) != 0) {
+//            throw new Exception("Failed to create rasdaman type.");
+        }
 
         return Pair.of(mddTypeName, setTypeName);
     }

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import framework.context.SciDBContext;
+import util.DomainUtil;
 import util.Pair;
 
 /**
@@ -56,9 +57,8 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        double approxChunkSize = Math.pow(benchContext.getCollTileSize(), 1 / ((double) noOfDimensions));
-        int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
-
+        long chunkUpperBound = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
+        long chunkSize = chunkUpperBound + 1l;
         dataGenerator = new DataGenerator(fileSize);
         String filePath = dataGenerator.getFilePath();
 

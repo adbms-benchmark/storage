@@ -43,6 +43,21 @@ public abstract class SystemController extends Context {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+
+        if (processExecutor.getExitStatus() != 0){
+            System.err.println("----------------------------------------");
+            System.err.println("Command failed");
+            System.err.print("Command:");
+            for (int i = 0; i < command.length; i++) {
+                System.err.print(" ");
+                System.err.print(command[i]);
+            }
+            System.err.println("");
+            System.err.println("");
+            System.err.println(processExecutor.getError());
+            System.err.println("----------------------------------------------------------");
+        }
+
         return processExecutor.getExitStatus();
     }
 

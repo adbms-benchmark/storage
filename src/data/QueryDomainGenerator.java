@@ -1,12 +1,14 @@
 package data;
 
 import framework.context.BenchmarkContext;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import util.DomainUtil;
 import util.Pair;
 
 /**
- *
  * @author George Merticariu
  * @author Dimitar Misev
  */
@@ -44,22 +46,21 @@ public class QueryDomainGenerator {
     public List<List<Pair<Long, Long>>> getPositionQueryDomain() {
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
-        double collectionAxisSize = Math.pow(benchContext.getCollSize(), 1 / (double) noOfDimensions);
-        double selectAxisSize = Math.pow(benchContext.getMaxQuerySelectSize(), 1 / (double) noOfDimensions);
+        //TODO-GM: remove -1 when a new dataset is created (scidb asks for the chunk size which for [0:<upper_bound>] is <upper_bound> + 1
+        long tileDimensionUpperBound = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize()) - 1l;
+        long tileDimensionInsideTilePosition = tileDimensionUpperBound / 2;
 
-        double selectStep = (collectionAxisSize - selectAxisSize) / ((double) noOfQueries);
-        double lowerAxisSize = 0;
-        double higherAxisSize = selectAxisSize;
-
-        for (int queryIndex = 0; queryIndex < noOfQueries; ++queryIndex) {
+        for (int i = 0; i < noOfDimensions + 1; ++i) {
             List<Pair<Long, Long>> domain = new ArrayList<>();
-            for (int domainIndex = 0; domainIndex < noOfDimensions; ++domainIndex) {
-                domain.add(Pair.of((long) Math.ceil(lowerAxisSize), (long) (Math.ceil(higherAxisSize) - 1l)));
-            }
-            lowerAxisSize += selectStep;
-            higherAxisSize += selectStep;
-            result.add(domain);
+            for (int j = 0; j < noOfDimensions; ++j) {
+                if (j < i) {
+                    domain.add(Pair.of(tileDimensionInsideTilePosition, tileDimensionInsideTilePosition));
+                } else {
+                    domain.add(Pair.of(tileDimensionUpperBound, tileDimensionUpperBound + 1l));
+                }
 
+            }
+            result.add(domain);
         }
 
         return result;
@@ -72,8 +73,8 @@ public class QueryDomainGenerator {
         }
         double selectAxisSize = Math.pow(benchContext.getMaxQuerySelectSize(), 1 / (double) noOfDimensions);
 
-        double step = selectAxisSize / ((double) noOfQueries);
-        double firstAxisSize = step;
+        double step = selectAxisSize / ((double) (noOfQueries - 1));
+        double firstAxisSize = 1;
 
         for (int queryIndex = 0; queryIndex < noOfQueries; ++queryIndex) {
             double restAxisSize = firstAxisSize;
@@ -129,5 +130,4 @@ public class QueryDomainGenerator {
 
         return result;
     }
-
 }

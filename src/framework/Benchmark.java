@@ -1,7 +1,11 @@
 package framework;
 
+import data.BenchmarkQuery;
+
+import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,7 +15,7 @@ import java.util.List;
 public class Benchmark {
 
     public static final String HOME_DIR = System.getenv("HOME");
-    public static int REPEAT_NO = 2;
+    public static final int REPEAT_NO = 5;
     public static final int MAX_RETRY = 3;
 
     private final QueryGenerator queryGenerator;
@@ -24,27 +28,23 @@ public class Benchmark {
         this.systemController = systemController;
     }
 
-    public void runBenchmark(int noOfDim, long collectionSize, long maxSelectSize) throws Exception {
-        String fileName = HOME_DIR + "/" + systemController.getSystemName() + "_benchmark_results.csv";
-        if (systemController.getSystemName().equals("SciQL")) {
-            REPEAT_NO = 1;
-        } else {
-            REPEAT_NO = 2;
-        }
-        try (PrintWriter pr = new PrintWriter(new FileWriter(fileName, true))) {
+    public void runBenchmark(long collectionSize, long maxSelectSize) throws Exception {
+        String resultsDirPath = HOME_DIR + "/results/";
+        File resultsDir = new File(resultsDirPath);
+        resultsDir.mkdirs();
+
+        File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
+        try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
             systemController.restartSystem();
             // the query executor should check whether a collection is already created
             queryExecutor.createCollection();
 
-            List<String> benchmarkQueries = queryGenerator.getBenchmarkQueries();
-            pr.println("System name, Query, Number of dimensions, Collection size, Maximum selection size, Avg execution time (ms)");
+            List<BenchmarkQuery> benchmarkQueries = queryGenerator.getBenchmarkQueries();
 
-            for (String query : benchmarkQueries) {
-                System.out.printf("Executing query: \"%s\"\n", query);
+            for (BenchmarkQuery query : benchmarkQueries) {
+                System.out.printf("Executing query: \"%s\"\n", query.getQueryString());
 
-                pr.print(String.format("%s, \"%s\", %d, %d, %d, ", systemController.getSystemName(), query, noOfDim, collectionSize, maxSelectSize));
-                long total = 0;
-                int repeatNo = 0;
+                List<Long> queryExecutionTimes = new ArrayList<>();
                 for (int repeatIndex = 0; repeatIndex < REPEAT_NO; ++repeatIndex) {
                     boolean failed = true;
                     long time = -1;
@@ -52,28 +52,30 @@ public class Benchmark {
                     for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
                         try {
                             systemController.restartSystem();
-                            time = queryExecutor.executeTimedQuery(query);
+                            time = queryExecutor.executeTimedQuery(query.getQueryString());
                             failed = false;
                         } catch (Exception ex) {
-                            System.out.printf("Query \"%s\" failed. Retrying...\n", query, retryIndex + 1);
+                            System.out.printf("Query \"%s\" failed on try %d. Retrying...\n", query, retryIndex + 1);
                         }
                     }
+                    queryExecutionTimes.add(time);
+                }
 
-                    if (!failed) {
-                        total += time;
-                        repeatNo++;
-//                        pr.print(time + ", ");
-                    } else {
-                        System.out.printf("Query \"%s\" failed. Skipping...\n", query);
+                StringBuilder resultLine = new StringBuilder();
+                resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ", systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(), query.getDimensionality(), collectionSize, maxSelectSize));
+                boolean isFirst = true;
+
+                for (Long queryExecutionTime : queryExecutionTimes) {
+                    if (!isFirst) {
+                        resultLine.append(", ");
                     }
+                    resultLine.append("\"");
+                    resultLine.append(queryExecutionTime);
+                    resultLine.append("\"");
+                    isFirst = false;
                 }
-                if (repeatNo == 0) {
-                    ++repeatNo;
-                }
-                long avg = total / repeatNo;
-                System.out.printf("Executed in %d ms.\n\n", avg);
 
-                pr.println(avg);
+                pr.println(resultLine.toString());
                 pr.flush();
             }
         } finally {

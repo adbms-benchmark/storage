@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import framework.context.RasdamanContext;
+import util.DomainUtil;
 import util.Pair;
 
 /**
@@ -58,8 +59,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        double approxChunkSize = Math.pow(benchContext.getCollTileSize(), 1 / ((double) noOfDimensions));
-        int chunkSize = ((int) Math.ceil(approxChunkSize)) - 1;
+        long chunkSize = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long tileSize = (long) Math.pow(chunkSize, noOfDimensions);
 
         dataGenerator = new DataGenerator(fileSize);
@@ -67,7 +67,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         List<Pair<Long, Long>> tileStructureDomain = new ArrayList<>();
         for (int i = 0; i < noOfDimensions; i++) {
-            tileStructureDomain.add(Pair.of(0l, ((long) chunkSize)));
+            tileStructureDomain.add(Pair.of(0l, chunkSize));
         }
 
         Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
@@ -85,6 +85,361 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                 "--mddtype", aChar.getFirst(),
                 "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
                 "--file", filePath});
+    }
+
+    /**
+     * Hack for inserting datasizes of more than 1Gb
+     * @param slices
+     * @throws Exception
+     */
+    public void updateCollection(int slices) throws Exception {
+        Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
+
+        switch (noOfDimensions) {
+            case 1: {
+                double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
+                long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
+                long fileSize = domainGenerator.getFileSize(domainBoundaries);
+
+                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                String filePath = dataGenerator.getFilePath();
+
+                Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
+                long shift0 = axis0Domain.getSecond() - axis0Domain.getFirst();
+
+                System.out.println("No of updates: " + Math.pow(slicesPerDim, noOfDimensions));
+                for (int axis0 = 0; axis0 < slicesPerDim; axis0++) {
+                    Pair<Long, Long> shiftedAxis0 = Pair.of(axis0Domain.getFirst() + axis0 * shift0, axis0Domain.getSecond() + axis0 * shift0);
+                    List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
+                    shiftedAxis.add(shiftedAxis0);
+
+                    String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                    boolean success = false;
+
+                    while (!success) {
+                        try {
+                            executeTimedQuery(updateQuery, new String[]{
+                                    "--user", context.getUser(),
+                                    "--passwd", context.getPassword(),
+                                    "--mddtype", aChar.getFirst(),
+                                    "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
+                                    "--file", filePath});
+                            success = true;
+                            rasdamanSystemController.restartSystem();
+                        } catch (Exception ex) {
+                            rasdamanSystemController.restartSystem();
+                        }
+                    }
+                }
+                break;
+            }
+            case 2: {
+                double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
+                long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
+                long fileSize = domainGenerator.getFileSize(domainBoundaries);
+
+                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                String filePath = dataGenerator.getFilePath();
+
+                Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
+                Pair<Long, Long> axis1Domain = domainBoundaries.get(1);
+
+                long shift0 = axis0Domain.getSecond() - axis0Domain.getFirst();
+                long shift1 = axis1Domain.getSecond() - axis1Domain.getFirst();
+                System.out.println("No of updates: " + Math.pow(slicesPerDim, noOfDimensions));
+                for (int axis0 = 0; axis0 < slicesPerDim; ++axis0) {
+                    Pair<Long, Long> shiftedAxis0 = Pair.of(axis0Domain.getFirst() + axis0 * shift0, axis0Domain.getSecond() + axis0 * shift0);
+                    for (int axis1 = 0; axis1 < slicesPerDim; ++axis1) {
+                        Pair<Long, Long> shiftedAxis1 = Pair.of(axis1Domain.getFirst() + axis1 * shift1, axis1Domain.getSecond() + axis1 * shift1);
+                        List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
+                        shiftedAxis.add(shiftedAxis0);
+                        shiftedAxis.add(shiftedAxis1);
+
+                        String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                        boolean success = false;
+
+                        while (!success) {
+                            try {
+                                executeTimedQuery(updateQuery, new String[]{
+                                        "--user", context.getUser(),
+                                        "--passwd", context.getPassword(),
+                                        "--mddtype", aChar.getFirst(),
+                                        "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
+                                        "--file", filePath});
+                                success = true;
+                                rasdamanSystemController.restartSystem();
+                            } catch (Exception ex) {
+                                rasdamanSystemController.restartSystem();
+                            }
+                        }
+                    }
+
+
+                }
+
+
+                break;
+            }
+            case 3: {
+
+                double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
+                long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
+                long fileSize = domainGenerator.getFileSize(domainBoundaries);
+
+                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                String filePath = dataGenerator.getFilePath();
+
+                Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
+                Pair<Long, Long> axis1Domain = domainBoundaries.get(1);
+                Pair<Long, Long> axis2Domain = domainBoundaries.get(2);
+
+                long shift0 = axis0Domain.getSecond() - axis0Domain.getFirst();
+                long shift1 = axis1Domain.getSecond() - axis1Domain.getFirst();
+                long shift2 = axis2Domain.getSecond() - axis2Domain.getFirst();
+                System.out.println("No of updates: " + Math.pow(slicesPerDim, noOfDimensions));
+                for (int axis0 = 0; axis0 < slicesPerDim; ++axis0) {
+                    Pair<Long, Long> shiftedAxis0 = Pair.of(axis0Domain.getFirst() + axis0 * shift0, axis0Domain.getSecond() + axis0 * shift0);
+                    for (int axis1 = 0; axis1 < slicesPerDim; ++axis1) {
+                        Pair<Long, Long> shiftedAxis1 = Pair.of(axis1Domain.getFirst() + axis1 * shift1, axis1Domain.getSecond() + axis1 * shift1);
+                        for (int axis2 = 0; axis2 < slicesPerDim; ++axis2) {
+                            Pair<Long, Long> shiftedAxis2 = Pair.of(axis2Domain.getFirst() + axis2 * shift2, axis2Domain.getSecond() + axis2 * shift2);
+
+                            List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
+                            shiftedAxis.add(shiftedAxis0);
+                            shiftedAxis.add(shiftedAxis1);
+                            shiftedAxis.add(shiftedAxis2);
+
+                            String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                            boolean success = false;
+
+                            while (!success) {
+                                try {
+                                    executeTimedQuery(updateQuery, new String[]{
+                                            "--user", context.getUser(),
+                                            "--passwd", context.getPassword(),
+                                            "--mddtype", aChar.getFirst(),
+                                            "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
+                                            "--file", filePath});
+                                    success = true;
+                                } catch (Exception ex) {
+                                    rasdamanSystemController.restartSystem();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                break;
+            }
+            case 4: {
+
+                double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
+                long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
+                long fileSize = domainGenerator.getFileSize(domainBoundaries);
+
+                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                String filePath = dataGenerator.getFilePath();
+
+                Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
+                Pair<Long, Long> axis1Domain = domainBoundaries.get(1);
+                Pair<Long, Long> axis2Domain = domainBoundaries.get(2);
+                Pair<Long, Long> axis3Domain = domainBoundaries.get(3);
+
+                long shift0 = axis0Domain.getSecond() - axis0Domain.getFirst();
+                long shift1 = axis1Domain.getSecond() - axis1Domain.getFirst();
+                long shift2 = axis2Domain.getSecond() - axis2Domain.getFirst();
+                long shift3 = axis3Domain.getSecond() - axis3Domain.getFirst();
+                System.out.println("No of updates: " + Math.pow(slicesPerDim, noOfDimensions));
+                for (int axis0 = 0; axis0 < slicesPerDim; ++axis0) {
+                    Pair<Long, Long> shiftedAxis0 = Pair.of(axis0Domain.getFirst() + axis0 * shift0, axis0Domain.getSecond() + axis0 * shift0);
+                    for (int axis1 = 0; axis1 < slicesPerDim; ++axis1) {
+                        Pair<Long, Long> shiftedAxis1 = Pair.of(axis1Domain.getFirst() + axis1 * shift1, axis1Domain.getSecond() + axis1 * shift1);
+                        for (int axis2 = 0; axis2 < slicesPerDim; ++axis2) {
+                            Pair<Long, Long> shiftedAxis2 = Pair.of(axis2Domain.getFirst() + axis2 * shift2, axis2Domain.getSecond() + axis2 * shift2);
+                            for (int axis3 = 0; axis3 < slicesPerDim; ++axis3) {
+                                Pair<Long, Long> shiftedAxis3 = Pair.of(axis3Domain.getFirst() + axis3 * shift3, axis3Domain.getSecond() + axis3 * shift3);
+
+                                List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
+                                shiftedAxis.add(shiftedAxis0);
+                                shiftedAxis.add(shiftedAxis1);
+                                shiftedAxis.add(shiftedAxis2);
+                                shiftedAxis.add(shiftedAxis3);
+
+                                String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                                boolean success = false;
+
+                                while (!success) {
+                                    try {
+                                        executeTimedQuery(updateQuery, new String[]{
+                                                "--user", context.getUser(),
+                                                "--passwd", context.getPassword(),
+                                                "--mddtype", aChar.getFirst(),
+                                                "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
+                                                "--file", filePath});
+                                        success = true;
+                                    } catch (Exception ex) {
+                                        rasdamanSystemController.restartSystem();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                break;
+            }
+            case 5: {
+
+                double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
+                long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
+                long fileSize = domainGenerator.getFileSize(domainBoundaries);
+
+                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                String filePath = dataGenerator.getFilePath();
+
+                Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
+                Pair<Long, Long> axis1Domain = domainBoundaries.get(1);
+                Pair<Long, Long> axis2Domain = domainBoundaries.get(2);
+                Pair<Long, Long> axis3Domain = domainBoundaries.get(3);
+                Pair<Long, Long> axis4Domain = domainBoundaries.get(4);
+
+                long shift0 = axis0Domain.getSecond() - axis0Domain.getFirst();
+                long shift1 = axis1Domain.getSecond() - axis1Domain.getFirst();
+                long shift2 = axis2Domain.getSecond() - axis2Domain.getFirst();
+                long shift3 = axis3Domain.getSecond() - axis3Domain.getFirst();
+                long shift4 = axis4Domain.getSecond() - axis4Domain.getFirst();
+                System.out.println("No of updates: " + Math.pow(slicesPerDim, noOfDimensions));
+                int insertNo = 0;
+                for (int axis0 = 0; axis0 < slicesPerDim; ++axis0) {
+                    Pair<Long, Long> shiftedAxis0 = Pair.of(axis0Domain.getFirst() + axis0 * shift0, axis0Domain.getSecond() + axis0 * shift0);
+                    for (int axis1 = 0; axis1 < slicesPerDim; ++axis1) {
+                        Pair<Long, Long> shiftedAxis1 = Pair.of(axis1Domain.getFirst() + axis1 * shift1, axis1Domain.getSecond() + axis1 * shift1);
+                        for (int axis2 = 0; axis2 < slicesPerDim; ++axis2) {
+                            Pair<Long, Long> shiftedAxis2 = Pair.of(axis2Domain.getFirst() + axis2 * shift2, axis2Domain.getSecond() + axis2 * shift2);
+                            for (int axis3 = 0; axis3 < slicesPerDim; ++axis3) {
+                                Pair<Long, Long> shiftedAxis3 = Pair.of(axis3Domain.getFirst() + axis3 * shift3, axis3Domain.getSecond() + axis3 * shift3);
+                                for (int axis4 = 0; axis4 < slicesPerDim; ++axis4) {
+                                    Pair<Long, Long> shiftedAxis4 = Pair.of(axis4Domain.getFirst() + axis4 * shift4, axis4Domain.getSecond() + axis4 * shift4);
+
+                                    List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
+                                    shiftedAxis.add(shiftedAxis0);
+                                    shiftedAxis.add(shiftedAxis1);
+                                    shiftedAxis.add(shiftedAxis2);
+                                    shiftedAxis.add(shiftedAxis3);
+                                    shiftedAxis.add(shiftedAxis4);
+
+                                    String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                                    boolean success = false;
+                                    insertNo++;
+                                    System.out.println("Performing insert: " + insertNo);
+                                    while (!success) {
+                                        try {
+                                            executeTimedQuery(updateQuery, new String[]{
+                                                    "--user", context.getUser(),
+                                                    "--passwd", context.getPassword(),
+                                                    "--mddtype", aChar.getFirst(),
+                                                    "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
+                                                    "--file", filePath});
+                                            success = true;
+
+                                            rasdamanSystemController.restartSystem();
+                                        } catch (Exception ex) {
+                                            rasdamanSystemController.restartSystem();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            case 6: {
+
+                double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
+                long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
+                long fileSize = domainGenerator.getFileSize(domainBoundaries);
+
+                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                String filePath = dataGenerator.getFilePath();
+
+                Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
+                Pair<Long, Long> axis1Domain = domainBoundaries.get(1);
+                Pair<Long, Long> axis2Domain = domainBoundaries.get(2);
+                Pair<Long, Long> axis3Domain = domainBoundaries.get(3);
+                Pair<Long, Long> axis4Domain = domainBoundaries.get(4);
+                Pair<Long, Long> axis5Domain = domainBoundaries.get(5);
+
+                long shift0 = axis0Domain.getSecond() - axis0Domain.getFirst();
+                long shift1 = axis1Domain.getSecond() - axis1Domain.getFirst();
+                long shift2 = axis2Domain.getSecond() - axis2Domain.getFirst();
+                long shift3 = axis3Domain.getSecond() - axis3Domain.getFirst();
+                long shift4 = axis4Domain.getSecond() - axis4Domain.getFirst();
+                long shift5 = axis5Domain.getSecond() - axis5Domain.getFirst();
+                System.out.println("No of updates: " + Math.pow(slicesPerDim, noOfDimensions));
+                int insertNo = 0;
+                for (int axis0 = 0; axis0 < slicesPerDim; ++axis0) {
+                    Pair<Long, Long> shiftedAxis0 = Pair.of(axis0Domain.getFirst() + axis0 * shift0, axis0Domain.getSecond() + axis0 * shift0);
+                    for (int axis1 = 0; axis1 < slicesPerDim; ++axis1) {
+                        Pair<Long, Long> shiftedAxis1 = Pair.of(axis1Domain.getFirst() + axis1 * shift1, axis1Domain.getSecond() + axis1 * shift1);
+                        for (int axis2 = 0; axis2 < slicesPerDim; ++axis2) {
+                            Pair<Long, Long> shiftedAxis2 = Pair.of(axis2Domain.getFirst() + axis2 * shift2, axis2Domain.getSecond() + axis2 * shift2);
+                            for (int axis3 = 0; axis3 < slicesPerDim; ++axis3) {
+                                Pair<Long, Long> shiftedAxis3 = Pair.of(axis3Domain.getFirst() + axis3 * shift3, axis3Domain.getSecond() + axis3 * shift3);
+                                for (int axis4 = 0; axis4 < slicesPerDim; ++axis4) {
+                                    Pair<Long, Long> shiftedAxis4 = Pair.of(axis4Domain.getFirst() + axis4 * shift4, axis4Domain.getSecond() + axis4 * shift4);
+                                    for (int axis5 = 0; axis5 < slicesPerDim; ++axis5) {
+                                        Pair<Long, Long> shiftedAxis5 = Pair.of(axis5Domain.getFirst() + axis5 * shift5, axis5Domain.getSecond() + axis5 * shift5);
+
+                                        List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
+                                        shiftedAxis.add(shiftedAxis0);
+                                        shiftedAxis.add(shiftedAxis1);
+                                        shiftedAxis.add(shiftedAxis2);
+                                        shiftedAxis.add(shiftedAxis3);
+                                        shiftedAxis.add(shiftedAxis4);
+                                        shiftedAxis.add(shiftedAxis5);
+
+                                        String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                                        boolean success = false;
+                                        insertNo++;
+                                        System.out.println("Performing insert: " + insertNo);
+                                        while (!success) {
+                                            try {
+                                                executeTimedQuery(updateQuery, new String[]{
+                                                        "--user", context.getUser(),
+                                                        "--passwd", context.getPassword(),
+                                                        "--mddtype", aChar.getFirst(),
+                                                        "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
+                                                        "--file", filePath});
+                                                success = true;
+                                                rasdamanSystemController.restartSystem();
+                                            } catch (Exception ex) {
+                                                rasdamanSystemController.restartSystem();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+
+        }
+
     }
 
     @Override

@@ -1,6 +1,7 @@
 package framework.asqldb;
 
 
+import data.BenchmarkQuery;
 import data.QueryDomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
@@ -27,15 +28,16 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     public AsqldbQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
         this.queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
         this.benchContext = benchContext;
+        this.noOfDimensions = noOfDimensions;
     }
 
     @Override
-    public List<String> getBenchmarkQueries() {
-        List<String> queries = new ArrayList<>();
+    public List<BenchmarkQuery> getBenchmarkQueries() {
+        List<BenchmarkQuery> queries = new ArrayList<>();
         for (TableContext tableContext : BenchmarkContext.dataSizes) {
             String query = "select count_cells(a >= 30 and b < 30) from " + tableContext.asqldbTable1 + " as a, "
                     + tableContext.asqldbTable2 + " as b";
-            queries.add(query);
+            queries.add(BenchmarkQuery.unknown(query, noOfDimensions));
         }
         return queries;
     }

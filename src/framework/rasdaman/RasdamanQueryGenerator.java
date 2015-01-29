@@ -1,16 +1,18 @@
 package framework.rasdaman;
 
 
+import data.BenchmarkQuery;
 import data.QueryDomainGenerator;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+
 import util.Pair;
 
 /**
- *
  * @author George Merticariu
  */
 public class RasdamanQueryGenerator extends QueryGenerator {
@@ -21,12 +23,13 @@ public class RasdamanQueryGenerator extends QueryGenerator {
     public RasdamanQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
         queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
         this.benchContext = benchContext;
+        this.noOfDimensions = noOfDimensions;
     }
 
     @Override
-    public List<String> getBenchmarkQueries() {
+    public List<BenchmarkQuery> getBenchmarkQueries() {
 
-        List<String> queries = new ArrayList<>();
+        List<BenchmarkQuery> queries = new ArrayList<>();
 
         List<List<Pair<Long, Long>>> sizeQueryDomain = queryDomainGenerator.getSizeQueryDomain();
         List<List<Pair<Long, Long>>> positionQueryDomain = queryDomainGenerator.getPositionQueryDomain();
@@ -34,21 +37,20 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
 
         for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-            queries.add(generateRasdamanQuery(queryDomain));
+            queries.add(BenchmarkQuery.size(generateRasdamanQuery(queryDomain), noOfDimensions));
         }
 
         for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-            queries.add(generateRasdamanQuery(queryDomain));
+            queries.add(BenchmarkQuery.position(generateRasdamanQuery(queryDomain), noOfDimensions));
         }
 
         for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-            queries.add(generateRasdamanQuery(queryDomain));
+            queries.add(BenchmarkQuery.shape(generateRasdamanQuery(queryDomain), noOfDimensions));
         }
 
         for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
-            queries.add(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()));
+            queries.add(BenchmarkQuery.multipleSelect(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()), noOfDimensions));
         }
-
 
         return queries;
     }

@@ -1,5 +1,7 @@
 package framework;
 
+import data.BenchmarkQuery;
+
 import java.util.List;
 
 /**
@@ -8,5 +10,7 @@ import java.util.List;
  */
 public abstract class QueryGenerator {
 
-    public abstract List<String> getBenchmarkQueries();
+    protected int noOfDimensions;
+
+    public abstract List<BenchmarkQuery> getBenchmarkQueries();
 }
