@@ -91,14 +91,6 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         File resultsDir = IO.getResultsDir();
         File insertResultFile = new File(resultsDir.getAbsolutePath(), "rasdaman_insert_results.csv");
 
-
-        long oneGB = 1024l * 1024l * 1024l;
-        if (benchContext.getCollSize() > oneGB) {
-            int slices = (int) (benchContext.getCollSize() / (oneGB));
-            benchContext.setCollSize(oneGB);
-            insertTime = updateCollection(slices);
-        }
-
         IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize, chunkSize + 1l, noOfDimensions, insertTime));
     }
 
