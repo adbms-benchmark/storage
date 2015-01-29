@@ -60,7 +60,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
         long chunkSize = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
-        long tileSize = (long) Math.pow(chunkSize, noOfDimensions);
+        long tileSize = (long) Math.pow(chunkSize + 1l, noOfDimensions);
 
         dataGenerator = new DataGenerator(fileSize);
         String filePath = dataGenerator.getFilePath();
@@ -89,6 +89,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
     /**
      * Hack for inserting datasizes of more than 1Gb
+     *
      * @param slices
      * @throws Exception
      */
