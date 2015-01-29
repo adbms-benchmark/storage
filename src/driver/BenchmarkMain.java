@@ -138,22 +138,19 @@ public class BenchmarkMain {
 //                collectionSizes.put(102400l, "100Kb");
 //                collectionSizes.put(1048576l, "1Mb");
                 collectionSizes.put(104857600l, "100Mb");
-                collectionSizes.put(1073741824l, "1Gb");
+//                collectionSizes.put(1073741824l, "1Gb");
 //                collectionSizes.put(10737418240l, "10Gb");
 
                 ConnectionContext sciqlConnection = new ConnectionContext("conf/sciql.properties");
                 BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
                 int noQueries = 10;
 
-                for (int noOfDim = 1; noOfDim <= 6; ++noOfDim) {
+                for (int noOfDim = 6; noOfDim <= 6; ++noOfDim) {
                     for (Map.Entry<Long, String> longStringEntry : collectionSizes.entrySet()) {
                         System.out.println("SciQLQueryExecutor: " + noOfDim + "D");
                         String colName = String.format("cold%ds%s", noOfDim, longStringEntry.getValue());
                         long collectionSize = longStringEntry.getKey();
                         long maxSelectSize = (long) ((double) collectionSize / 10.0);
-                        if (collectionSize == 104857600l && noOfDim < 4) {
-                            continue;
-                        }
 
                         benchContext.setCollName1(colName);
                         benchContext.setCollSize(collectionSize);
