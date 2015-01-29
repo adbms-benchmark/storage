@@ -14,9 +14,9 @@ import framework.scidb.SciDBSystemController;
 import framework.sciql.SciQLQueryExecutor;
 import framework.sciql.SciQLQueryGenerator;
 import framework.sciql.SciQLSystemController;
-
 import java.io.File;
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author George Merticariu

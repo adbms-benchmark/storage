@@ -28,8 +28,17 @@ public class DataGenerator {
 
     private void generate() throws IOException {
         file = new File("/e/data/" + fileSize);
-        if (file.exists())
+        if (file.exists()) {
+            long currSize = file.length();
+            if (currSize > fileSize) {
+                SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
+                        "truncate", "-s", "" + fileSize);
+            } else {
+                SystemController.executeShellCommand(
+                        "/bin/sh", "-c", "head -c " + (fileSize - currSize) + " /dev/urandom | tee -a " + file.getAbsolutePath());
+            }
             return;
+        }
         SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
                 "head", "-c", "" + fileSize, "/dev/urandom");
     }
