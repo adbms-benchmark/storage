@@ -38,23 +38,15 @@ public class BenchmarkContext extends Context {
     public static final String KEY_DATA_DIR = "data.dir";
 
     public BenchmarkContext(String propertiesPath) throws FileNotFoundException, IOException {
-//        super(propertiesPath);
-//        collSize = getValueLong(KEY_COLL_SIZE);
-//        collName1 = getValue(KEY_COLL_NAME1);
-//        collName2 = getValue(KEY_COLL_NAME2);
-//        maxQuerySelectSize = getValueLong(KEY_QUERY_SELECT_SIZE);
-//        collTileSize = getValueLong(KEY_COLL_TILE_SIZE);
-//        dataDir = getValue(KEY_DATA_DIR);
-//        maxQueryRerty = getValueInteger(KEY_QUERY_MAX_RETRY);
-//        maxQueryExecutionTime = getValueInteger(KEY_QUERY_MAX_EXECUTION_TIME);
-        collSize = 1024l * 1024l * 1024l;
-        collName1 = "gogu";
-        collName2 = "gogu";
-        maxQuerySelectSize = collSize / 10;
-        collTileSize = 4l * 1024l * 1024l;
-        dataDir = "";
-        maxQueryRerty = 1;
-        maxQueryExecutionTime = 1;
+        super(propertiesPath);
+        collSize = getValueLong(KEY_COLL_SIZE);
+        collName1 = getValue(KEY_COLL_NAME1);
+        collName2 = getValue(KEY_COLL_NAME2);
+        maxQuerySelectSize = getValueLong(KEY_QUERY_SELECT_SIZE);
+        collTileSize = getValueLong(KEY_COLL_TILE_SIZE);
+        dataDir = getValue(KEY_DATA_DIR);
+        maxQueryRerty = getValueInteger(KEY_QUERY_MAX_RETRY);
+        maxQueryExecutionTime = getValueInteger(KEY_QUERY_MAX_EXECUTION_TIME);
     }
 
     public long getCollSize() {
