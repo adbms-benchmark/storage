@@ -58,6 +58,12 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
     @Override
     public void createCollection() throws Exception {
+        long oneGB = 1024l * 1024l * 1024l;
+        int slices = (int) (benchContext.getCollSize() / (oneGB));
+        if (benchContext.getCollSize() > oneGB) {
+            benchContext.setCollSize(oneGB);
+        }
+
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -90,6 +96,10 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         File resultsDir = IO.getResultsDir();
         File insertResultFile = new File(resultsDir.getAbsolutePath(), "rasdaman_insert_results.csv");
+
+        if (benchContext.getCollSize() > oneGB) {
+            insertTime = updateCollection(slices);
+        }
 
         IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize, chunkSize + 1l, noOfDimensions, insertTime));
     }
