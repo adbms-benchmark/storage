@@ -94,8 +94,8 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         long oneGB = 1024l * 1024l * 1024l;
         if (benchContext.getCollSize() > oneGB) {
-            benchContext.setCollSize(oneGB);
             int slices = (int) (benchContext.getCollSize() / (oneGB));
+            benchContext.setCollSize(oneGB);
             insertTime = updateCollection(slices);
         }
 
