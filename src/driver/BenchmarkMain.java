@@ -1,5 +1,6 @@
 package driver;
 
+import framework.Benchmark;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import framework.context.RasdamanContext;
@@ -77,9 +78,9 @@ public class BenchmarkMain {
                             RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext, noOfDim, noQueries);
 
                             s.restartSystem();
-                            r.createCollection();
-//                            Benchmark benchmark = new Benchmark(q, r, s);
-//                            benchmark.runBenchmark(collectionSize, maxSelectSize);
+//                            r.createCollection();
+                            Benchmark benchmark = new Benchmark(q, r, s);
+                            benchmark.runBenchmark(collectionSize, maxSelectSize);
 
                         }
                     }
@@ -119,9 +120,9 @@ public class BenchmarkMain {
                             SciDBSystemController s = new SciDBSystemController(scidbContext.getStartCommand(), scidbContext.getStopCommand());
 
                             s.restartSystem();
-                            r.createCollection();
-//                            Benchmark benchmark = new Benchmark(q, r, s);
-//                            benchmark.runBenchmark(collectionSize, maxSelectSize);
+//                            r.createCollection();
+                            Benchmark benchmark = new Benchmark(q, r, s);
+                            benchmark.runBenchmark(collectionSize, maxSelectSize);
 
                         }
                     }
@@ -132,16 +133,16 @@ public class BenchmarkMain {
             case "SciQL": {
 
                 Map<Long, String> collectionSizes = new TreeMap<>();
-//                collectionSizes.put(1024l, "1Kb");
-//                collectionSizes.put(102400l, "100Kb");
-//                collectionSizes.put(1048576l, "1Mb");
+                collectionSizes.put(1024l, "1Kb");
+                collectionSizes.put(102400l, "100Kb");
+                collectionSizes.put(1048576l, "1Mb");
                 collectionSizes.put(104857600l, "100Mb");
 //                collectionSizes.put(1073741824l, "1Gb");
 //                collectionSizes.put(10737418240l, "10Gb");
 
                 ConnectionContext sciqlConnection = new ConnectionContext("conf/sciql.properties");
 
-                for (int noOfDim = 6; noOfDim <= 6; ++noOfDim) {
+                for (int noOfDim = 1; noOfDim <= 6; ++noOfDim) {
                     for (Map.Entry<Long, String> longStringEntry : collectionSizes.entrySet()) {
                         System.out.println("SciQLQueryExecutor: " + noOfDim + "D");
                         String colName = String.format("cold%ds%s", noOfDim, longStringEntry.getValue());
@@ -157,9 +158,9 @@ public class BenchmarkMain {
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
                         systemController.restartSystem();
-                        queryExecutor.createCollection();
-//                        Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
-//                        benchmark.runBenchmark(benchContext.getCollSize(), benchContext.getMaxQuerySelectSize());
+//                        queryExecutor.createCollection();
+                        Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
+                        benchmark.runBenchmark(benchContext.getCollSize(), benchContext.getMaxQuerySelectSize());
                     }
                 }
 
