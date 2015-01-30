@@ -7,6 +7,7 @@ public class BenchmarkQuery {
         POSITION,
         SHAPE,
         MULTIPLE_SELECT,
+        MIDDLE_POINT,
         UNKNOWN
     }
 
@@ -39,6 +40,10 @@ public class BenchmarkQuery {
 
     public static BenchmarkQuery unknown(String queryString, int dimensionality) {
         return new BenchmarkQuery(queryString, dimensionality, QueryType.UNKNOWN);
+    }
+
+    public static BenchmarkQuery middlePoint(String queryString, int dimensionality) {
+        return new BenchmarkQuery(queryString, dimensionality, QueryType.MIDDLE_POINT);
     }
 
 

@@ -8,6 +8,7 @@ import framework.context.SciDBContext;
 import framework.rasdaman.RasdamanQueryExecutor;
 import framework.rasdaman.RasdamanQueryGenerator;
 import framework.rasdaman.RasdamanSystemController;
+import framework.scidb.SciDBAFLQueryGenerator;
 import framework.scidb.SciDBAQLQueryGenerator;
 import framework.scidb.SciDBQueryExecutor;
 import framework.scidb.SciDBSystemController;
@@ -77,11 +78,8 @@ public class BenchmarkMain {
                             RasdamanQueryExecutor r = new RasdamanQueryExecutor(scidbContext, s, benchContext, noOfDim);
                             RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext, noOfDim, noQueries);
 
-                            s.restartSystem();
-//                            r.createCollection();
                             Benchmark benchmark = new Benchmark(q, r, s);
                             benchmark.runBenchmark(collectionSize, maxSelectSize);
-
                         }
                     }
                 }
@@ -116,11 +114,9 @@ public class BenchmarkMain {
                             benchContext.setMaxQuerySelectSize(maxSelectSize);
 
                             SciDBQueryExecutor r = new SciDBQueryExecutor(scidbContext, benchContext, noOfDim);
-                            SciDBAQLQueryGenerator q = new SciDBAQLQueryGenerator(benchContext, noOfDim, noQueries);
+                            SciDBAFLQueryGenerator q = new SciDBAFLQueryGenerator(benchContext, noOfDim, noQueries);
                             SciDBSystemController s = new SciDBSystemController(scidbContext.getStartCommand(), scidbContext.getStopCommand());
 
-                            s.restartSystem();
-//                            r.createCollection();
                             Benchmark benchmark = new Benchmark(q, r, s);
                             benchmark.runBenchmark(collectionSize, maxSelectSize);
 
@@ -157,8 +153,6 @@ public class BenchmarkMain {
                         SciQLSystemController systemController = new SciQLSystemController("conf/system.properties", sciqlConnection);
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
-                        systemController.restartSystem();
-//                        queryExecutor.createCollection();
                         Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
                         benchmark.runBenchmark(benchContext.getCollSize(), benchContext.getMaxQuerySelectSize());
                     }

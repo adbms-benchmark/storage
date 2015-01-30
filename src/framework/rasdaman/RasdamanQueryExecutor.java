@@ -76,7 +76,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 //
-        long chunkSize = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
+        long chunkSize = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long tileSize = (long) Math.pow(chunkSize + 1l, noOfDimensions);
 //
         dataGenerator = new DataGenerator(fileSize);

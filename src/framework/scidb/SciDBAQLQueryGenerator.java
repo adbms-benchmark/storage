@@ -53,6 +53,12 @@ public class SciDBAQLQueryGenerator extends QueryGenerator {
         return queries;
     }
 
+    @Override
+    public BenchmarkQuery getMiddlePointQuery() {
+        List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
+        return BenchmarkQuery.middlePoint(generateSciDBQuery(middlePointQueryDomain), noOfDimensions);
+    }
+
     private String generateSciDBQuery(List<Pair<Long, Long>> domain) {
         return MessageFormat.format("SELECT * FROM consume((SELECT a FROM {0} WHERE {1}))", benchContext.getCollName1(), convertToSciDBDomain(domain));
     }

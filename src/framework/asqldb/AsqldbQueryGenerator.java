@@ -42,6 +42,12 @@ public class AsqldbQueryGenerator extends QueryGenerator {
         return queries;
     }
 
+    @Override
+    public BenchmarkQuery getMiddlePointQuery() {
+        List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
+        return BenchmarkQuery.middlePoint(generateRasdamanQuery(middlePointQueryDomain), noOfDimensions);
+    }
+
     public static String convertToRasdamanDomain(List<Pair<Long, Long>> domain) {
         StringBuilder rasdamanDomain = new StringBuilder();
         rasdamanDomain.append('[');

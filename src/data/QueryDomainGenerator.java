@@ -24,6 +24,18 @@ public class QueryDomainGenerator {
         this.benchContext = benchContext;
     }
 
+    public List<Pair<Long, Long>> getMiddlePointQueryDomain() {
+        long dimensionUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollSize());
+        long middleBound = dimensionUpperBound / 2;
+        List<Pair<Long, Long>> domain = new ArrayList<>();
+
+        for (int i = 0; i < noOfDimensions; ++i) {
+            domain.add(Pair.of(middleBound, middleBound));
+        }
+
+        return domain;
+    }
+
     public List<List<Pair<Long, Long>>> getSizeQueryDomain() {
 
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
@@ -46,7 +58,7 @@ public class QueryDomainGenerator {
     public List<List<Pair<Long, Long>>> getPositionQueryDomain() {
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
-        long tileDimensionUpperBound = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
+        long tileDimensionUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long tileDimensionInsideTilePosition = tileDimensionUpperBound / 2;
 
         for (int i = 0; i < noOfDimensions + 1; ++i) {
