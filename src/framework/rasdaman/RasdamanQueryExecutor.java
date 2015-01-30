@@ -66,10 +66,10 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         long oneGB = 1024l * 1024l * 1024l;
         int slices = (int) (benchContext.getCollSize() / (oneGB));
         boolean startSequentialUpdate = false;
-        if (benchContext.getCollSize() > oneGB) {
-            benchContext.setCollSize(oneGB);
-            startSequentialUpdate = true;
-        }
+//        if (benchContext.getCollSize() > oneGB) {
+//            benchContext.setCollSize(oneGB);
+//            startSequentialUpdate = true;
+//        }
 
         long insertTime = -1;
 
@@ -79,36 +79,36 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         long chunkSize = DomainUtil.getTileDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long tileSize = (long) Math.pow(chunkSize + 1l, noOfDimensions);
 //
-//        dataGenerator = new DataGenerator(fileSize);
-//        String filePath = dataGenerator.getFilePath();
-//
-//        List<Pair<Long, Long>> tileStructureDomain = new ArrayList<>();
-//        for (int i = 0; i < noOfDimensions; i++) {
-//            tileStructureDomain.add(Pair.of(0l, chunkSize));
-//        }
-//
-//        Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
-//
-//        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName1(), aChar.getSecond());
-//        executeTimedQuery(createCollectionQuery, new String[]{
-//                "--user", context.getUser(),
-//                "--passwd", context.getPassword()});
-//
-//        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
-//        System.out.println("Executing insert query: " + insertQuery);
-//        insertTime = executeTimedQuery(insertQuery, new String[]{
-//                "--user", context.getUser(),
-//                "--passwd", context.getPassword(),
-//                "--mddtype", aChar.getFirst(),
-//                "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
-//                "--file", filePath});
+        dataGenerator = new DataGenerator(fileSize);
+        String filePath = dataGenerator.getFilePath();
+
+        List<Pair<Long, Long>> tileStructureDomain = new ArrayList<>();
+        for (int i = 0; i < noOfDimensions; i++) {
+            tileStructureDomain.add(Pair.of(0l, chunkSize));
+        }
+
+        Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
+
+        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName1(), aChar.getSecond());
+        executeTimedQuery(createCollectionQuery, new String[]{
+                "--user", context.getUser(),
+                "--passwd", context.getPassword()});
+
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
+        System.out.println("Executing insert query: " + insertQuery);
+        insertTime = executeTimedQuery(insertQuery, new String[]{
+                "--user", context.getUser(),
+                "--passwd", context.getPassword(),
+                "--mddtype", aChar.getFirst(),
+                "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
+                "--file", filePath});
 
         File resultsDir = IO.getResultsDir();
         File insertResultFile = new File(resultsDir.getAbsolutePath(), "rasdaman_insert_results.csv");
 
-        if (startSequentialUpdate) {
-            insertTime = updateCollection(slices);
-        }
+//        if (startSequentialUpdate) {
+//            insertTime = updateCollection(slices);
+//        }
 
         IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize*slices, chunkSize + 1l, noOfDimensions, insertTime));
     }
