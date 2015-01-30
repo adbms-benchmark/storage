@@ -37,7 +37,12 @@ public class Benchmark {
             // the query executor should check whether a collection is already created
 //            queryExecutor.createCollection();
 
-            List<BenchmarkQuery> benchmarkQueries = queryGenerator.getBenchmarkQueries();
+            List<BenchmarkQuery> benchmarkQueries = new ArrayList<>();
+
+            //if collections size is 100MB or 1GB run all classes
+            if (collectionSize == 1073741824l || collectionSize == 104857600l) {
+                benchmarkQueries.addAll(queryGenerator.getBenchmarkQueries());
+            }
 
             BenchmarkQuery pointQuery = queryGenerator.getMiddlePointQuery();
             benchmarkQueries.add(pointQuery);
