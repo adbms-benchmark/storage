@@ -1,13 +1,11 @@
 package framework;
 
 import data.BenchmarkQuery;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
 import util.IO;
 
 /**
@@ -33,9 +31,9 @@ public class Benchmark {
         File resultsDir = IO.getResultsDir();
         File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
-//            systemController.restartSystem();
+            systemController.restartSystem();
             // the query executor should check whether a collection is already created
-//            queryExecutor.createCollection();
+            queryExecutor.createCollection();
 
             List<BenchmarkQuery> benchmarkQueries = new ArrayList<>();
 

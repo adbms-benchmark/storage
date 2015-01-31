@@ -209,9 +209,14 @@ public class SciQLQueryExecutor extends QueryExecutor {
             executor.executeRedirectInput(in.file);
         }
         executeTimedQueryUpdate("DELETE FROM " + benchContext.getCollName1().toLowerCase() + " WHERE v is NULL");
-        long result = TimerUtil.getElapsedMilli("sciql query update");
+        long insertTime = TimerUtil.getElapsedMilli("sciql query update");
         TimerUtil.clearTimers();
-        System.out.println("time: " + result + " ms");
+        System.out.println("time: " + insertTime + " ms");
+
+        File resultsDir = IO.getResultsDir();
+        File insertResultFile = new File(resultsDir.getAbsolutePath(), "SciQL_insert_results.csv");
+        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"",
+                benchContext.getCollName1(), fileSize, -1, noOfDimensions, insertTime));
     }
 
     private void write(int j, long... indexes) throws IOException {

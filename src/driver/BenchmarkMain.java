@@ -9,7 +9,6 @@ import framework.rasdaman.RasdamanQueryExecutor;
 import framework.rasdaman.RasdamanQueryGenerator;
 import framework.rasdaman.RasdamanSystemController;
 import framework.scidb.SciDBAFLQueryGenerator;
-import framework.scidb.SciDBAQLQueryGenerator;
 import framework.scidb.SciDBQueryExecutor;
 import framework.scidb.SciDBSystemController;
 import framework.sciql.SciQLQueryExecutor;
@@ -129,11 +128,11 @@ public class BenchmarkMain {
             case "SciQL": {
 
                 Map<Long, String> collectionSizes = new TreeMap<>();
-                collectionSizes.put(1024l, "1Kb");
-                collectionSizes.put(102400l, "100Kb");
-                collectionSizes.put(1048576l, "1Mb");
-                collectionSizes.put(104857600l, "100Mb");
-//                collectionSizes.put(1073741824l, "1Gb");
+//                collectionSizes.put(1024l, "1Kb");
+//                collectionSizes.put(102400l, "100Kb");
+//                collectionSizes.put(1048576l, "1Mb");
+//                collectionSizes.put(104857600l, "100Mb");
+                collectionSizes.put(1073741824l, "1Gb");
 //                collectionSizes.put(10737418240l, "10Gb");
 
                 ConnectionContext sciqlConnection = new ConnectionContext("conf/sciql.properties");
