@@ -48,21 +48,19 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
     @Override
     public long executeTimedQuery(String query, String... args) throws Exception {
-        TimerUtil.clearTimers();
         TimerUtil.startTimer("sciql query");
         SciQLConnection.executeQuery(query);
         long result = TimerUtil.getElapsedMilli("sciql query");
-        TimerUtil.clearTimers();
+        TimerUtil.removeTimer("sciql query");
 //        System.out.println("time: " + result + " ms");
         return result;
     }
 
     public long executeTimedQueryUpdate(String query) {
-        TimerUtil.clearTimers();
         TimerUtil.startTimer("sciql query update");
         SciQLConnection.executeUpdateQuery(query);
         long result = TimerUtil.getElapsedMilli("sciql query update");
-        TimerUtil.clearTimers();
+        TimerUtil.removeTimer("sciql query update");
         System.out.println("time: " + result + " ms");
         return result;
     }
@@ -203,13 +201,13 @@ public class SciQLQueryExecutor extends QueryExecutor {
         closeWriters();
 
         TimerUtil.clearTimers();
-        TimerUtil.startTimer("sciql query update");
+        TimerUtil.startTimer("up");
         for (SciQLInputData in : inputs) {
             ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
             executor.executeRedirectInput(in.file);
         }
         executeTimedQueryUpdate("DELETE FROM " + benchContext.getCollName1().toLowerCase() + " WHERE v is NULL");
-        long insertTime = TimerUtil.getElapsedMilli("sciql query update");
+        long insertTime = TimerUtil.getElapsedMilli("up");
         TimerUtil.clearTimers();
         System.out.println("time: " + insertTime + " ms");
 
