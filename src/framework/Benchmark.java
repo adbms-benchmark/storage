@@ -61,7 +61,7 @@ public class Benchmark {
 
                     for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
                         try {
-                            systemController.restartSystem();
+//                            systemController.restartSystem();
                             time = queryExecutor.executeTimedQuery(query.getQueryString());
                             System.out.print(".. " + time + "ms");
                             failed = false;
