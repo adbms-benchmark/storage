@@ -31,11 +31,11 @@ public class Benchmark {
         File resultsDir = IO.getResultsDir();
         File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
-            systemController.restartSystem();
             // the query executor should check whether a collection is already created
             if (queryGenerator.noOfDimensions == 1 && collectionSize == 1073741824l) {
                 ;
             } else {
+                systemController.restartSystem();
                 queryExecutor.createCollection();
                 systemController.restartSystem();
             }
