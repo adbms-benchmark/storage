@@ -33,7 +33,12 @@ public class Benchmark {
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
             systemController.restartSystem();
             // the query executor should check whether a collection is already created
-            queryExecutor.createCollection();
+            if (queryGenerator.noOfDimensions == 1 && collectionSize == 1073741824l) {
+                ;
+            } else {
+                queryExecutor.createCollection();
+                systemController.restartSystem();
+            }
 
             List<BenchmarkQuery> benchmarkQueries = new ArrayList<>();
 
@@ -58,6 +63,7 @@ public class Benchmark {
                         try {
                             systemController.restartSystem();
                             time = queryExecutor.executeTimedQuery(query.getQueryString());
+                            System.out.print(".. " + time + "ms");
                             failed = false;
                         } catch (Exception ex) {
                             System.out.printf("Query \"%s\" failed on try %d. Retrying...\n", query.getQueryString(), retryIndex + 1);
@@ -82,6 +88,7 @@ public class Benchmark {
 
                 pr.println(resultLine.toString());
                 pr.flush();
+                System.out.println("");
             }
         } finally {
 //            queryExecutor.dropCollection();

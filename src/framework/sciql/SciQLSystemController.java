@@ -45,11 +45,12 @@ public class SciQLSystemController extends SystemController {
             // ignore, it may be already stopped
         }
         waitUntilLockRemoved();
+        Thread.sleep(500);
 
         if (executeShellCommand(startSystemCommand) != 0) {
             throw new Exception("Failed starting monetdb.");
         }
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
         SciQLConnection.open(connContext);
         String res = TimerUtil.stopTimer("time");
