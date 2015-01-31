@@ -48,7 +48,11 @@ public class SciQLSystemController extends SystemController {
         Thread.sleep(500);
 
         if (executeShellCommand(startSystemCommand) != 0) {
-            throw new Exception("Failed starting monetdb.");
+            executeShellCommand(stopSystemCommand);
+            waitUntilLockRemoved();
+            if (executeShellCommand(startSystemCommand) != 0) {
+                throw new Exception("Failed starting monetdb.");
+            }
         }
         Thread.sleep(500);
 
