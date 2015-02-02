@@ -25,8 +25,8 @@ public class SciDBSystem extends AdbmsSystem {
 
         String binDir = IO.concatPaths(installDir, "bin");
         this.queryCommand = IO.concatPaths(binDir, queryBin);
-        this.startCommand = new String[]{IO.concatPaths(binDir, systemControl), IO.concatPaths(binDir, startBin), clusterName};
-        this.stopCommand = new String[]{IO.concatPaths(binDir, systemControl), IO.concatPaths(binDir, stopBin), clusterName};
+        this.startCommand = new String[]{IO.concatPaths(binDir, systemControl), startBin, clusterName};
+        this.stopCommand = new String[]{IO.concatPaths(binDir, systemControl), stopBin, clusterName};
     }
 
     @Override

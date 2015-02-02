@@ -100,9 +100,9 @@ public abstract class AdbmsSystem extends SystemContext {
             case "rasdaman":
                 return new RasdamanSystem(configFile);
             case "sciql":
-                return new SciDBSystem(configFile);
-            case "scidb":
                 return new SciQLSystem(configFile);
+            case "scidb":
+            return new SciDBSystem(configFile);
             case "asqldb":
                 return new AsqldbSystem(configFile);
             default:
