@@ -1,9 +1,10 @@
 package framework.rasdaman;
 
 import framework.QueryGenerator;
-import framework.context.ConnectionContext;
 import framework.AdbmsSystem;
+import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
+import framework.context.RasdamanContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -92,6 +93,11 @@ public class RasdamanSystem extends AdbmsSystem {
     @Override
     public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
         return new RasdamanQueryGenerator(benchmarkContext);
+    }
+
+    @Override
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
+        return new RasdamanQueryExecutor(new RasdamanContext(configFile), benchmarkContext, this);
     }
 
 }

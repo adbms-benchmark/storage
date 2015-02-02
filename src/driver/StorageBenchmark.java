@@ -248,7 +248,9 @@ public class StorageBenchmark {
         int[] dimensions = config.getIntArray("dimension");
         
         for (String system : systems) {
-            AdbmsSystem systemController = AdbmsSystem.getSystemController(system, configs[configInd++]);
+            String configFile = configs[configInd++];
+            AdbmsSystem systemController = AdbmsSystem.getSystemController(system, configFile);
+            
             for (Pair<Long, String> size : sizes) {
                 for (int dimension : dimensions) {
                     benchmarkContext.setArrayDimensionality(dimension);

@@ -86,6 +86,8 @@ public abstract class AdbmsSystem extends ConnectionContext {
     }
     
     public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
+    
+    public abstract QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException;
 
     @Override
     public String toString() {

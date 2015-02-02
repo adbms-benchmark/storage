@@ -1,5 +1,6 @@
 package framework.asqldb;
 
+import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanSystem;
@@ -38,6 +39,11 @@ public class AsqldbSystem extends RasdamanSystem {
     @Override
     public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
         return new AsqldbQueryGenerator(benchmarkContext);
+    }
+
+    @Override
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
+        return new AsqldbQueryExecutor(this, benchmarkContext, this);
     }
 
 }

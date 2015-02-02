@@ -2,7 +2,9 @@ package framework.scidb;
 
 import framework.QueryGenerator;
 import framework.AdbmsSystem;
+import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
+import framework.context.SciDBContext;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -34,5 +36,10 @@ public class SciDBSystem extends AdbmsSystem {
     @Override
     public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
         return new SciDBAFLQueryGenerator(benchmarkContext);
+    }
+
+    @Override
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
+        return new SciDBQueryExecutor(new SciDBContext(configFile), benchmarkContext, this);
     }
 }
