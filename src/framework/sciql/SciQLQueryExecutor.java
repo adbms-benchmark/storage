@@ -4,7 +4,6 @@ import data.DataGenerator;
 import framework.ProcessExecutor;
 import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
-import framework.context.SystemContext;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +13,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.asqldb.util.TimerUtil;
+import static util.DomainUtil.SIZE_100MB;
 import util.IO;
-import static util.DomainUtil.*;
 import util.Pair;
 
 /**
@@ -30,9 +29,8 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private byte[] data;
     private int dataIndex;
 
-    public SciQLQueryExecutor(SystemContext context,
-            BenchmarkContext benchContext, SciQLSystem systemController) {
-        super(context, benchContext);
+    public SciQLQueryExecutor(BenchmarkContext benchContext, SciQLSystem systemController) {
+        super(systemController, benchContext);
         this.systemController = systemController;
         this.inputs = new ArrayList<>();
     }

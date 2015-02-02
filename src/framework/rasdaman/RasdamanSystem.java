@@ -4,7 +4,6 @@ import framework.AdbmsSystem;
 import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
-import framework.context.RasdamanContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,25 +18,20 @@ import util.Pair;
  */
 public class RasdamanSystem extends AdbmsSystem {
 
-    public static final String KEY_RASDAMAN_HOME = "install.dir";
+    private static final String RASDL_BIN_KEY = "bin.rasdl";
 
-    protected String rasdlBinary;
-    protected String rasqlBinary;
-    protected String rasdamanHome;
+    private final String rasdlCommand;
 
     public RasdamanSystem(String propertiesPath) throws IOException {
-        super(propertiesPath, "rasdaman");
-        this.rasdamanHome = getValue(KEY_RASDAMAN_HOME);
-        String rasdamanBinDir = IO.concatPaths(rasdamanHome, "bin");
-        this.startSystemCommand = new String[]{rasdamanBinDir + "/start_rasdaman.sh"};
-        this.stopSystemCommand = new String[]{rasdamanBinDir + "/stop_rasdaman.sh"};
-        this.rasqlBinary = rasdamanBinDir + "/rasql";
-        this.rasdlBinary = rasdamanBinDir + "/rasdl";
-    }
+        super(propertiesPath, RASDAMAN_SYSTEM_NAME);
 
-    public RasdamanSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String rasdlBinary) throws IOException {
-        super(propertiesPath, startSystemCommand, stopSystemCommand, "rasdaman");
-        this.rasdlBinary = rasdlBinary;
+        String binDir = IO.concatPaths(installDir, "bin");
+        String rasdlBin = getValue(RASDL_BIN_KEY);
+
+        this.rasdlCommand = IO.concatPaths(binDir, rasdlBin);
+        this.queryCommand = IO.concatPaths(binDir, queryBin);
+        this.startCommand = new String[]{IO.concatPaths(binDir, startBin)};
+        this.stopCommand = new String[]{IO.concatPaths(binDir, stopBin)};
     }
 
     @Override
@@ -67,8 +61,8 @@ public class RasdamanSystem extends AdbmsSystem {
             pr.println(setTypeDefinition);
         }
 
-        if (executeShellCommand(rasdlBinary, "--insert", "--read", typeFile.getAbsolutePath()) != 0) {
-//            throw new Exception("Failed to create rasdaman type.");
+        if (executeShellCommand(rasdlCommand, "--insert", "--read", typeFile.getAbsolutePath()) != 0) {
+
         }
 
         return Pair.of(mddTypeName, setTypeName);
@@ -76,18 +70,18 @@ public class RasdamanSystem extends AdbmsSystem {
 
     public void deleteRasdamanType(String mddTypeName, String setTypeName) {
 
-        if (executeShellCommand(rasdlBinary, "--delsettype", setTypeName) != 0) {
+        if (executeShellCommand(rasdlCommand, "--delsettype", setTypeName) != 0) {
             System.out.printf("Faild to delete set type");
         }
 
-        if (executeShellCommand(rasdlBinary, "--delmddtype", mddTypeName) != 0) {
+        if (executeShellCommand(rasdlCommand, "--delmddtype", mddTypeName) != 0) {
             System.out.printf("Failed to delete mdd type");
         }
 
     }
 
-    public String getRasqlBinary() {
-        return rasqlBinary;
+    public String getRasdlCommand() {
+        return rasdlCommand;
     }
 
     @Override
@@ -96,8 +90,8 @@ public class RasdamanSystem extends AdbmsSystem {
     }
 
     @Override
-    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
-        return new RasdamanQueryExecutor(new RasdamanContext(configFile), benchmarkContext, this);
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
+        return new RasdamanQueryExecutor(benchmarkContext, this);
     }
 
 }

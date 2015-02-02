@@ -1,8 +1,8 @@
 package framework.sciql;
 
-import framework.QueryGenerator;
 import framework.AdbmsSystem;
 import framework.QueryExecutor;
+import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
@@ -92,7 +92,7 @@ public class SciQLSystem extends AdbmsSystem {
     }
 
     @Override
-    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
-        return new SciQLQueryExecutor(this, benchmarkContext, this);
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
+        return new SciQLQueryExecutor(benchmarkContext, this);
     }
 }

@@ -1,7 +1,6 @@
 package framework.scidb;
 
 import data.DataGenerator;
-import data.DomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
 import framework.AdbmsSystem;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import framework.context.SciDBContext;
 import util.DomainUtil;
 import util.IO;
 import util.Pair;
@@ -20,12 +18,12 @@ import util.Pair;
 /**
  * @author George Merticariu
  */
-public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
+public class SciDBQueryExecutor extends QueryExecutor<SciDBSystem> {
     
     private SciDBSystem systemController;
 
-    public SciDBQueryExecutor(SciDBContext context, BenchmarkContext benchContext, SciDBSystem system) {
-        super(context, benchContext);
+    public SciDBQueryExecutor(BenchmarkContext benchContext, SciDBSystem system) {
+        super(system, benchContext);
         this.systemController = system;
     }
 

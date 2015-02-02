@@ -5,7 +5,6 @@ import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanSystem;
 import java.io.IOException;
-
 import util.Pair;
 
 /**
@@ -42,7 +41,7 @@ public class AsqldbSystem extends RasdamanSystem {
     }
 
     @Override
-    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
         return new AsqldbQueryExecutor(this, benchmarkContext, this);
     }
 

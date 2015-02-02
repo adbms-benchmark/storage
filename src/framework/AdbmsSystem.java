@@ -6,7 +6,6 @@ import framework.context.SystemContext;
 import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLSystem;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -87,7 +86,7 @@ public abstract class AdbmsSystem extends SystemContext {
     
     public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
     
-    public abstract QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException;
+    public abstract QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException;
 
     @Override
     public String toString() {

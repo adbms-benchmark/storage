@@ -7,10 +7,10 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.Switch;
-import framework.Benchmark;
-import framework.QueryGenerator;
 import framework.AdbmsSystem;
+import framework.Benchmark;
 import framework.QueryExecutor;
+import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
@@ -127,7 +127,7 @@ public class StorageBenchmark {
                     benchmarkContext.updateArrayName();
 
                     QueryGenerator queryGenerator = systemController.getQueryGenerator(benchmarkContext);
-                    QueryExecutor queryExecutor = systemController.getQueryExecutor(benchmarkContext, configFile);
+                    QueryExecutor queryExecutor = systemController.getQueryExecutor(benchmarkContext);
                     Benchmark benchmark = new Benchmark(benchmarkContext, queryGenerator, queryExecutor, systemController);
                     try {
                         benchmark.runBenchmark();

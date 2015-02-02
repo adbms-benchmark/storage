@@ -1,12 +1,12 @@
 package framework.scidb;
 
-import framework.QueryGenerator;
 import framework.AdbmsSystem;
 import framework.QueryExecutor;
+import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
-import framework.context.SciDBContext;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import util.IO;
 
 /**
  *
@@ -14,12 +14,19 @@ import java.io.IOException;
  */
 public class SciDBSystem extends AdbmsSystem {
 
+    private static final String SYSTEM_CONTROL_KEY = "bin.system";
+    private static final String CLUSTER_NAME_KEY = "cluster.name";
+
     public SciDBSystem(String propertiesPath) throws FileNotFoundException, IOException {
         super(propertiesPath, "SciDB");
-    }
 
-    public SciDBSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand) throws IOException {
-        super(propertiesPath, startSystemCommand, stopSystemCommand, "SciDB");
+        String clusterName = getValue(CLUSTER_NAME_KEY);
+        String systemControl = getValue(SYSTEM_CONTROL_KEY);
+
+        String binDir = IO.concatPaths(installDir, "bin");
+        this.queryCommand = IO.concatPaths(binDir, queryBin);
+        this.startCommand = new String[]{IO.concatPaths(binDir, systemControl), IO.concatPaths(binDir, startBin), clusterName};
+        this.stopCommand = new String[]{IO.concatPaths(binDir, systemControl), IO.concatPaths(binDir, stopBin), clusterName};
     }
 
     @Override
@@ -39,7 +46,7 @@ public class SciDBSystem extends AdbmsSystem {
     }
 
     @Override
-    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext, String configFile) throws IOException {
-        return new SciDBQueryExecutor(new SciDBContext(configFile), benchmarkContext, this);
+    public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
+        return new SciDBQueryExecutor(benchmarkContext, this);
     }
 }

@@ -58,7 +58,7 @@ public class AsqldbSciQL {
             {
                 System.out.println("SciQL");
 
-                SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlContext, benchContext, sciqlSysController);
+                SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(benchContext, sciqlSysController);
                 SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext);
 
                 Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, sciqlSysController);

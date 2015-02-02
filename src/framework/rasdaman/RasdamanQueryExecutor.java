@@ -1,11 +1,9 @@
 package framework.rasdaman;
 
 import data.DataGenerator;
-import data.DomainGenerator;
-import framework.QueryExecutor;
 import framework.AdbmsSystem;
+import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
-import framework.context.RasdamanContext;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -18,19 +16,18 @@ import util.Pair;
 /**
  * @author George Merticariu
  */
-public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
+public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
 
     private RasdamanSystem systemController;
 
-    public RasdamanQueryExecutor(RasdamanContext context, BenchmarkContext benchContext, RasdamanSystem systemController) {
-        super(context, benchContext);
+    public RasdamanQueryExecutor(BenchmarkContext benchContext, RasdamanSystem systemController) {
+        super(systemController, benchContext);
         this.systemController = systemController;
     }
 
     @Override
     public long executeTimedQuery(String query, String... args) throws Exception {
         List<String> commandList = new ArrayList<>();
-        //TODO-GM: read rasql path from config file
         commandList.add(context.getQueryCommand());
         commandList.add("-q");
         commandList.add(query);
