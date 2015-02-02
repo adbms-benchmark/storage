@@ -1,33 +1,32 @@
 package framework;
 
 import framework.context.ConnectionContext;
-import framework.context.Context;
+import framework.rasdaman.RasdamanSystemController;
+import framework.scidb.SciDBSystemController;
+import framework.sciql.SciQLSystemController;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Scanner;
 
 /**
  * @author George Merticariu
  */
-public abstract class SystemController extends Context {
+public abstract class SystemController extends ConnectionContext {
 
     protected String[] startSystemCommand;
     protected String[] stopSystemCommand;
     protected String systemName;
-    protected ConnectionContext connContext;
 
-    public SystemController(String propertiesPath, ConnectionContext connContext) throws FileNotFoundException, IOException {
+    public SystemController(String propertiesPath, String systemName) throws FileNotFoundException, IOException {
         super(propertiesPath);
-        this.connContext = connContext;
+        this.systemName = systemName;
     }
 
-    protected SystemController(String[] startSystemCommand, String[] stopSystemCommand, String systemName) {
+    protected SystemController(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String systemName) throws IOException {
+        super(propertiesPath);
         this.startSystemCommand = startSystemCommand;
         this.stopSystemCommand = stopSystemCommand;
         this.systemName = systemName;
-        this.connContext = null;
     }
 
     public abstract void restartSystem() throws Exception;
@@ -80,5 +79,18 @@ public abstract class SystemController extends Context {
     public String toString() {
         return systemName + "System Controller:" + "\n startSystemCommand=" + arrayToString(startSystemCommand) +
                 "\n stopSystemCommand=" + arrayToString(stopSystemCommand);
+    }
+
+    public static SystemController getSystemController(String system, String configFile) throws IOException {
+        switch (system) {
+                case "rasdaman":
+                    return new RasdamanSystemController(configFile);
+                case "sciql":
+                    return new SciDBSystemController(configFile);
+                case "scidb":
+                    return new SciQLSystemController(configFile);
+                default:
+                    throw new IllegalArgumentException("System " + system + " not supported.");
+        }
     }
 }

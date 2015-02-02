@@ -13,7 +13,7 @@ import util.Pair;
 public class AsqldbSystemController extends RasdamanSystemController {
 
     public AsqldbSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
-        super(propertiesPath, connContext);
+        super(propertiesPath);
         systemName = "ASQLDB";
     }
 

@@ -1,6 +1,8 @@
 package framework.scidb;
 
 import framework.SystemController;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  *
@@ -8,8 +10,12 @@ import framework.SystemController;
  */
 public class SciDBSystemController extends SystemController {
 
-    public SciDBSystemController(String[] startSystemCommand, String[] stopSystemCommand) {
-        super(startSystemCommand, stopSystemCommand, "SciDB");
+    public SciDBSystemController(String propertiesPath) throws FileNotFoundException, IOException {
+        super(propertiesPath, "SciDB");
+    }
+
+    public SciDBSystemController(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand) throws IOException {
+        super(propertiesPath, startSystemCommand, stopSystemCommand, "SciDB");
     }
 
     @Override

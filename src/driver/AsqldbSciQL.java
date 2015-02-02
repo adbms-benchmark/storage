@@ -23,7 +23,7 @@ public class AsqldbSciQL {
         // @TODO: take paths from args
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
-        BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp");
+        BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp", -1);
         AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties", asqldbContext);
         SciQLSystemController sciqlSysController = new SciQLSystemController("conf/system.properties", sciqlContext);
 
@@ -52,7 +52,7 @@ public class AsqldbSciQL {
                 AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
                 AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
 
-                Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, asqldbSysController);
+                Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, asqldbSysController);
 //                benchmark.runBenchmark();
             }
             {
@@ -61,7 +61,7 @@ public class AsqldbSciQL {
                 SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlContext, sciqlSysController, benchContext, noOfDim);
                 SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
 
-                Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, sciqlSysController);
+                Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, sciqlSysController);
 //                benchmark.runBenchmark();
             }
         } finally {

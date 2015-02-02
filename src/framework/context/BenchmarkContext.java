@@ -18,13 +18,19 @@ public class BenchmarkContext {
     private final int queryNumber;
     private final int retryNumber;
     private final String dataDir;
+    private final int timeout;
+    
+    private boolean disableBenchmark;
+    private boolean createData;
+    private boolean dropData;
 
-    public BenchmarkContext(int maxSelectSize, long collTileSize, int queryNumber, int retryNumber, String dataDir) {
+    public BenchmarkContext(int maxSelectSize, long collTileSize, int queryNumber, int retryNumber, String dataDir, int timeout) {
         this.maxSelectSize = maxSelectSize;
         this.collTileSize = collTileSize;
         this.queryNumber = queryNumber;
         this.retryNumber = retryNumber;
         this.dataDir = dataDir;
+        this.timeout = timeout;
     }
 
     public String getArrayName() {
@@ -81,6 +87,34 @@ public class BenchmarkContext {
 
     public void setArrayDimensionality(int arrayDimensionality) {
         this.arrayDimensionality = arrayDimensionality;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public boolean isDisableBenchmark() {
+        return disableBenchmark;
+    }
+
+    public void setDisableBenchmark(boolean disableBenchmark) {
+        this.disableBenchmark = disableBenchmark;
+    }
+
+    public boolean isCreateData() {
+        return createData;
+    }
+
+    public void setCreateData(boolean createData) {
+        this.createData = createData;
+    }
+
+    public boolean isDropData() {
+        return dropData;
+    }
+
+    public void setDropData(boolean dropData) {
+        this.dropData = dropData;
     }
 
     @Override

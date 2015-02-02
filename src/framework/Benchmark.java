@@ -1,6 +1,7 @@
 package framework;
 
 import data.BenchmarkQuery;
+import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -20,11 +21,14 @@ public class Benchmark {
     private final QueryGenerator queryGenerator;
     private final QueryExecutor queryExecutor;
     private final SystemController systemController;
+    private final BenchmarkContext benchmarkContext;
 
-    public Benchmark(QueryGenerator queryGenerator, QueryExecutor queryExecutor, SystemController systemController) {
+    public Benchmark(BenchmarkContext benchmarkContext, QueryGenerator queryGenerator, 
+            QueryExecutor queryExecutor, SystemController systemController) {
         this.queryGenerator = queryGenerator;
         this.queryExecutor = queryExecutor;
         this.systemController = systemController;
+        this.benchmarkContext = benchmarkContext;
     }
 
     public void runBenchmark(long collectionSize, long maxSelectSize) throws Exception {

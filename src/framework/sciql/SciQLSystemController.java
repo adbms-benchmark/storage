@@ -22,9 +22,8 @@ public class SciQLSystemController extends SystemController {
     protected String sciqlMclientPath;
     protected String merovingianLockFile;
 
-    public SciQLSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
-        super(propertiesPath, connContext);
-        this.systemName = "SciQL";
+    public SciQLSystemController(String propertiesPath) throws IOException {
+        super(propertiesPath, "SciQL");
         this.sciqlHome = getValue(KEY_SCIQL_HOME);
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
         this.sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
@@ -56,7 +55,7 @@ public class SciQLSystemController extends SystemController {
         }
         Thread.sleep(500);
 
-        SciQLConnection.open(connContext);
+        SciQLConnection.open(this);
         String res = TimerUtil.stopTimer("time");
         System.out.println("ok, " + res + ".");
     }

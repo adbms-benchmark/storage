@@ -22,8 +22,8 @@ public class RasdamanSystemController extends SystemController {
     protected String rasqlBinary;
     protected String rasdamanHome;
 
-    public RasdamanSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
-        super(propertiesPath, connContext);
+    public RasdamanSystemController(String propertiesPath) throws IOException {
+        super(propertiesPath, "rasdaman");
         this.rasdamanHome = getValue(KEY_RASDAMAN_HOME);
         String rasdamanBinDir = IO.concatPaths(rasdamanHome, "bin");
         this.startSystemCommand = new String[]{rasdamanBinDir + "/start_rasdaman.sh"};
@@ -32,9 +32,8 @@ public class RasdamanSystemController extends SystemController {
         this.rasdlBinary = rasdamanBinDir + "/rasdl";
     }
 
-    //TODO-GM: change order of the parameters
-    public RasdamanSystemController(String[] startSystemCommand, String[] stopSystemCommand, String rasdlBinary) {
-        super(startSystemCommand, stopSystemCommand, "rasdaman");
+    public RasdamanSystemController(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String rasdlBinary) throws IOException {
+        super(propertiesPath, startSystemCommand, stopSystemCommand, "rasdaman");
         this.rasdlBinary = rasdlBinary;
     }
 

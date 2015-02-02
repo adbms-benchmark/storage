@@ -8,6 +8,7 @@ import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.Switch;
 import framework.Benchmark;
+import framework.SystemController;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import framework.context.RasdamanContext;
@@ -22,6 +23,7 @@ import framework.sciql.SciQLQueryExecutor;
 import framework.sciql.SciQLQueryGenerator;
 import framework.sciql.SciQLSystemController;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 import org.slf4j.Logger;
@@ -38,16 +40,6 @@ public class StorageBenchmark {
 
     private static Logger logger;
 
-    private static void printUsage(String... args) {
-        StringBuilder sb = new StringBuilder();
-        String fileName = new File(StorageBenchmark.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getName();
-        sb.append("Usage:\n");
-        sb.append(String.format("Benchmark rasdaman: java -jar %s %s\n", fileName, "rasdaman"));
-        sb.append(String.format("Benchmark SciDB: java -jar %s %s\n", fileName, "SciDB"));
-        sb.append(String.format("Benchmark SciQL: java -jar %s %s\n", fileName, "SciQL"));
-        System.out.print(sb.toString());
-    }
-
     public static void main(String... args) throws Exception {
 
         SimpleJSAP jsap = getCmdLineConfig();
@@ -59,17 +51,13 @@ public class StorageBenchmark {
 
         System.exit(runBenchmark(config));
 
-        if (args.length != 1) {
-            printUsage(args);
-            return;
-        }
-        BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp");
+        BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp", -1);
         int noQueries = 6;
 
         switch (args[0]) {
             case "rasdaman": {
 
-                RasdamanContext scidbContext = new RasdamanContext("conf/rasdaman.properties");
+                RasdamanContext rasdamanContext = new RasdamanContext("conf/rasdaman.properties");
 
                 Map<Long, String> collectionSizes = new TreeMap<>();
                 collectionSizes.put(1024l, "1Kb");
@@ -92,11 +80,11 @@ public class StorageBenchmark {
                             benchContext.setArrayName(colName);
                             benchContext.setArraySize(collectionSize);
 
-                            RasdamanSystemController s = new RasdamanSystemController(scidbContext.getStartCommand(), scidbContext.getStopCommand(), scidbContext.getRasdlBin());
-                            RasdamanQueryExecutor r = new RasdamanQueryExecutor(scidbContext, s, benchContext, noOfDim);
+                            RasdamanSystemController s = new RasdamanSystemController("conf/rasdaman.properties");
+                            RasdamanQueryExecutor r = new RasdamanQueryExecutor(rasdamanContext, s, benchContext, noOfDim);
                             RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext, noOfDim, noQueries);
 
-                            Benchmark benchmark = new Benchmark(q, r, s);
+                            Benchmark benchmark = new Benchmark(benchContext, q, r, s);
                             benchmark.runBenchmark(collectionSize, maxSelectSize);
                         }
                     }
@@ -132,9 +120,9 @@ public class StorageBenchmark {
 
                             SciDBQueryExecutor r = new SciDBQueryExecutor(scidbContext, benchContext, noOfDim);
                             SciDBAFLQueryGenerator q = new SciDBAFLQueryGenerator(benchContext, noOfDim, noQueries);
-                            SciDBSystemController s = new SciDBSystemController(scidbContext.getStartCommand(), scidbContext.getStopCommand());
+                            SciDBSystemController s = new SciDBSystemController("conf/scidb.properties");
 
-                            Benchmark benchmark = new Benchmark(q, r, s);
+                            Benchmark benchmark = new Benchmark(benchContext, q, r, s);
                             benchmark.runBenchmark(collectionSize, maxSelectSize);
 
                         }
@@ -166,10 +154,10 @@ public class StorageBenchmark {
                         benchContext.setArraySize(collectionSize);
 
                         SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
-                        SciQLSystemController systemController = new SciQLSystemController("conf/system.properties", sciqlConnection);
+                        SciQLSystemController systemController = new SciQLSystemController("conf/sciql.properties");
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
-                        Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
+                        Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, systemController);
                         benchmark.runBenchmark(benchContext.getArraySize(), benchContext.getMaxSelectSize());
                     }
                 }
@@ -177,7 +165,6 @@ public class StorageBenchmark {
                 break;
             }
             default: {
-                printUsage(args);
                 return;
             }
         }
@@ -191,6 +178,8 @@ public class StorageBenchmark {
                 new Parameter[]{
                     new FlaggedOption("system", JSAP.STRING_PARSER, "rasdaman,scidb,sciql", JSAP.REQUIRED,
                             's', "systems", "Array DBMS to target in this run.").setList(true).setListSeparator(','),
+                    new FlaggedOption("config", JSAP.STRING_PARSER, "conf/rasdaman.properties,conf/scidb.properties,conf/sciql.properties", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
+                            "system-configs", "System configuration (connection details, directories, etc).").setList(true).setListSeparator(','),
                     new FlaggedOption("dimension", JSAP.INTEGER_PARSER, "1,2,3,4,5,6", JSAP.REQUIRED,
                             'd', "dimensions", "Data dimensionality to be tested.").setList(true).setListSeparator(','),
                     new FlaggedOption("size", JSAP.STRING_PARSER, "1kB,100kB,1MB,100MB,1GB", JSAP.REQUIRED,
@@ -233,22 +222,38 @@ public class StorageBenchmark {
         logger = LoggerFactory.getLogger(StorageBenchmark.class);
     }
 
-    private static int runBenchmark(JSAPResult config) {
+    private static int runBenchmark(JSAPResult config) throws IOException {
         int exitCode = 0;
 
-        boolean disableBenchmark = config.getBoolean("nobenchmark");
-        boolean create = config.getBoolean("create");
-        boolean drop = config.getBoolean("drop");
+        int maxSelectSize = config.getInt("max_select_size");
+        Pair<Long, String> tileSize = DomainUtil.parseSize(config.getString("tilesize"));
+        int queries = config.getInt("queries");
+        int repeat = config.getInt("repeat");
+        String datadir = config.getString("datadir");
+        int timeout = config.getInt("timeout");
+        
+        BenchmarkContext benchmarkContext = new BenchmarkContext(maxSelectSize, tileSize.getFirst(), queries, repeat, datadir, timeout);
+        benchmarkContext.setCreateData(config.getBoolean("create"));
+        benchmarkContext.setDropData(config.getBoolean("drop"));
+        benchmarkContext.setDisableBenchmark(config.getBoolean("nobenchmark"));
 
         String[] systems = config.getStringArray("system");
-        int[] dimensions = config.getIntArray("dimension");
+        String[] configs = config.getStringArray("config");
+        if (systems.length != configs.length) {
+            throw new IllegalArgumentException(systems.length + " systems specified, but " + configs.length + " system configuration files.");
+        }
+        int configInd = 0;
         Pair<Long, String>[] sizes = DomainUtil.parseSizes(config.getStringArray("size"));
-
-        Pair<Long, String> tileSize = DomainUtil.parseSize(config.getString("tilesize"));
-        int repeat = config.getInt("repeat");
-        int maxSelectSize = config.getInt("max_select_size");
-        int queries = config.getInt("queries");
-        int timeout = config.getInt("timeout");
+        int[] dimensions = config.getIntArray("dimension");
+        
+        for (String system : systems) {
+            SystemController systemController = SystemController.getSystemController(system, configs[configInd++]);
+            for (Pair<Long, String> size : sizes) {
+                for (int dimension : dimensions) {
+                    
+                }
+            }
+        }
 
         return exitCode;
     }
