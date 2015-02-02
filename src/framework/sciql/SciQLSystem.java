@@ -30,8 +30,8 @@ public class SciQLSystem extends AdbmsSystem {
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
         this.sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
         this.sciqlMclientPath = IO.concatPaths(sciqlBinDir, "mclient");
-        this.startSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "start", sciqlDbfarm};
-        this.stopSystemCommand = new String[]{sciqlBinDir + "/monetdbd", "stop", sciqlDbfarm};
+        this.startCommand = new String[]{sciqlBinDir + "/monetdbd", "start", sciqlDbfarm};
+        this.stopCommand = new String[]{sciqlBinDir + "/monetdbd", "stop", sciqlDbfarm};
         this.merovingianLockFile = IO.concatPaths(sciqlDbfarm, ".merovingian_lock");
     }
 
@@ -42,16 +42,16 @@ public class SciQLSystem extends AdbmsSystem {
         System.out.print("restarting monetdb... ");
         SciQLConnection.close();
 
-        if (executeShellCommand(stopSystemCommand) != 0) {
+        if (executeShellCommand(stopCommand) != 0) {
             // ignore, it may be already stopped
         }
         waitUntilLockRemoved();
         Thread.sleep(500);
 
-        if (executeShellCommand(startSystemCommand) != 0) {
-            executeShellCommand(stopSystemCommand);
+        if (executeShellCommand(startCommand) != 0) {
+            executeShellCommand(stopCommand);
             waitUntilLockRemoved();
-            if (executeShellCommand(startSystemCommand) != 0) {
+            if (executeShellCommand(startCommand) != 0) {
                 throw new Exception("Failed starting monetdb.");
             }
         }
