@@ -36,11 +36,11 @@ public class RasdamanSystem extends AdbmsSystem {
 
     @Override
     public void restartSystem() throws Exception {
-        if (executeShellCommand(stopSystemCommand) != 0) {
+        if (executeShellCommand(stopCommand) != 0) {
             throw new Exception("Failed to stop the system.");
         }
 
-        if (executeShellCommand(startSystemCommand) != 0) {
+        if (executeShellCommand(startCommand) != 0) {
             throw new Exception("Failed to start the system.");
         }
     }

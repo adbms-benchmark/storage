@@ -6,35 +6,36 @@ import framework.context.SystemContext;
 import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLSystem;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
  * Wrapps Array DBMS system-specific functionality, like restarting the system.
- * 
+ *
  * @author Dimitar Misev
  * @author George Merticariu
  */
 public abstract class AdbmsSystem extends SystemContext {
-    
+
     public static final String RASDAMAN_SYSTEM_NAME = "rasdaman";
     public static final String SCIDB_SYSTEM_NAME = "SciDB";
     public static final String SCIQL_SYSTEM_NAME = "SciQL";
     public static final String ASQLDB_SYSTEM_NAME = "ASQLDB";
 
-    protected String[] startSystemCommand;
-    protected String[] stopSystemCommand;
     protected String systemName;
 
     public AdbmsSystem(String propertiesPath, String systemName) throws FileNotFoundException, IOException {
         super(propertiesPath);
         this.systemName = systemName;
+        this.startCommand = new String[]{startBin};
+        this.stopCommand = new String[]{stopBin};
     }
 
     protected AdbmsSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String systemName) throws IOException {
         super(propertiesPath);
-        this.startSystemCommand = startSystemCommand;
-        this.stopSystemCommand = stopSystemCommand;
+        this.startCommand = startSystemCommand;
+        this.stopCommand = stopSystemCommand;
         this.systemName = systemName;
     }
 
@@ -52,7 +53,7 @@ public abstract class AdbmsSystem extends SystemContext {
             e.printStackTrace();
         }
 
-        if (processExecutor.getExitStatus() != 0){
+        if (processExecutor.getExitStatus() != 0) {
             System.err.println("----------------------------------------");
             System.err.println("Command failed");
             System.err.print("Command:");
@@ -83,29 +84,29 @@ public abstract class AdbmsSystem extends SystemContext {
         }
         return sb.toString();
     }
-    
+
     public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
-    
+
     public abstract QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException;
 
     @Override
     public String toString() {
-        return systemName + "System Controller:" + "\n startSystemCommand=" + arrayToString(startSystemCommand) +
-                "\n stopSystemCommand=" + arrayToString(stopSystemCommand);
+        return systemName + "System Controller:" + "\n startSystemCommand=" + arrayToString(startCommand) +
+                "\n stopSystemCommand=" + arrayToString(stopCommand);
     }
 
     public static AdbmsSystem getSystemController(String system, String configFile) throws IOException {
         switch (system) {
-                case "rasdaman":
-                    return new RasdamanSystem(configFile);
-                case "sciql":
-                    return new SciDBSystem(configFile);
-                case "scidb":
-                    return new SciQLSystem(configFile);
-                case "asqldb":
-                    return new AsqldbSystem(configFile);
-                default:
-                    throw new IllegalArgumentException("System " + system + " not supported.");
+            case "rasdaman":
+                return new RasdamanSystem(configFile);
+            case "sciql":
+                return new SciDBSystem(configFile);
+            case "scidb":
+                return new SciQLSystem(configFile);
+            case "asqldb":
+                return new AsqldbSystem(configFile);
+            default:
+                throw new IllegalArgumentException("System " + system + " not supported.");
         }
     }
 }
