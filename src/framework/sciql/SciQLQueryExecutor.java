@@ -4,7 +4,7 @@ import data.DataGenerator;
 import framework.ProcessExecutor;
 import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
-import framework.context.ConnectionContext;
+import framework.context.SystemContext;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private byte[] data;
     private int dataIndex;
 
-    public SciQLQueryExecutor(ConnectionContext context,
+    public SciQLQueryExecutor(SystemContext context,
             BenchmarkContext benchContext, SciQLSystem systemController) {
         super(context, benchContext);
         this.systemController = systemController;

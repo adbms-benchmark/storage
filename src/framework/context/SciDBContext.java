@@ -2,7 +2,7 @@ package framework.context;
 
 import java.io.IOException;
 
-public class SciDBContext extends ConnectionContext {
+public class SciDBContext extends SystemContext {
     private static final String BIN_DIR_KEY = "bin.dir";
     private static final String EXECUTE_QUERY_BIN_KEY = "bin.query";
     private static final String SYSTEM_CONTROL_KEY = "bin.system";

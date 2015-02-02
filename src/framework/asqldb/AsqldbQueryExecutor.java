@@ -4,7 +4,7 @@ import data.DataGenerator;
 import data.DomainGenerator;
 import static util.IO.HOME_DIR;
 import framework.context.BenchmarkContext;
-import framework.context.ConnectionContext;
+import framework.context.SystemContext;
 import framework.QueryExecutor;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -23,7 +23,7 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
     private final AsqldbSystem systemController;
 
-    public AsqldbQueryExecutor(ConnectionContext context,
+    public AsqldbQueryExecutor(SystemContext context,
             BenchmarkContext benchContext, AsqldbSystem systemController) {
         super(context, benchContext);
         this.systemController = systemController;

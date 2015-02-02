@@ -31,7 +31,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
     public long executeTimedQuery(String query, String... args) throws Exception {
         List<String> commandList = new ArrayList<>();
         //TODO-GM: read rasql path from config file
-        commandList.add(context.getExecuteQueryBin());
+        commandList.add(context.getQueryCommand());
         commandList.add("-q");
         commandList.add(query);
         Collections.addAll(commandList, args);

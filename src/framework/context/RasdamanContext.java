@@ -1,35 +1,27 @@
 package framework.context;
 
 import java.io.IOException;
+import util.IO;
 
-public class RasdamanContext extends ConnectionContext {
-
-    private static final String BIN_DIR_KEY = "bin.dir";
-    private static final String EXECUTE_QUERY_BIN_KEY = "bin.query";
+public class RasdamanContext extends SystemContext {
 
     private static final String RASDL_BIN_KEY = "bin.rasdl";
-    private static final String START_COMMAND_KEY = "command.start";
-    private static final String STOP_COMMAND_KEY = "command.stop";
 
     private final String[] startCommand;
     private final String[] stopCommand;
-    private final String executeQueryBin;
-    private final String rasdlBin;
+    private final String queryCommand;
+    private final String rasdlCommand;
 
     public RasdamanContext(String propertiesPath) throws IOException {
         super(propertiesPath);
 
-        String binDir = getValue(BIN_DIR_KEY);
-        String executeQueryPath = getValue(EXECUTE_QUERY_BIN_KEY);
-        String startCommand = getValue(START_COMMAND_KEY);
-        String stopCommand = getValue(STOP_COMMAND_KEY);
+        String binDir = IO.concatPaths(installDir, "bin");
         String rasdlBin = getValue(RASDL_BIN_KEY);
 
-        this.rasdlBin = String.format("%s/%s", binDir, rasdlBin);
-
-        this.executeQueryBin = String.format("%s/%s", binDir, executeQueryPath);
-        this.startCommand = new String[]{String.format("%s/%s", binDir, startCommand)};
-        this.stopCommand = new String[]{String.format("%s/%s", binDir, stopCommand)};
+        this.rasdlCommand = String.format("%s/%s", binDir, rasdlBin);
+        this.queryCommand = String.format("%s/%s", binDir, queryBin);
+        this.startCommand = new String[]{String.format("%s/%s", binDir, startBin)};
+        this.stopCommand = new String[]{String.format("%s/%s", binDir, stopBin)};
     }
 
     public String[] getStartCommand() {
@@ -40,11 +32,11 @@ public class RasdamanContext extends ConnectionContext {
         return stopCommand;
     }
 
-    public String getExecuteQueryBin() {
-        return executeQueryBin;
+    public String getQueryCommand() {
+        return queryCommand;
     }
 
-    public String getRasdlBin() {
-        return rasdlBin;
+    public String getRasdlCommand() {
+        return rasdlCommand;
     }
 }

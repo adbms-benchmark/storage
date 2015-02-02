@@ -2,7 +2,7 @@ package framework;
 
 import framework.asqldb.AsqldbSystem;
 import framework.context.BenchmarkContext;
-import framework.context.ConnectionContext;
+import framework.context.SystemContext;
 import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLSystem;
@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Dimitar Misev
  * @author George Merticariu
  */
-public abstract class AdbmsSystem extends ConnectionContext {
+public abstract class AdbmsSystem extends SystemContext {
     
     public static final String RASDAMAN_SYSTEM_NAME = "rasdaman";
     public static final String SCIDB_SYSTEM_NAME = "SciDB";

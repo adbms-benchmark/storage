@@ -1,6 +1,6 @@
 package framework.sciql;
 
-import framework.context.ConnectionContext;
+import framework.context.SystemContext;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -20,7 +20,7 @@ public class SciQLConnection {
 
     private static Connection connection = null;
 
-    public static void open(ConnectionContext connectionContext) {
+    public static void open(SystemContext connectionContext) {
         try {
             Class.forName(SCIQL_JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
