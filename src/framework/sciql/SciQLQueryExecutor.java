@@ -25,24 +25,17 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
     public static final long SIZE_100MB = 104857600l;
 
-    private DataGenerator dataGenerator;
-    private final DomainGenerator domainGenerator;
     private final SciQLSystem systemController;
-    private final BenchmarkContext benchContext;
-    private final int noOfDimensions;
     //
     private final List<SciQLInputData> inputs;
     private SciQLInputData input;
     private byte[] data;
     private int dataIndex;
 
-    public SciQLQueryExecutor(ConnectionContext context, SciQLSystem systemController,
-            BenchmarkContext benchContext, int noOfDimensions) {
-        super(context);
-        this.domainGenerator = new DomainGenerator(noOfDimensions);
+    public SciQLQueryExecutor(ConnectionContext context,
+            BenchmarkContext benchContext, SciQLSystem systemController) {
+        super(context, benchContext);
         this.systemController = systemController;
-        this.benchContext = benchContext;
-        this.noOfDimensions = noOfDimensions;
         this.inputs = new ArrayList<>();
     }
 

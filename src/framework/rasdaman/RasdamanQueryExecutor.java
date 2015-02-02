@@ -20,18 +20,11 @@ import util.Pair;
  */
 public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
-    private DataGenerator dataGenerator;
-    private DomainGenerator domainGenerator;
-    private RasdamanSystem rasdamanSystemController;
-    private int noOfDimensions;
-    private BenchmarkContext benchContext;
+    private RasdamanSystem systemController;
 
-    public RasdamanQueryExecutor(RasdamanContext context, RasdamanSystem rasdamanSystemController, BenchmarkContext benchContext, int noOfDimensions) {
-        super(context);
-        domainGenerator = new DomainGenerator(noOfDimensions);
-        this.rasdamanSystemController = rasdamanSystemController;
-        this.noOfDimensions = noOfDimensions;
-        this.benchContext = benchContext;
+    public RasdamanQueryExecutor(RasdamanContext context, BenchmarkContext benchContext, RasdamanSystem systemController) {
+        super(context, benchContext);
+        this.systemController = systemController;
     }
 
     @Override
@@ -49,7 +42,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         if (status != 0) {
             System.out.println("failed, restarting system..,");
-            rasdamanSystemController.restartSystem();
+            systemController.restartSystem();
             startTime = System.currentTimeMillis();
             status = AdbmsSystem.executeShellCommand(commandList.toArray(new String[]{}));
             result = System.currentTimeMillis() - startTime;
@@ -87,7 +80,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
             tileStructureDomain.add(Pair.of(0l, chunkSize));
         }
 
-        Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
+        Pair<String, String> aChar = systemController.createRasdamanType(noOfDimensions, "char");
 
         String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getArrayName(), aChar.getSecond());
         executeTimedQuery(createCollectionQuery, new String[]{
@@ -120,7 +113,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
      * @throws Exception
      */
     public long updateCollection(int slices) throws Exception {
-        Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
+        Pair<String, String> aChar = systemController.createRasdamanType(noOfDimensions, "char");
         long executionTime = 1;
         switch (noOfDimensions) {
             case 1: {
@@ -154,9 +147,9 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                     "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
                                     "--file", filePath});
                             success = true;
-                            rasdamanSystemController.restartSystem();
+                            systemController.restartSystem();
                         } catch (Exception ex) {
-                            rasdamanSystemController.restartSystem();
+                            systemController.restartSystem();
                         }
                     }
                 }
@@ -200,9 +193,9 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                         "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
                                         "--file", filePath});
                                 success = true;
-                                rasdamanSystemController.restartSystem();
+                                systemController.restartSystem();
                             } catch (Exception ex) {
-                                rasdamanSystemController.restartSystem();
+                                systemController.restartSystem();
                             }
                         }
                     }
@@ -257,7 +250,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                             "--file", filePath});
                                     success = true;
                                 } catch (Exception ex) {
-                                    rasdamanSystemController.restartSystem();
+                                    systemController.restartSystem();
                                 }
                             }
                         }
@@ -315,7 +308,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                                 "--file", filePath});
                                         success = true;
                                     } catch (Exception ex) {
-                                        rasdamanSystemController.restartSystem();
+                                        systemController.restartSystem();
                                     }
                                 }
                             }
@@ -381,9 +374,9 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                                     "--file", filePath});
                                             success = true;
 
-                                            rasdamanSystemController.restartSystem();
+                                            systemController.restartSystem();
                                         } catch (Exception ex) {
-                                            rasdamanSystemController.restartSystem();
+                                            systemController.restartSystem();
                                         }
                                     }
                                 }
@@ -454,9 +447,9 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                                         "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
                                                         "--file", filePath});
                                                 success = true;
-                                                rasdamanSystemController.restartSystem();
+                                                systemController.restartSystem();
                                             } catch (Exception ex) {
-                                                rasdamanSystemController.restartSystem();
+                                                systemController.restartSystem();
                                             }
                                         }
                                     }

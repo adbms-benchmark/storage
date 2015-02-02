@@ -21,16 +21,12 @@ import util.Pair;
  * @author George Merticariu
  */
 public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
-    private DomainGenerator domainGenerator;
-    private DataGenerator dataGenerator;
-    private int noOfDimensions;
-    private BenchmarkContext benchContext;
+    
+    private SciDBSystem systemController;
 
-    public SciDBQueryExecutor(SciDBContext context, BenchmarkContext benchContext, int noOfDimensions) {
-        super(context);
-        domainGenerator = new DomainGenerator(noOfDimensions);
-        this.noOfDimensions = noOfDimensions;
-        this.benchContext = benchContext;
+    public SciDBQueryExecutor(SciDBContext context, BenchmarkContext benchContext, SciDBSystem system) {
+        super(context, benchContext);
+        this.systemController = system;
     }
 
     @Override

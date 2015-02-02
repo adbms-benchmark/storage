@@ -21,19 +21,12 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
     public static final String TMP_TIFF_FILE = "/tmp/tiff2d.tif";
 
-    private DataGenerator dataGenerator;
-    private final DomainGenerator domainGenerator;
     private final AsqldbSystem systemController;
-    private final BenchmarkContext benchContext;
-    private final int noOfDimensions;
 
-    public AsqldbQueryExecutor(ConnectionContext context, AsqldbSystem systemController,
-            BenchmarkContext benchContext, int noOfDimensions) {
-        super(context);
-        this.domainGenerator = new DomainGenerator(noOfDimensions);
+    public AsqldbQueryExecutor(ConnectionContext context,
+            BenchmarkContext benchContext, AsqldbSystem systemController) {
+        super(context, benchContext);
         this.systemController = systemController;
-        this.benchContext = benchContext;
-        this.noOfDimensions = noOfDimensions;
         AsqldbConnection.open(context.getUrl());
     }
 
