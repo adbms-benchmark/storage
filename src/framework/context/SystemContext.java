@@ -32,6 +32,11 @@ public class SystemContext extends Context {
     public static final String KEY_START_BIN = "command.start";
     public static final String KEY_STOP_BIN = "command.stop";
 
+    // commands with absolute paths
+    protected String[] startCommand;
+    protected String[] stopCommand;
+    protected String queryCommand;
+
     public SystemContext(String propertiesPath) throws IOException {
         super(propertiesPath);
         this.user = getValue(KEY_USER);
@@ -99,6 +104,18 @@ public class SystemContext extends Context {
 
     public String getStopBin() {
         return stopBin;
+    }
+
+    public String[] getStartCommand() {
+        return startCommand;
+    }
+
+    public String[] getStopCommand() {
+        return stopCommand;
+    }
+
+    public String getQueryCommand() {
+        return queryCommand;
     }
 
     @Override
