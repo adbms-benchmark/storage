@@ -56,7 +56,7 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
 
     @Override
     public void createCollection() throws Exception {
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
         long chunkUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
@@ -66,9 +66,9 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
 
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
-        createArrayQuery.append(benchContext.getCollName1());
+        createArrayQuery.append(benchContext.getArrayName());
         createArrayQuery.append(" <");
-        createArrayQuery.append(benchContext.getCollName1());
+        createArrayQuery.append(benchContext.getArrayName());
         createArrayQuery.append(":char>");
         createArrayQuery.append('[');
 
@@ -95,19 +95,19 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
 
         executeTimedQuery(createArrayQuery.toString());
 
-        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", benchContext.getCollName1(), filePath);
+        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''(char)''", benchContext.getArrayName(), filePath);
         long insertTime = executeTimedQuery(insertDataQuery, "-n");
 
         File resultsDir = IO.getResultsDir();
         File insertResultFile = new File(resultsDir.getAbsolutePath(), "SciDB_insert_results.csv");
 
-        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize, chunkSize, noOfDimensions, insertTime));
+        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getArrayName(), fileSize, chunkSize, noOfDimensions, insertTime));
 
     }
 
     @Override
     public void dropCollection() throws Exception {
-        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getCollName1());
+        String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", benchContext.getArrayName());
         executeTimedQuery(dropCollectionQuery);
     }
 }

@@ -60,11 +60,11 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
     }
 
     private String generateSciDBQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBBetween(benchContext.getCollName1(), domain));
+        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBBetween(benchContext.getArrayName(), domain));
     }
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBDomain(benchContext.getCollName1(), domain1, domain2));
+        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBDomain(benchContext.getArrayName(), domain1, domain2));
     }
 
     public static String convertToSciDBBetween(String collectionName, List<Pair<Long, Long>> domain) {

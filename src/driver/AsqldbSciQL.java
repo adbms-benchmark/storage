@@ -1,11 +1,11 @@
 package driver;
 
 import framework.Benchmark;
-import framework.context.BenchmarkContext;
-import framework.context.ConnectionContext;
 import framework.asqldb.AsqldbQueryExecutor;
 import framework.asqldb.AsqldbQueryGenerator;
 import framework.asqldb.AsqldbSystemController;
+import framework.context.BenchmarkContext;
+import framework.context.ConnectionContext;
 import framework.sciql.SciQLConnection;
 import framework.sciql.SciQLQueryExecutor;
 import framework.sciql.SciQLQueryGenerator;
@@ -23,7 +23,7 @@ public class AsqldbSciQL {
         // @TODO: take paths from args
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
-        BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
+        BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp");
         AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties", asqldbContext);
         SciQLSystemController sciqlSysController = new SciQLSystemController("conf/system.properties", sciqlContext);
 

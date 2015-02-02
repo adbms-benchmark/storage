@@ -64,7 +64,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
     @Override
     public void createCollection() throws Exception {
         long oneGB = 1024l * 1024l * 1024l;
-        int slices = (int) (benchContext.getCollSize() / (oneGB));
+        int slices = (int) (benchContext.getArraySize() / (oneGB));
         boolean startSequentialUpdate = false;
 //        if (benchContext.getCollSize() > oneGB) {
 //            benchContext.setCollSize(oneGB);
@@ -73,7 +73,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         long insertTime = -1;
 
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 //
         long chunkSize = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
@@ -89,12 +89,12 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
         Pair<String, String> aChar = rasdamanSystemController.createRasdamanType(noOfDimensions, "char");
 
-        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getCollName1(), aChar.getSecond());
+        String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchContext.getArrayName(), aChar.getSecond());
         executeTimedQuery(createCollectionQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()});
 
-        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED %s TILE SIZE %d", benchContext.getCollName1(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
+        String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED %s TILE SIZE %d", benchContext.getArrayName(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
         System.out.println("Executing insert query: " + insertQuery);
         insertTime = executeTimedQuery(insertQuery, new String[]{
                 "--user", context.getUser(),
@@ -110,7 +110,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 //            insertTime = updateCollection(slices);
 //        }
 
-        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getCollName1(), fileSize*slices, chunkSize + 1l, noOfDimensions, insertTime));
+        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"", benchContext.getArrayName(), fileSize*slices, chunkSize + 1l, noOfDimensions, insertTime));
     }
 
     /**
@@ -126,7 +126,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
             case 1: {
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
                 long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
-                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getArraySize()) / Math.pow(slicesPerDim, noOfDimensions));
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -142,7 +142,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                     List<Pair<Long, Long>> shiftedAxis = new ArrayList<>();
                     shiftedAxis.add(shiftedAxis0);
 
-                    String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                    String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getArrayName());
                     boolean success = false;
 
                     while (!success) {
@@ -167,7 +167,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
             case 2: {
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
                 long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
-                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getArraySize()) / Math.pow(slicesPerDim, noOfDimensions));
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -188,7 +188,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                         shiftedAxis.add(shiftedAxis0);
                         shiftedAxis.add(shiftedAxis1);
 
-                        String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                        String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getArrayName());
                         boolean success = false;
 
                         while (!success) {
@@ -217,7 +217,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
                 long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
-                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getArraySize()) / Math.pow(slicesPerDim, noOfDimensions));
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -244,7 +244,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                             shiftedAxis.add(shiftedAxis1);
                             shiftedAxis.add(shiftedAxis2);
 
-                            String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                            String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getArrayName());
                             boolean success = false;
 
                             while (!success) {
@@ -270,7 +270,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
                 long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
-                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getArraySize()) / Math.pow(slicesPerDim, noOfDimensions));
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -302,7 +302,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                 shiftedAxis.add(shiftedAxis2);
                                 shiftedAxis.add(shiftedAxis3);
 
-                                String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                                String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getArrayName());
                                 boolean success = false;
 
                                 while (!success) {
@@ -329,7 +329,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
                 long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
-                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getArraySize()) / Math.pow(slicesPerDim, noOfDimensions));
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -367,7 +367,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                     shiftedAxis.add(shiftedAxis3);
                                     shiftedAxis.add(shiftedAxis4);
 
-                                    String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                                    String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getArrayName());
                                     boolean success = false;
                                     insertNo++;
                                     System.out.println("Performing insert: " + insertNo);
@@ -398,7 +398,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
                 double approxSlicePerDim = Math.pow(slices, 1 / ((double) noOfDimensions));
                 long slicesPerDim = ((long) Math.ceil(approxSlicePerDim));
-                long newFileSize = (long) (((double) slices) * ((double) benchContext.getCollSize()) / Math.pow(slicesPerDim, noOfDimensions));
+                long newFileSize = (long) (((double) slices) * ((double) benchContext.getArraySize()) / Math.pow(slicesPerDim, noOfDimensions));
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
@@ -441,7 +441,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
                                         shiftedAxis.add(shiftedAxis4);
                                         shiftedAxis.add(shiftedAxis5);
 
-                                        String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getCollName1());
+                                        String updateQuery = String.format("UPDATE %s AS t set t assign $1", benchContext.getArrayName());
                                         boolean success = false;
                                         insertNo++;
                                         System.out.println("Performing insert: " + insertNo);
@@ -475,7 +475,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
     @Override
     public void dropCollection() throws Exception {
-        String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchContext.getCollName1());
+        String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchContext.getArrayName());
         executeTimedQuery(dropCollectionQuery, new String[]{
                 "--user", context.getUser(),
                 "--passwd", context.getPassword()

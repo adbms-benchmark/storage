@@ -1,5 +1,12 @@
 package driver;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Parameter;
+import com.martiansoftware.jsap.SimpleJSAP;
+import com.martiansoftware.jsap.Switch;
 import framework.Benchmark;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
@@ -17,15 +24,23 @@ import framework.sciql.SciQLSystemController;
 import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.impl.SimpleLogger;
+import util.DomainUtil;
+import util.Pair;
 
 /**
  * @author George Merticariu
+ * @author Dimitar Misev
  */
-public class BenchmarkMain {
+public class StorageBenchmark {
+
+    private static Logger logger;
 
     private static void printUsage(String... args) {
         StringBuilder sb = new StringBuilder();
-        String fileName = new File(BenchmarkMain.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getName();
+        String fileName = new File(StorageBenchmark.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getName();
         sb.append("Usage:\n");
         sb.append(String.format("Benchmark rasdaman: java -jar %s %s\n", fileName, "rasdaman"));
         sb.append(String.format("Benchmark SciDB: java -jar %s %s\n", fileName, "SciDB"));
@@ -34,16 +49,21 @@ public class BenchmarkMain {
     }
 
     public static void main(String... args) throws Exception {
-        //TODO-GM: read contex configuration for each system from a config file
-        //TODO-GM: retry-on-failure (restart system, run query)
-        //TODO-GM: use context parameters
 
+        SimpleJSAP jsap = getCmdLineConfig();
+        JSAPResult config = jsap.parse(args);
+        if (jsap.messagePrinted()) {
+            System.exit(1);
+        }
+        setupLogger(config.getBoolean("verbose"));
+
+        System.exit(runBenchmark(config));
 
         if (args.length != 1) {
             printUsage(args);
             return;
         }
-        BenchmarkContext benchContext = new BenchmarkContext("conf/benchmark.properties");
+        BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp");
         int noQueries = 6;
 
         switch (args[0]) {
@@ -69,9 +89,8 @@ public class BenchmarkMain {
                             long collectionSize = longStringEntry.getKey();
                             long maxSelectSize = (long) ((double) collectionSize / 10.0);
 
-                            benchContext.setCollName1(colName);
-                            benchContext.setCollSize(collectionSize);
-                            benchContext.setMaxQuerySelectSize(maxSelectSize);
+                            benchContext.setArrayName(colName);
+                            benchContext.setArraySize(collectionSize);
 
                             RasdamanSystemController s = new RasdamanSystemController(scidbContext.getStartCommand(), scidbContext.getStopCommand(), scidbContext.getRasdlBin());
                             RasdamanQueryExecutor r = new RasdamanQueryExecutor(scidbContext, s, benchContext, noOfDim);
@@ -108,9 +127,8 @@ public class BenchmarkMain {
                             long collectionSize = longStringEntry.getKey();
                             long maxSelectSize = (long) ((double) collectionSize / 10.0);
 
-                            benchContext.setCollName1(colName);
-                            benchContext.setCollSize(collectionSize);
-                            benchContext.setMaxQuerySelectSize(maxSelectSize);
+                            benchContext.setArrayName(colName);
+                            benchContext.setArraySize(collectionSize);
 
                             SciDBQueryExecutor r = new SciDBQueryExecutor(scidbContext, benchContext, noOfDim);
                             SciDBAFLQueryGenerator q = new SciDBAFLQueryGenerator(benchContext, noOfDim, noQueries);
@@ -144,16 +162,15 @@ public class BenchmarkMain {
                         long collectionSize = longStringEntry.getKey();
                         long maxSelectSize = (long) ((double) collectionSize / 10.0);
 
-                        benchContext.setCollName1(colName);
-                        benchContext.setCollSize(collectionSize);
-                        benchContext.setMaxQuerySelectSize(maxSelectSize);
+                        benchContext.setArrayName(colName);
+                        benchContext.setArraySize(collectionSize);
 
                         SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
                         SciQLSystemController systemController = new SciQLSystemController("conf/system.properties", sciqlConnection);
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
                         Benchmark benchmark = new Benchmark(queryGenerator, queryExecutor, systemController);
-                        benchmark.runBenchmark(benchContext.getCollSize(), benchContext.getMaxQuerySelectSize());
+                        benchmark.runBenchmark(benchContext.getArraySize(), benchContext.getMaxSelectSize());
                     }
                 }
 
@@ -166,5 +183,74 @@ public class BenchmarkMain {
         }
     }
 
-}
+    private static SimpleJSAP getCmdLineConfig() throws JSAPException {
 
+        SimpleJSAP jsap = new SimpleJSAP(
+                getMainName(),
+                "Benchmark storage management in Array Databases. Currently supported systems: rasdaman, SciDB, SciQL.",
+                new Parameter[]{
+                    new FlaggedOption("system", JSAP.STRING_PARSER, "rasdaman,scidb,sciql", JSAP.REQUIRED,
+                            's', "systems", "Array DBMS to target in this run.").setList(true).setListSeparator(','),
+                    new FlaggedOption("dimension", JSAP.INTEGER_PARSER, "1,2,3,4,5,6", JSAP.REQUIRED,
+                            'd', "dimensions", "Data dimensionality to be tested.").setList(true).setListSeparator(','),
+                    new FlaggedOption("size", JSAP.STRING_PARSER, "1kB,100kB,1MB,100MB,1GB", JSAP.REQUIRED,
+                            'b', "sizes", "Data sizes to be tested, as a number followed by B,kB,MB,GB,TB,PB,EB.").setList(true).setListSeparator(','),
+                    new FlaggedOption("repeat", JSAP.INTEGER_PARSER, "5", JSAP.REQUIRED,
+                            'r', "repeat", "Times to repeat each test query."),
+                    new FlaggedOption("queries", JSAP.INTEGER_PARSER, "6", JSAP.REQUIRED,
+                            'q', "queries", "Number of queries per query category."),
+                    new FlaggedOption("max_select_size", JSAP.INTEGER_PARSER, "10", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
+                            "max-select-size", "Maximum select size, as percentage of the array size."),
+                    new FlaggedOption("timeout", JSAP.INTEGER_PARSER, "-1", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
+                            "timout", "Query timeout in seconds; -1 means no query timeout."),
+                    new FlaggedOption("tilesize", JSAP.STRING_PARSER, "4MB", JSAP.REQUIRED,
+                            't', "tile-size", "Tile size, same format as for the --sizes option."),
+                    new FlaggedOption("datadir", JSAP.STRING_PARSER, "/tmp", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
+                            "datadir", "Data directory, for temporary and permanent data used in ingestion."),
+                    new Switch("create",
+                            'c', "create", "Create data."),
+                    new Switch("drop", JSAP.NO_SHORTFLAG,
+                            "drop", "Drop data."),
+                    new Switch("nobenchmark", JSAP.NO_SHORTFLAG,
+                            "disable-benchmark", "Do not run benchmark, just create or drop data."),
+                    new Switch("verbose",
+                            'v', "verbose", "Print extra information.")
+                }
+        );
+        return jsap;
+    }
+
+    private static String getMainName() {
+        return new File(StorageBenchmark.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getName();
+    }
+
+    private static void setupLogger(boolean verbose) {
+        if (verbose) {
+            System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
+        } else {
+            System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+        }
+        logger = LoggerFactory.getLogger(StorageBenchmark.class);
+    }
+
+    private static int runBenchmark(JSAPResult config) {
+        int exitCode = 0;
+
+        boolean disableBenchmark = config.getBoolean("nobenchmark");
+        boolean create = config.getBoolean("create");
+        boolean drop = config.getBoolean("drop");
+
+        String[] systems = config.getStringArray("system");
+        int[] dimensions = config.getIntArray("dimension");
+        Pair<Long, String>[] sizes = DomainUtil.parseSizes(config.getStringArray("size"));
+
+        Pair<Long, String> tileSize = DomainUtil.parseSize(config.getString("tilesize"));
+        int repeat = config.getInt("repeat");
+        int maxSelectSize = config.getInt("max_select_size");
+        int queries = config.getInt("queries");
+        int timeout = config.getInt("timeout");
+
+        return exitCode;
+    }
+
+}

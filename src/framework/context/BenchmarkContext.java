@@ -1,128 +1,100 @@
 package framework.context;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import util.BenchmarkUtil;
 
 /**
  * @author George Merticariu
  * @author Dimitar Misev
  */
-public class BenchmarkContext extends Context {
+public class BenchmarkContext {
 
-    public static final TableContext[] dataSizes = new TableContext[]{
-            new TableContext(0, 9),
-            new TableContext(1, 21),
-            new TableContext(2, 56),
-            new TableContext(3, 110),
-            new TableContext(4, 230),
-            new TableContext(5, 500)
-    };
+    private String arrayName;
+    private long arraySize;
+    private String arraySizeShort;
+    private int arrayDimensionality;
 
-    private long collSize;
-    private long maxQuerySelectSize;
+    private final int maxSelectSize;
     private final long collTileSize;
     private final int queryNumber;
-    private String collName1;
-    private final String collName2;
+    private final int retryNumber;
     private final String dataDir;
 
-    private final int maxQueryRerty;
-    private final int maxQueryExecutionTime;
-
-    public static final String KEY_COLL_SIZE = "coll.size";
-    public static final String KEY_COLL_NAME1 = "coll.name1";
-    public static final String KEY_COLL_NAME2 = "coll.name2";
-    public static final String KEY_COLL_TILE_SIZE = "coll.tile_size";
-    public static final String KEY_QUERY_SELECT_SIZE = "query.select_size";
-    public static final String KEY_QUERY_MAX_RETRY = "query.max.retry";
-    public static final String KEY_QUERY_MAX_EXECUTION_TIME = "query.max.execution_time";
-    public static final String KEY_DATA_DIR = "data.dir";
-    public static final String KEY_QUERY_NUMBER = "query.number";
-
-    public BenchmarkContext(String propertiesPath) throws FileNotFoundException, IOException {
-        super(propertiesPath);
-        collSize = getValueLong(KEY_COLL_SIZE);
-        collName1 = getValue(KEY_COLL_NAME1);
-        collName2 = getValue(KEY_COLL_NAME2);
-        maxQuerySelectSize = getValueLong(KEY_QUERY_SELECT_SIZE);
-        collTileSize = getValueLong(KEY_COLL_TILE_SIZE);
-        dataDir = getValue(KEY_DATA_DIR);
-        maxQueryRerty = getValueInteger(KEY_QUERY_MAX_RETRY);
-        maxQueryExecutionTime = getValueInteger(KEY_QUERY_MAX_EXECUTION_TIME);
-        queryNumber = getValueInteger(KEY_QUERY_NUMBER);
+    public BenchmarkContext(int maxSelectSize, long collTileSize, int queryNumber, int retryNumber, String dataDir) {
+        this.maxSelectSize = maxSelectSize;
+        this.collTileSize = collTileSize;
+        this.queryNumber = queryNumber;
+        this.retryNumber = retryNumber;
+        this.dataDir = dataDir;
     }
 
-    public long getCollSize() {
-        return collSize;
+    public String getArrayName() {
+        return arrayName;
     }
 
-    public long getMaxQuerySelectSize() {
-        return maxQuerySelectSize;
+    public long getArraySize() {
+        return arraySize;
+    }
+
+    public int getArrayDimensionality() {
+        return arrayDimensionality;
+    }
+
+    public int getMaxSelectSize() {
+        return maxSelectSize;
     }
 
     public long getCollTileSize() {
         return collTileSize;
     }
 
-    public String getCollName1() {
-        return collName1;
+    public int getQueryNumber() {
+        return queryNumber;
     }
 
-    public String getCollName2() {
-        return collName2;
+    public int getRetryNumber() {
+        return retryNumber;
     }
 
     public String getDataDir() {
         return dataDir;
     }
 
-    /**
-     * Gets the maximum query retry. If the query execution fails, it will be retried.
-     *
-     * @return Integer value, representing how many times the query should be retried before
-     * discarded.
-     */
-    public int getMaxQueryRerty() {
-        return maxQueryRerty;
+    public String getArraySizeShort() {
+        return arraySizeShort;
     }
 
-    /**
-     * Get the maximum query execution time. If a query runs longer than this period, its execution
-     * is terminated.
-     *
-     * @return Integer value representing the maximum query execution time in seconds.
-     */
-    public int getMaxQueryExecutionTime() {
-        return maxQueryExecutionTime;
+    public void setArraySizeShort(String arraySizeShort) {
+        this.arraySizeShort = arraySizeShort;
     }
 
-    public void setMaxQuerySelectSize(long maxQuerySelectSize) {
-        this.maxQuerySelectSize = maxQuerySelectSize;
+    public void setArrayName(String arrayName) {
+        this.arrayName = arrayName;
     }
 
-    public void setCollName1(String collName1) {
-        this.collName1 = collName1;
+    public void updateArrayName() {
+        this.arrayName = BenchmarkUtil.getArrayName(arrayDimensionality, arraySizeShort);
     }
 
-    public void setCollSize(long collSize) {
-        this.collSize = collSize;
+    public void setArraySize(long arraySize) {
+        this.arraySize = arraySize;
     }
 
-    public int getQueryNumber() {
-        return queryNumber;
+    public void setArrayDimensionality(int arrayDimensionality) {
+        this.arrayDimensionality = arrayDimensionality;
     }
 
     @Override
     public String toString() {
-        return "Benchmark context:"
-                + "\n collName=" + collName1
-                + "\n collSize=" + collSize
-                + "\n dataFile=" + dataDir
-                + "\n maxQuerySelectSize=" + maxQuerySelectSize
+        return "BenchmarkContext:\n"
+                + " arrayName=" + arrayName
+                + "\n arraySize=" + arraySize
+                + "\n arraySizeShort=" + arraySizeShort
+                + "\n arrayDimensionality=" + arrayDimensionality
+                + "\n maxSelectSize=" + maxSelectSize
                 + "\n collTileSize=" + collTileSize
-                + "\n maxQueryRetry=" + maxQueryRerty
                 + "\n queryNumber=" + queryNumber
-                + "\n maxQueryExecutionTime=" + maxQueryExecutionTime;
+                + "\n retryNumber=" + retryNumber
+                + "\n dataDir=" + dataDir;
     }
 
 }

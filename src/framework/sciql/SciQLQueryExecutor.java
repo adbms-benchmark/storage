@@ -76,7 +76,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
     @Override
     public void createCollection() throws Exception {
 
-        String collName = benchContext.getCollName1();
+        String collName = benchContext.getArrayName();
         if (SciQLConnection.tableExists(collName)) {
             System.out.println("Collection " + collName + " found, not reingesting.");
             return;
@@ -84,7 +84,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         System.out.println("--------------------------------------------------------------------------");
         System.out.println("Creating collection " + collName);
 
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getCollSize());
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
         StringBuilder createArrayQuery = new StringBuilder();
@@ -206,7 +206,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
             ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
             executor.executeRedirectInput(in.file);
         }
-        executeTimedQueryUpdate("DELETE FROM " + benchContext.getCollName1().toLowerCase() + " WHERE v is NULL");
+        executeTimedQueryUpdate("DELETE FROM " + benchContext.getArrayName().toLowerCase() + " WHERE v is NULL");
         long insertTime = TimerUtil.getElapsedMilli("up");
         TimerUtil.clearTimers();
         System.out.println("time: " + insertTime + " ms");
@@ -214,7 +214,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         File resultsDir = IO.getResultsDir();
         File insertResultFile = new File(resultsDir.getAbsolutePath(), "SciQL_insert_results.csv");
         IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"",
-                benchContext.getCollName1(), fileSize, -1, noOfDimensions, insertTime));
+                benchContext.getArrayName(), fileSize, -1, noOfDimensions, insertTime));
     }
 
     private void write(int j, long... indexes) throws IOException {
@@ -244,12 +244,12 @@ public class SciQLQueryExecutor extends QueryExecutor {
         System.out.println("updating writers, file size " + fileSize);
         if (partsNo == 0) {
             System.out.println("single part");
-            String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getCollName1() + "-1.sql");
+            String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getArrayName() + "-1.sql");
             File check = new File(partFileName);
             BufferedWriter writer = null;
             if (!check.exists()) {
                 writer = Files.newBufferedWriter(Paths.get(partFileName), Charset.defaultCharset());
-                writer.write("COPY " + fileSize + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1().toLowerCase() + "\" FROM stdin USING DELIMITERS ' ','\\n','\"';");
+                writer.write("COPY " + fileSize + " RECORDS INTO \"sys\".\"" + benchContext.getArrayName().toLowerCase() + "\" FROM stdin USING DELIMITERS ' ','\\n','\"';");
                 writer.newLine();
             }
             SciQLInputData input = new SciQLInputData(writer, 0, fileSize - 1, fileSize, partFileName);
@@ -257,12 +257,12 @@ public class SciQLQueryExecutor extends QueryExecutor {
         } else {
             System.out.println(partsNo + " number of files");
             for (int i = 1; i <= partsNo; i++) {
-                String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getCollName1() + "-" + i + ".sql");
+                String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getArrayName() + "-" + i + ".sql");
                 File check = new File(partFileName);
                 BufferedWriter writer = null;
                 if (!check.exists()) {
                     writer = Files.newBufferedWriter(Paths.get(partFileName), Charset.defaultCharset());
-                    writer.write("COPY " + SIZE_100MB + " RECORDS INTO \"sys\".\"" + benchContext.getCollName1().toLowerCase() + "\" FROM stdin USING DELIMITERS ' ','\\n','\"';");
+                    writer.write("COPY " + SIZE_100MB + " RECORDS INTO \"sys\".\"" + benchContext.getArrayName().toLowerCase() + "\" FROM stdin USING DELIMITERS ' ','\\n','\"';");
                     writer.newLine();
                 }
                 long from = (i - 1) * SIZE_100MB;

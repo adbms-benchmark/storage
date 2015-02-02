@@ -25,7 +25,7 @@ public class QueryDomainGenerator {
     }
 
     public List<Pair<Long, Long>> getMiddlePointQueryDomain() {
-        long dimensionUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollSize());
+        long dimensionUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getArraySize());
         long middleBound = dimensionUpperBound / 2;
         List<Pair<Long, Long>> domain = new ArrayList<>();
 
@@ -40,7 +40,7 @@ public class QueryDomainGenerator {
 
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
-        double selectStep = (Math.pow(benchContext.getMaxQuerySelectSize(), 1 / ((double) noOfDimensions)) / ((double) noOfQueries));
+        double selectStep = (Math.pow(benchContext.getMaxSelectSize(), 1 / ((double) noOfDimensions)) / ((double) noOfQueries));
         double axisSize = selectStep;
 
         for (int queryIndex = 0; queryIndex < noOfQueries; ++queryIndex) {
@@ -82,7 +82,7 @@ public class QueryDomainGenerator {
         if (noOfDimensions < 2) {
             return result;
         }
-        double selectAxisSize = Math.pow(benchContext.getMaxQuerySelectSize(), 1 / (double) noOfDimensions);
+        double selectAxisSize = Math.pow(benchContext.getMaxSelectSize(), 1 / (double) noOfDimensions);
 
         double step = selectAxisSize / ((double) (noOfQueries - 1));
         double firstAxisSize = 1;
@@ -92,7 +92,7 @@ public class QueryDomainGenerator {
             for (int i = 2; i < noOfDimensions; ++i) {
                 restAxisSize *= selectAxisSize;
             }
-            double secondAxisSize = benchContext.getMaxQuerySelectSize() / restAxisSize;
+            double secondAxisSize = benchContext.getMaxSelectSize() / restAxisSize;
 
             List<Pair<Long, Long>> domain = new ArrayList<>();
             domain.add(Pair.of(0l, (long) (Math.ceil(firstAxisSize) - 1l)));
@@ -112,9 +112,9 @@ public class QueryDomainGenerator {
     public List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> getMultiAccessQueryDomain() {
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> result = new ArrayList<>();
 
-        long maxChunkSelectSize = benchContext.getMaxQuerySelectSize() / 2;
+        long maxChunkSelectSize = benchContext.getMaxSelectSize() / 2;
 
-        double collectionAxisSize = Math.pow(benchContext.getCollSize(), 1 / (double) noOfDimensions);
+        double collectionAxisSize = Math.pow(benchContext.getArraySize(), 1 / (double) noOfDimensions);
         double selectAxisSize = Math.pow(maxChunkSelectSize, 1 / (double) noOfDimensions);
 
         double selectStep = (collectionAxisSize - selectAxisSize) / ((double) noOfQueries);

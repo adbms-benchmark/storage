@@ -5,7 +5,6 @@ import data.BenchmarkQuery;
 import data.QueryDomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.QueryGenerator;
-import framework.context.TableContext;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -34,11 +33,11 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     @Override
     public List<BenchmarkQuery> getBenchmarkQueries() {
         List<BenchmarkQuery> queries = new ArrayList<>();
-        for (TableContext tableContext : BenchmarkContext.dataSizes) {
-            String query = "select count_cells(a >= 30 and b < 30) from " + tableContext.asqldbTable1 + " as a, "
-                    + tableContext.asqldbTable2 + " as b";
-            queries.add(BenchmarkQuery.unknown(query, noOfDimensions));
-        }
+//        for (TableContext tableContext : BenchmarkContext.dataSizes) {
+//            String query = "select count_cells(a >= 30 and b < 30) from " + tableContext.asqldbTable1 + " as a, "
+//                    + tableContext.asqldbTable2 + " as b";
+//            queries.add(BenchmarkQuery.unknown(query, noOfDimensions));
+//        }
         return queries;
     }
 
@@ -72,12 +71,12 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
 //        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}",
         return MessageFormat.format("SELECT avg_cells(A{1}) + avg_cells(A{2}) FROM {0}",
-                benchContext.getCollName1(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+                benchContext.getArrayName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
         return MessageFormat.format("SELECT A{1} FROM {0}",
-                benchContext.getCollName1(), convertToRasdamanDomain(domain));
+                benchContext.getArrayName(), convertToRasdamanDomain(domain));
     }
 
     public static String convertToRasdamanMddType(int noOfDimensions) {
