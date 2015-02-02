@@ -15,10 +15,10 @@ public class RasdamanContext extends SystemContext {
         String binDir = IO.concatPaths(installDir, "bin");
         String rasdlBin = getValue(RASDL_BIN_KEY);
 
-        this.rasdlCommand = String.format("%s/%s", binDir, rasdlBin);
-        this.queryCommand = String.format("%s/%s", binDir, queryBin);
-        this.startCommand = new String[]{String.format("%s/%s", binDir, startBin)};
-        this.stopCommand = new String[]{String.format("%s/%s", binDir, stopBin)};
+        this.rasdlCommand = IO.concatPaths(binDir, rasdlBin);
+        this.queryCommand = IO.concatPaths(binDir, queryBin);
+        this.startCommand = new String[]{IO.concatPaths(binDir, startBin)};
+        this.stopCommand = new String[]{IO.concatPaths(binDir, stopBin)};
     }
 
     public String getRasdlCommand() {
