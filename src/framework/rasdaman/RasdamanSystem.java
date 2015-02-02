@@ -1,8 +1,8 @@
 package framework.rasdaman;
 
-import framework.QueryGenerator;
 import framework.AdbmsSystem;
 import framework.QueryExecutor;
+import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.context.RasdamanContext;
 import java.io.File;
@@ -19,7 +19,7 @@ import util.Pair;
  */
 public class RasdamanSystem extends AdbmsSystem {
 
-    public static final String KEY_RASDAMAN_HOME = "rasdaman.home";
+    public static final String KEY_RASDAMAN_HOME = "install.dir";
 
     protected String rasdlBinary;
     protected String rasqlBinary;
