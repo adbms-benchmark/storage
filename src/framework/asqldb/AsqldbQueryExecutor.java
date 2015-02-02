@@ -23,11 +23,11 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
     private DataGenerator dataGenerator;
     private final DomainGenerator domainGenerator;
-    private final AsqldbSystemController systemController;
+    private final AsqldbSystem systemController;
     private final BenchmarkContext benchContext;
     private final int noOfDimensions;
 
-    public AsqldbQueryExecutor(ConnectionContext context, AsqldbSystemController systemController,
+    public AsqldbQueryExecutor(ConnectionContext context, AsqldbSystem systemController,
             BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         this.domainGenerator = new DomainGenerator(noOfDimensions);

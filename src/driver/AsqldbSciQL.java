@@ -3,13 +3,13 @@ package driver;
 import framework.Benchmark;
 import framework.asqldb.AsqldbQueryExecutor;
 import framework.asqldb.AsqldbQueryGenerator;
-import framework.asqldb.AsqldbSystemController;
+import framework.asqldb.AsqldbSystem;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import framework.sciql.SciQLConnection;
 import framework.sciql.SciQLQueryExecutor;
 import framework.sciql.SciQLQueryGenerator;
-import framework.sciql.SciQLSystemController;
+import framework.sciql.SciQLSystem;
 import org.asqldb.util.AsqldbConnection;
 
 /**
@@ -24,8 +24,8 @@ public class AsqldbSciQL {
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp", -1);
-        AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties");
-        SciQLSystemController sciqlSysController = new SciQLSystemController("conf/sciql.properties");
+        AsqldbSystem asqldbSysController = new AsqldbSystem("conf/system.properties");
+        SciQLSystem sciqlSysController = new SciQLSystem("conf/sciql.properties");
 
         System.out.println("---------------------------------------------------");
         System.out.println("Benchmark configuration");

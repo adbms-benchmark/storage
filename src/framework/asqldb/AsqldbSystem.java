@@ -2,7 +2,7 @@ package framework.asqldb;
 
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
-import framework.rasdaman.RasdamanSystemController;
+import framework.rasdaman.RasdamanSystem;
 import java.io.IOException;
 
 import util.Pair;
@@ -11,9 +11,9 @@ import util.Pair;
  *
  * @author Dimitar Misev
  */
-public class AsqldbSystemController extends RasdamanSystemController {
+public class AsqldbSystem extends RasdamanSystem {
 
-    public AsqldbSystemController(String propertiesPath) throws IOException {
+    public AsqldbSystem(String propertiesPath) throws IOException {
         super(propertiesPath);
         systemName = "ASQLDB";
     }

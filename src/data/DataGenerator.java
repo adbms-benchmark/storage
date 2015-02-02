@@ -1,6 +1,6 @@
 package data;
 
-import framework.SystemController;
+import framework.AdbmsSystem;
 import java.io.File;
 import java.io.IOException;
 
@@ -31,15 +31,15 @@ public class DataGenerator {
         if (file.exists()) {
 //            long currSize = file.length();
 //            if (currSize > fileSize) {
-//                SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
+//                AdbmsSystem.executeShellCommandRedirect(file.getAbsolutePath(),
 //                        "truncate", "-s", "" + fileSize);
 //            } else {
-//                SystemController.executeShellCommand(
+//                AdbmsSystem.executeShellCommand(
 //                        "/bin/sh", "-c", "head -c " + (fileSize - currSize) + " /dev/urandom | tee -a " + file.getAbsolutePath());
 //            }
             return;
         }
-        SystemController.executeShellCommandRedirect(file.getAbsolutePath(),
+        AdbmsSystem.executeShellCommandRedirect(file.getAbsolutePath(),
                 "head", "-c", "" + fileSize, "/dev/urandom");
     }
 

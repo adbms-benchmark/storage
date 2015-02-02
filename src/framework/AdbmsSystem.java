@@ -1,24 +1,22 @@
 package framework;
 
-import framework.asqldb.AsqldbQueryGenerator;
-import framework.asqldb.AsqldbSystemController;
+import framework.asqldb.AsqldbSystem;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
-import framework.rasdaman.RasdamanQueryGenerator;
-import framework.rasdaman.RasdamanSystemController;
-import framework.scidb.SciDBAFLQueryGenerator;
-import framework.scidb.SciDBSystemController;
-import framework.sciql.SciQLQueryGenerator;
-import framework.sciql.SciQLSystemController;
+import framework.rasdaman.RasdamanSystem;
+import framework.scidb.SciDBSystem;
+import framework.sciql.SciQLSystem;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
+ * Wrapps Array DBMS system-specific functionality, like restarting the system.
+ * 
  * @author Dimitar Misev
  * @author George Merticariu
  */
-public abstract class SystemController extends ConnectionContext {
+public abstract class AdbmsSystem extends ConnectionContext {
     
     public static final String RASDAMAN_SYSTEM_NAME = "rasdaman";
     public static final String SCIDB_SYSTEM_NAME = "SciDB";
@@ -29,12 +27,12 @@ public abstract class SystemController extends ConnectionContext {
     protected String[] stopSystemCommand;
     protected String systemName;
 
-    public SystemController(String propertiesPath, String systemName) throws FileNotFoundException, IOException {
+    public AdbmsSystem(String propertiesPath, String systemName) throws FileNotFoundException, IOException {
         super(propertiesPath);
         this.systemName = systemName;
     }
 
-    protected SystemController(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String systemName) throws IOException {
+    protected AdbmsSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String systemName) throws IOException {
         super(propertiesPath);
         this.startSystemCommand = startSystemCommand;
         this.stopSystemCommand = stopSystemCommand;
@@ -95,16 +93,16 @@ public abstract class SystemController extends ConnectionContext {
                 "\n stopSystemCommand=" + arrayToString(stopSystemCommand);
     }
 
-    public static SystemController getSystemController(String system, String configFile) throws IOException {
+    public static AdbmsSystem getSystemController(String system, String configFile) throws IOException {
         switch (system) {
                 case "rasdaman":
-                    return new RasdamanSystemController(configFile);
+                    return new RasdamanSystem(configFile);
                 case "sciql":
-                    return new SciDBSystemController(configFile);
+                    return new SciDBSystem(configFile);
                 case "scidb":
-                    return new SciQLSystemController(configFile);
+                    return new SciQLSystem(configFile);
                 case "asqldb":
-                    return new AsqldbSystemController(configFile);
+                    return new AsqldbSystem(configFile);
                 default:
                     throw new IllegalArgumentException("System " + system + " not supported.");
         }

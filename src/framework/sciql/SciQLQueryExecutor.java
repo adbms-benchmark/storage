@@ -27,7 +27,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
     private DataGenerator dataGenerator;
     private final DomainGenerator domainGenerator;
-    private final SciQLSystemController systemController;
+    private final SciQLSystem systemController;
     private final BenchmarkContext benchContext;
     private final int noOfDimensions;
     //
@@ -36,7 +36,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private byte[] data;
     private int dataIndex;
 
-    public SciQLQueryExecutor(ConnectionContext context, SciQLSystemController systemController,
+    public SciQLQueryExecutor(ConnectionContext context, SciQLSystem systemController,
             BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         this.domainGenerator = new DomainGenerator(noOfDimensions);

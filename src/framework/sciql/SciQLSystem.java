@@ -1,7 +1,7 @@
 package framework.sciql;
 
 import framework.QueryGenerator;
-import framework.SystemController;
+import framework.AdbmsSystem;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import util.IO;
  *
  * @author George Merticariu
  */
-public class SciQLSystemController extends SystemController {
+public class SciQLSystem extends AdbmsSystem {
 
     public static final String KEY_SCIQL_HOME = "sciql.home";
     public static final String KEY_SCIQL_DBFARM = "sciql.dbfarm";
@@ -23,7 +23,7 @@ public class SciQLSystemController extends SystemController {
     protected String sciqlMclientPath;
     protected String merovingianLockFile;
 
-    public SciQLSystemController(String propertiesPath) throws IOException {
+    public SciQLSystem(String propertiesPath) throws IOException {
         super(propertiesPath, "SciQL");
         this.sciqlHome = getValue(KEY_SCIQL_HOME);
         this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);

@@ -1,7 +1,7 @@
 package framework.scidb;
 
 import framework.QueryGenerator;
-import framework.SystemController;
+import framework.AdbmsSystem;
 import framework.context.BenchmarkContext;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,13 +10,13 @@ import java.io.IOException;
  *
  * @author George Merticariu
  */
-public class SciDBSystemController extends SystemController {
+public class SciDBSystem extends AdbmsSystem {
 
-    public SciDBSystemController(String propertiesPath) throws FileNotFoundException, IOException {
+    public SciDBSystem(String propertiesPath) throws FileNotFoundException, IOException {
         super(propertiesPath, "SciDB");
     }
 
-    public SciDBSystemController(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand) throws IOException {
+    public SciDBSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand) throws IOException {
         super(propertiesPath, startSystemCommand, stopSystemCommand, "SciDB");
     }
 

@@ -3,7 +3,7 @@ package framework.rasdaman;
 import data.DataGenerator;
 import data.DomainGenerator;
 import framework.QueryExecutor;
-import framework.SystemController;
+import framework.AdbmsSystem;
 import framework.context.BenchmarkContext;
 import framework.context.RasdamanContext;
 import java.io.File;
@@ -22,11 +22,11 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
 
     private DataGenerator dataGenerator;
     private DomainGenerator domainGenerator;
-    private RasdamanSystemController rasdamanSystemController;
+    private RasdamanSystem rasdamanSystemController;
     private int noOfDimensions;
     private BenchmarkContext benchContext;
 
-    public RasdamanQueryExecutor(RasdamanContext context, RasdamanSystemController rasdamanSystemController, BenchmarkContext benchContext, int noOfDimensions) {
+    public RasdamanQueryExecutor(RasdamanContext context, RasdamanSystem rasdamanSystemController, BenchmarkContext benchContext, int noOfDimensions) {
         super(context);
         domainGenerator = new DomainGenerator(noOfDimensions);
         this.rasdamanSystemController = rasdamanSystemController;
@@ -44,14 +44,14 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanContext> {
         Collections.addAll(commandList, args);
 
         long startTime = System.currentTimeMillis();
-        int status = SystemController.executeShellCommand(commandList.toArray(new String[]{}));
+        int status = AdbmsSystem.executeShellCommand(commandList.toArray(new String[]{}));
         long result = System.currentTimeMillis() - startTime;
 
         if (status != 0) {
             System.out.println("failed, restarting system..,");
             rasdamanSystemController.restartSystem();
             startTime = System.currentTimeMillis();
-            status = SystemController.executeShellCommand(commandList.toArray(new String[]{}));
+            status = AdbmsSystem.executeShellCommand(commandList.toArray(new String[]{}));
             result = System.currentTimeMillis() - startTime;
             if (status != 0) {
                 throw new Exception(String.format("Query execution failed with status %d", status));

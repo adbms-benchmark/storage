@@ -9,20 +9,20 @@ import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.Switch;
 import framework.Benchmark;
 import framework.QueryGenerator;
-import framework.SystemController;
+import framework.AdbmsSystem;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
 import framework.context.RasdamanContext;
 import framework.context.SciDBContext;
 import framework.rasdaman.RasdamanQueryExecutor;
 import framework.rasdaman.RasdamanQueryGenerator;
-import framework.rasdaman.RasdamanSystemController;
+import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBAFLQueryGenerator;
 import framework.scidb.SciDBQueryExecutor;
-import framework.scidb.SciDBSystemController;
+import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLQueryExecutor;
 import framework.sciql.SciQLQueryGenerator;
-import framework.sciql.SciQLSystemController;
+import framework.sciql.SciQLSystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class StorageBenchmark {
                             benchContext.setArrayName(colName);
                             benchContext.setArraySize(collectionSize);
 
-                            RasdamanSystemController s = new RasdamanSystemController("conf/rasdaman.properties");
+                            RasdamanSystem s = new RasdamanSystem("conf/rasdaman.properties");
                             RasdamanQueryExecutor r = new RasdamanQueryExecutor(rasdamanContext, s, benchContext, noOfDim);
                             RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext);
 
@@ -121,7 +121,7 @@ public class StorageBenchmark {
 
                             SciDBQueryExecutor r = new SciDBQueryExecutor(scidbContext, benchContext, noOfDim);
                             SciDBAFLQueryGenerator q = new SciDBAFLQueryGenerator(benchContext);
-                            SciDBSystemController s = new SciDBSystemController("conf/scidb.properties");
+                            SciDBSystem s = new SciDBSystem("conf/scidb.properties");
 
                             Benchmark benchmark = new Benchmark(benchContext, q, r, s);
                             benchmark.runBenchmark(collectionSize, maxSelectSize);
@@ -155,7 +155,7 @@ public class StorageBenchmark {
                         benchContext.setArraySize(collectionSize);
 
                         SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext);
-                        SciQLSystemController systemController = new SciQLSystemController("conf/sciql.properties");
+                        SciQLSystem systemController = new SciQLSystem("conf/sciql.properties");
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
                         Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, systemController);
@@ -248,7 +248,7 @@ public class StorageBenchmark {
         int[] dimensions = config.getIntArray("dimension");
         
         for (String system : systems) {
-            SystemController systemController = SystemController.getSystemController(system, configs[configInd++]);
+            AdbmsSystem systemController = AdbmsSystem.getSystemController(system, configs[configInd++]);
             for (Pair<Long, String> size : sizes) {
                 for (int dimension : dimensions) {
                     benchmarkContext.setArrayDimensionality(dimension);

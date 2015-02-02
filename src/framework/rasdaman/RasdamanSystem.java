@@ -2,7 +2,7 @@ package framework.rasdaman;
 
 import framework.QueryGenerator;
 import framework.context.ConnectionContext;
-import framework.SystemController;
+import framework.AdbmsSystem;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import util.Pair;
  * @author George Merticariu
  * @author Dimitar Misev
  */
-public class RasdamanSystemController extends SystemController {
+public class RasdamanSystem extends AdbmsSystem {
 
     public static final String KEY_RASDAMAN_HOME = "rasdaman.home";
 
@@ -24,7 +24,7 @@ public class RasdamanSystemController extends SystemController {
     protected String rasqlBinary;
     protected String rasdamanHome;
 
-    public RasdamanSystemController(String propertiesPath) throws IOException {
+    public RasdamanSystem(String propertiesPath) throws IOException {
         super(propertiesPath, "rasdaman");
         this.rasdamanHome = getValue(KEY_RASDAMAN_HOME);
         String rasdamanBinDir = IO.concatPaths(rasdamanHome, "bin");
@@ -34,7 +34,7 @@ public class RasdamanSystemController extends SystemController {
         this.rasdlBinary = rasdamanBinDir + "/rasdl";
     }
 
-    public RasdamanSystemController(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String rasdlBinary) throws IOException {
+    public RasdamanSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String rasdlBinary) throws IOException {
         super(propertiesPath, startSystemCommand, stopSystemCommand, "rasdaman");
         this.rasdlBinary = rasdlBinary;
     }

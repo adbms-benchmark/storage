@@ -20,11 +20,11 @@ public class Benchmark {
 
     private final QueryGenerator queryGenerator;
     private final QueryExecutor queryExecutor;
-    private final SystemController systemController;
+    private final AdbmsSystem systemController;
     private final BenchmarkContext benchmarkContext;
 
     public Benchmark(BenchmarkContext benchmarkContext, QueryGenerator queryGenerator, 
-            QueryExecutor queryExecutor, SystemController systemController) {
+            QueryExecutor queryExecutor, AdbmsSystem systemController) {
         this.queryGenerator = queryGenerator;
         this.queryExecutor = queryExecutor;
         this.systemController = systemController;

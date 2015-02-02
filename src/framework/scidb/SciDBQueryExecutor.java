@@ -4,7 +4,7 @@ import data.DataGenerator;
 import data.DomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.QueryExecutor;
-import framework.SystemController;
+import framework.AdbmsSystem;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -44,7 +44,7 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBContext> {
         Collections.addAll(commandList, args);
 
         long startTime = System.currentTimeMillis();
-        int status = SystemController.executeShellCommand(commandList.toArray(new String[]{}));
+        int status = AdbmsSystem.executeShellCommand(commandList.toArray(new String[]{}));
         long result = System.currentTimeMillis() - startTime;
 
         if (status != 0) {
