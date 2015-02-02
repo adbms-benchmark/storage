@@ -1,7 +1,6 @@
 package framework;
 
 import data.BenchmarkQuery;
-import static data.BenchmarkQuery.size;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.FileWriter;
@@ -68,7 +67,7 @@ public class Benchmark {
                 log.info("Executing query: " + query.getQueryString());
 
                 List<Long> queryExecutionTimes = new ArrayList<>();
-                for (int repeatIndex = 0; repeatIndex < benchmarkContext.getRetryNumber(); ++repeatIndex) {
+                for (int repeatIndex = 0; repeatIndex < benchmarkContext.getRepeatNumber(); ++repeatIndex) {
                     boolean failed = true;
                     long time = -1;
 
@@ -76,32 +75,33 @@ public class Benchmark {
                         try {
                             systemController.restartSystem();
                             time = queryExecutor.executeTimedQuery(query.getQueryString());
-                            System.out.print(".. " + time + "ms");
+                            log.debug(" -> " + time + "ms");
                             failed = false;
                         } catch (Exception ex) {
-                            System.out.printf("Query \"%s\" failed on try %d. Retrying...\n", query.getQueryString(), retryIndex + 1);
+                            log.warn(" query \"" + query.getQueryString() + "\" failed on try " + (retryIndex + 1) + ". Retrying.");
                         }
                     }
                     queryExecutionTimes.add(time);
                 }
 
                 StringBuilder resultLine = new StringBuilder();
-                resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ", systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(), query.getDimensionality(), arraysSize, maxSelectSize));
+                resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ",
+                        systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(),
+                        query.getDimensionality(), arraysSize, maxSelectSize));
+                
                 boolean isFirst = true;
-
                 for (Long queryExecutionTime : queryExecutionTimes) {
                     if (!isFirst) {
                         resultLine.append(", ");
+                        isFirst = false;
                     }
                     resultLine.append("\"");
                     resultLine.append(queryExecutionTime);
                     resultLine.append("\"");
-                    isFirst = false;
                 }
 
                 pr.println(resultLine.toString());
                 pr.flush();
-                System.out.println("");
             }
         } finally {
             if (benchmarkContext.isDropData()) {

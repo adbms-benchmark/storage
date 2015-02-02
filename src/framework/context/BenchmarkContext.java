@@ -16,7 +16,7 @@ public class BenchmarkContext {
     private final double maxSelectSizePercent;
     private final long collTileSize;
     private final int queryNumber;
-    private final int retryNumber;
+    private final int repeatNumber;
     private final String dataDir;
     private final int timeout;
     
@@ -28,7 +28,7 @@ public class BenchmarkContext {
         this.maxSelectSizePercent = maxSelectSizePercent;
         this.collTileSize = collTileSize;
         this.queryNumber = queryNumber;
-        this.retryNumber = repeatNumber;
+        this.repeatNumber = repeatNumber;
         this.dataDir = dataDir;
         this.timeout = timeout;
     }
@@ -61,8 +61,8 @@ public class BenchmarkContext {
         return queryNumber;
     }
 
-    public int getRetryNumber() {
-        return retryNumber;
+    public int getRepeatNumber() {
+        return repeatNumber;
     }
 
     public String getDataDir() {
@@ -131,7 +131,7 @@ public class BenchmarkContext {
                 + "\n maxSelectSize=" + maxSelectSizePercent
                 + "\n collTileSize=" + collTileSize
                 + "\n queryNumber=" + queryNumber
-                + "\n retryNumber=" + retryNumber
+                + "\n retryNumber=" + repeatNumber
                 + "\n dataDir=" + dataDir;
     }
 
