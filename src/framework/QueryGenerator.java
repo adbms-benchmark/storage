@@ -3,10 +3,8 @@ package framework;
 import data.BenchmarkQuery;
 import data.QueryDomainGenerator;
 import framework.context.BenchmarkContext;
-import util.Pair;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -19,7 +17,7 @@ public abstract class QueryGenerator {
     protected BenchmarkContext benchContext;
 
     public QueryGenerator(BenchmarkContext benchmarkContext) {
-        this.queryDomainGenerator = new QueryDomainGenerator(benchContext);
+        this.queryDomainGenerator = new QueryDomainGenerator(benchmarkContext);
         this.benchContext = benchmarkContext;
     }
 

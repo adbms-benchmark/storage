@@ -42,9 +42,4 @@ public class DataGenerator {
         AdbmsSystem.executeShellCommandRedirect(file.getAbsolutePath(),
                 "head", "-c", "" + fileSize, "/dev/urandom");
     }
-
-    public static void main(String[] args) {
-        DataGenerator gen = new DataGenerator(10);
-
-    }
 }

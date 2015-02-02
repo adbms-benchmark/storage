@@ -94,7 +94,7 @@ public class StorageBenchmark {
     private static int runBenchmark(JSAPResult config) throws IOException {
         int exitCode = 0;
 
-        double maxSelectSize = config.getInt("max_select_size");
+        double maxSelectSize = config.getDouble("max_select_size");
         Pair<Long, String> tileSize = DomainUtil.parseSize(config.getString("tilesize"));
         int queries = config.getInt("queries");
         int repeat = config.getInt("repeat");
