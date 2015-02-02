@@ -7,6 +7,16 @@ package util;
  */
 public class DomainUtil {
 
+    public static final long SIZE_1B = 1024l;
+    public static final long SIZE_1KB = 1024l;
+    public static final long SIZE_1MB = 1048576l;
+    public static final long SIZE_1GB = 1073741824l;
+    public static final long SIZE_1TB = 1099511627776l;
+    public static final long SIZE_1PB = 1125899906842624l;
+    public static final long SIZE_1EB = 1152921504606846976l;
+    
+    public static final long SIZE_100MB = 100 * SIZE_1MB;
+
     public static long getDimensionUpperBound(int noOfDimensions, long totalSize) {
         double approxChunkSizePerDim = Math.pow(totalSize, 1 / ((double) noOfDimensions));
         long chunkSizePerDim = ((long) Math.ceil(approxChunkSizePerDim)) - 1;
@@ -40,25 +50,25 @@ public class DomainUtil {
     public static long getMultiplier(String symbol) {
         switch (symbol) {
             case "b":
-                return 1l;
+                return SIZE_1B;
             case "kb":
             case "kib":
-                return 1024l;
+                return SIZE_1KB;
             case "mb":
             case "mib":
-                return 1048576l;
+                return SIZE_1MB;
             case "gb":
             case "gib":
-                return 1073741824l;
+                return SIZE_1GB;
             case "tb":
             case "tib":
-                return 1099511627776l;
+                return SIZE_1TB;
             case "pb":
             case "pib":
-                return 1125899906842624l;
+                return SIZE_1PB;
             case "eb":
             case "eib":
-                return 1152921504606846976l;
+                return SIZE_1EB;
             default:
                 throw new RuntimeException("Unsupported size symbol: " + symbol);
         }

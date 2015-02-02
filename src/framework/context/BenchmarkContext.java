@@ -13,7 +13,7 @@ public class BenchmarkContext {
     private String arraySizeShort;
     private int arrayDimensionality;
 
-    private final int maxSelectSize;
+    private final double maxSelectSizePercent;
     private final long collTileSize;
     private final int queryNumber;
     private final int retryNumber;
@@ -24,11 +24,11 @@ public class BenchmarkContext {
     private boolean createData;
     private boolean dropData;
 
-    public BenchmarkContext(int maxSelectSize, long collTileSize, int queryNumber, int retryNumber, String dataDir, int timeout) {
-        this.maxSelectSize = maxSelectSize;
+    public BenchmarkContext(double maxSelectSizePercent, long collTileSize, int queryNumber, int repeatNumber, String dataDir, int timeout) {
+        this.maxSelectSizePercent = maxSelectSizePercent;
         this.collTileSize = collTileSize;
         this.queryNumber = queryNumber;
-        this.retryNumber = retryNumber;
+        this.retryNumber = repeatNumber;
         this.dataDir = dataDir;
         this.timeout = timeout;
     }
@@ -45,8 +45,12 @@ public class BenchmarkContext {
         return arrayDimensionality;
     }
 
-    public int getMaxSelectSize() {
-        return maxSelectSize;
+    public long getMaxSelectSize() {
+        return (long) (((double) arraySize * maxSelectSizePercent) / 100.0);
+    }
+
+    public double getMaxSelectSizePercent() {
+        return maxSelectSizePercent;
     }
 
     public long getCollTileSize() {
@@ -124,7 +128,7 @@ public class BenchmarkContext {
                 + "\n arraySize=" + arraySize
                 + "\n arraySizeShort=" + arraySizeShort
                 + "\n arrayDimensionality=" + arrayDimensionality
-                + "\n maxSelectSize=" + maxSelectSize
+                + "\n maxSelectSize=" + maxSelectSizePercent
                 + "\n collTileSize=" + collTileSize
                 + "\n queryNumber=" + queryNumber
                 + "\n retryNumber=" + retryNumber

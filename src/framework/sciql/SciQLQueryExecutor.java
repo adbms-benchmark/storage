@@ -1,7 +1,6 @@
 package framework.sciql;
 
 import data.DataGenerator;
-import data.DomainGenerator;
 import framework.ProcessExecutor;
 import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
@@ -16,14 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.asqldb.util.TimerUtil;
 import util.IO;
+import static util.DomainUtil.*;
 import util.Pair;
 
 /**
  * @author Dimitar Misev
  */
 public class SciQLQueryExecutor extends QueryExecutor {
-
-    public static final long SIZE_100MB = 104857600l;
 
     private final SciQLSystem systemController;
     //

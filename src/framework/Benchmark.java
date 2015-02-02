@@ -1,12 +1,16 @@
 package framework;
 
 import data.BenchmarkQuery;
+import static data.BenchmarkQuery.size;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.DomainUtil;
 import util.IO;
 
 /**
@@ -15,7 +19,8 @@ import util.IO;
  */
 public class Benchmark {
 
-    public static final int REPEAT_NO = 5;
+    private static final Logger log = LoggerFactory.getLogger(Benchmark.class);
+
     public static final int MAX_RETRY = 3;
 
     private final QueryGenerator queryGenerator;
@@ -23,7 +28,7 @@ public class Benchmark {
     private final AdbmsSystem systemController;
     private final BenchmarkContext benchmarkContext;
 
-    public Benchmark(BenchmarkContext benchmarkContext, QueryGenerator queryGenerator, 
+    public Benchmark(BenchmarkContext benchmarkContext, QueryGenerator queryGenerator,
             QueryExecutor queryExecutor, AdbmsSystem systemController) {
         this.queryGenerator = queryGenerator;
         this.queryExecutor = queryExecutor;
@@ -31,41 +36,45 @@ public class Benchmark {
         this.benchmarkContext = benchmarkContext;
     }
 
-    public void runBenchmark(long collectionSize, long maxSelectSize) throws Exception {
+    public void runBenchmark() throws Exception {
+        log.info("Executing benchmark on " + systemController.getSystemName() + ", "
+                + benchmarkContext.getArrayDimensionality() + "D data of size "
+                + benchmarkContext.getArraySizeShort() + " (" + benchmarkContext.getArraySize() + "B)");
+
         File resultsDir = IO.getResultsDir();
         File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
+
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
             // the query executor should check whether a collection is already created
-            if (queryGenerator.noOfDimensions == 1 && collectionSize == 1073741824l) {
-                ;
-            } else {
+            if (benchmarkContext.isCreateData()) {
                 systemController.restartSystem();
                 queryExecutor.createCollection();
-                systemController.restartSystem();
             }
+            if (benchmarkContext.isDisableBenchmark()) {
+                return;
+            }
+
+            long arraysSize = benchmarkContext.getArraySize();
+            long maxSelectSize = benchmarkContext.getMaxSelectSize();
 
             List<BenchmarkQuery> benchmarkQueries = new ArrayList<>();
-
-            //if collections size is 100MB or 1GB run all classes
-            if (collectionSize == 1073741824l || collectionSize == 104857600l) {
+            // if collections size is 100MB or 1GB run all classes
+            if (arraysSize > DomainUtil.SIZE_100MB) {
                 benchmarkQueries.addAll(queryGenerator.getBenchmarkQueries());
             }
-
-            BenchmarkQuery pointQuery = queryGenerator.getMiddlePointQuery();
-            benchmarkQueries.add(pointQuery);
+            benchmarkQueries.add(queryGenerator.getMiddlePointQuery());
 
             for (BenchmarkQuery query : benchmarkQueries) {
-
-                System.out.printf("Executing query: \"%s\"\n", query.getQueryString());
+                log.info("Executing query: " + query.getQueryString());
 
                 List<Long> queryExecutionTimes = new ArrayList<>();
-                for (int repeatIndex = 0; repeatIndex < REPEAT_NO; ++repeatIndex) {
+                for (int repeatIndex = 0; repeatIndex < benchmarkContext.getRetryNumber(); ++repeatIndex) {
                     boolean failed = true;
                     long time = -1;
 
                     for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
                         try {
-//                            systemController.restartSystem();
+                            systemController.restartSystem();
                             time = queryExecutor.executeTimedQuery(query.getQueryString());
                             System.out.print(".. " + time + "ms");
                             failed = false;
@@ -77,7 +86,7 @@ public class Benchmark {
                 }
 
                 StringBuilder resultLine = new StringBuilder();
-                resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ", systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(), query.getDimensionality(), collectionSize, maxSelectSize));
+                resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ", systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(), query.getDimensionality(), arraysSize, maxSelectSize));
                 boolean isFirst = true;
 
                 for (Long queryExecutionTime : queryExecutionTimes) {
@@ -95,7 +104,9 @@ public class Benchmark {
                 System.out.println("");
             }
         } finally {
-//            queryExecutor.dropCollection();
+            if (benchmarkContext.isDropData()) {
+                queryExecutor.dropCollection();
+            }
         }
     }
 
