@@ -21,13 +21,8 @@ import util.Pair;
  */
 public class AsqldbQueryGenerator extends QueryGenerator {
 
-    private final QueryDomainGenerator queryDomainGenerator;
-    private final BenchmarkContext benchContext;
-
-    public AsqldbQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
-        this.queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
-        this.benchContext = benchContext;
-        this.noOfDimensions = noOfDimensions;
+    public AsqldbQueryGenerator(BenchmarkContext benchmarkContext) {
+        super(benchmarkContext);
     }
 
     @Override

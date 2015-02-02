@@ -1,7 +1,8 @@
 package framework.sciql;
 
+import framework.QueryGenerator;
 import framework.SystemController;
-import framework.context.ConnectionContext;
+import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
 import org.asqldb.util.TimerUtil;
@@ -82,5 +83,10 @@ public class SciQLSystemController extends SystemController {
 
     public String getMclientPath() {
         return sciqlMclientPath;
+    }
+
+    @Override
+    public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
+        return new SciQLQueryGenerator(benchmarkContext);
     }
 }

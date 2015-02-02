@@ -15,13 +15,8 @@ import util.Pair;
  */
 public class SciQLQueryGenerator extends QueryGenerator {
 
-    private final QueryDomainGenerator queryDomainGenerator;
-    private final BenchmarkContext benchContext;
-
-    public SciQLQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
-        this.queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
-        this.benchContext = benchContext;
-        this.noOfDimensions = noOfDimensions;
+    public SciQLQueryGenerator(BenchmarkContext benchmarkContext) {
+        super(benchmarkContext);
     }
 
     @Override

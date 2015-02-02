@@ -16,12 +16,8 @@ import util.Pair;
  */
 public class SciDBAQLQueryGenerator extends QueryGenerator {
 
-    private QueryDomainGenerator queryDomainGenerator;
-    private BenchmarkContext benchContext;
-
-    public SciDBAQLQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
-        queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
-        this.benchContext = benchContext;
+    public SciDBAQLQueryGenerator(BenchmarkContext benchmarkContext) {
+        super(benchmarkContext);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package framework.asqldb;
 
-import framework.context.ConnectionContext;
+import framework.QueryGenerator;
+import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanSystemController;
 import java.io.IOException;
 
@@ -12,7 +13,7 @@ import util.Pair;
  */
 public class AsqldbSystemController extends RasdamanSystemController {
 
-    public AsqldbSystemController(String propertiesPath, ConnectionContext connContext) throws IOException {
+    public AsqldbSystemController(String propertiesPath) throws IOException {
         super(propertiesPath);
         systemName = "ASQLDB";
     }
@@ -32,6 +33,11 @@ public class AsqldbSystemController extends RasdamanSystemController {
 //        AsqldbConnection.close();
         // nop
 //        AsqldbConnection.open(connContext.getUrl());
+    }
+
+    @Override
+    public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
+        return new AsqldbQueryGenerator(benchmarkContext);
     }
 
 }

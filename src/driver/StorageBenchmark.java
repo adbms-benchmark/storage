@@ -8,6 +8,7 @@ import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.Switch;
 import framework.Benchmark;
+import framework.QueryGenerator;
 import framework.SystemController;
 import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
@@ -82,7 +83,7 @@ public class StorageBenchmark {
 
                             RasdamanSystemController s = new RasdamanSystemController("conf/rasdaman.properties");
                             RasdamanQueryExecutor r = new RasdamanQueryExecutor(rasdamanContext, s, benchContext, noOfDim);
-                            RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext, noOfDim, noQueries);
+                            RasdamanQueryGenerator q = new RasdamanQueryGenerator(benchContext);
 
                             Benchmark benchmark = new Benchmark(benchContext, q, r, s);
                             benchmark.runBenchmark(collectionSize, maxSelectSize);
@@ -119,7 +120,7 @@ public class StorageBenchmark {
                             benchContext.setArraySize(collectionSize);
 
                             SciDBQueryExecutor r = new SciDBQueryExecutor(scidbContext, benchContext, noOfDim);
-                            SciDBAFLQueryGenerator q = new SciDBAFLQueryGenerator(benchContext, noOfDim, noQueries);
+                            SciDBAFLQueryGenerator q = new SciDBAFLQueryGenerator(benchContext);
                             SciDBSystemController s = new SciDBSystemController("conf/scidb.properties");
 
                             Benchmark benchmark = new Benchmark(benchContext, q, r, s);
@@ -153,7 +154,7 @@ public class StorageBenchmark {
                         benchContext.setArrayName(colName);
                         benchContext.setArraySize(collectionSize);
 
-                        SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
+                        SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext);
                         SciQLSystemController systemController = new SciQLSystemController("conf/sciql.properties");
                         SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlConnection, systemController, benchContext, noOfDim);
 
@@ -250,7 +251,13 @@ public class StorageBenchmark {
             SystemController systemController = SystemController.getSystemController(system, configs[configInd++]);
             for (Pair<Long, String> size : sizes) {
                 for (int dimension : dimensions) {
+                    benchmarkContext.setArrayDimensionality(dimension);
+                    benchmarkContext.setArraySize(size.getFirst());
+                    benchmarkContext.setArraySizeShort(size.getSecond());
+                    benchmarkContext.updateArrayName();
                     
+                    QueryGenerator queryGenerator = systemController.getQueryGenerator(benchmarkContext);
+                    Benchmark benchmark = new Benchmark(benchmarkContext, null, null, systemController);
                 }
             }
         }

@@ -24,7 +24,7 @@ public class AsqldbSciQL {
         ConnectionContext asqldbContext = new ConnectionContext("conf/asqldb.properties");
         ConnectionContext sciqlContext = new ConnectionContext("conf/sciql.properties");
         BenchmarkContext benchContext = new BenchmarkContext(10, 4000000, 6, 3, "/tmp", -1);
-        AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties", asqldbContext);
+        AsqldbSystemController asqldbSysController = new AsqldbSystemController("conf/system.properties");
         SciQLSystemController sciqlSysController = new SciQLSystemController("conf/sciql.properties");
 
         System.out.println("---------------------------------------------------");
@@ -50,7 +50,7 @@ public class AsqldbSciQL {
                 System.out.println("ASQLDB");
 
                 AsqldbQueryExecutor queryExecutor = new AsqldbQueryExecutor(asqldbContext, asqldbSysController, benchContext, noOfDim);
-                AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext, noOfDim, noQueries);
+                AsqldbQueryGenerator queryGenerator = new AsqldbQueryGenerator(benchContext);
 
                 Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, asqldbSysController);
 //                benchmark.runBenchmark();
@@ -59,7 +59,7 @@ public class AsqldbSciQL {
                 System.out.println("SciQL");
 
                 SciQLQueryExecutor queryExecutor = new SciQLQueryExecutor(sciqlContext, sciqlSysController, benchContext, noOfDim);
-                SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext, noOfDim, noQueries);
+                SciQLQueryGenerator queryGenerator = new SciQLQueryGenerator(benchContext);
 
                 Benchmark benchmark = new Benchmark(benchContext, queryGenerator, queryExecutor, sciqlSysController);
 //                benchmark.runBenchmark();

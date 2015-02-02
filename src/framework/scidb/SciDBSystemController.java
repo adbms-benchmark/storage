@@ -1,6 +1,8 @@
 package framework.scidb;
 
+import framework.QueryGenerator;
 import framework.SystemController;
+import framework.context.BenchmarkContext;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -27,5 +29,10 @@ public class SciDBSystemController extends SystemController {
         if (executeShellCommand(startSystemCommand) != 0) {
             throw new Exception("Failed to start the system.");
         }
+    }
+
+    @Override
+    public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
+        return new SciDBAFLQueryGenerator(benchmarkContext);
     }
 }

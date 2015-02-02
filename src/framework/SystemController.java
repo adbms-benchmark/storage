@@ -1,17 +1,29 @@
 package framework;
 
+import framework.asqldb.AsqldbQueryGenerator;
+import framework.asqldb.AsqldbSystemController;
+import framework.context.BenchmarkContext;
 import framework.context.ConnectionContext;
+import framework.rasdaman.RasdamanQueryGenerator;
 import framework.rasdaman.RasdamanSystemController;
+import framework.scidb.SciDBAFLQueryGenerator;
 import framework.scidb.SciDBSystemController;
+import framework.sciql.SciQLQueryGenerator;
 import framework.sciql.SciQLSystemController;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
+ * @author Dimitar Misev
  * @author George Merticariu
  */
 public abstract class SystemController extends ConnectionContext {
+    
+    public static final String RASDAMAN_SYSTEM_NAME = "rasdaman";
+    public static final String SCIDB_SYSTEM_NAME = "SciDB";
+    public static final String SCIQL_SYSTEM_NAME = "SciQL";
+    public static final String ASQLDB_SYSTEM_NAME = "ASQLDB";
 
     protected String[] startSystemCommand;
     protected String[] stopSystemCommand;
@@ -74,6 +86,8 @@ public abstract class SystemController extends ConnectionContext {
         }
         return sb.toString();
     }
+    
+    public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
 
     @Override
     public String toString() {
@@ -89,6 +103,8 @@ public abstract class SystemController extends ConnectionContext {
                     return new SciDBSystemController(configFile);
                 case "scidb":
                     return new SciQLSystemController(configFile);
+                case "asqldb":
+                    return new AsqldbSystemController(configFile);
                 default:
                     throw new IllegalArgumentException("System " + system + " not supported.");
         }

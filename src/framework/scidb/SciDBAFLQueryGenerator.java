@@ -15,13 +15,8 @@ import java.util.List;
  */
 public class SciDBAFLQueryGenerator extends QueryGenerator {
 
-    private QueryDomainGenerator queryDomainGenerator;
-    private BenchmarkContext benchContext;
-
-    public SciDBAFLQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
-        queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
-        this.benchContext = benchContext;
-        this.noOfDimensions = noOfDimensions;
+    public SciDBAFLQueryGenerator(BenchmarkContext benchmarkContext) {
+        super(benchmarkContext);
     }
 
     @Override

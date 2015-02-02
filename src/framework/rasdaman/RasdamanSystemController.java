@@ -1,7 +1,9 @@
 package framework.rasdaman;
 
+import framework.QueryGenerator;
 import framework.context.ConnectionContext;
 import framework.SystemController;
+import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -85,6 +87,11 @@ public class RasdamanSystemController extends SystemController {
 
     public String getRasqlBinary() {
         return rasqlBinary;
+    }
+
+    @Override
+    public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
+        return new RasdamanQueryGenerator(benchmarkContext);
     }
 
 }

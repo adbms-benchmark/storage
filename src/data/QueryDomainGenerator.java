@@ -18,10 +18,10 @@ public class QueryDomainGenerator {
     private final int noOfDimensions;
     private final int noOfQueries;
 
-    public QueryDomainGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
-        this.noOfDimensions = noOfDimensions;
-        this.noOfQueries = noOfQueries;
-        this.benchContext = benchContext;
+    public QueryDomainGenerator(BenchmarkContext benchmarkContext) {
+        this.noOfDimensions = benchmarkContext.getArrayDimensionality();
+        this.noOfQueries = benchmarkContext.getQueryNumber();
+        this.benchContext = benchmarkContext;
     }
 
     public List<Pair<Long, Long>> getMiddlePointQueryDomain() {

@@ -2,7 +2,6 @@ package framework.rasdaman;
 
 
 import data.BenchmarkQuery;
-import data.QueryDomainGenerator;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 
@@ -17,13 +16,8 @@ import util.Pair;
  */
 public class RasdamanQueryGenerator extends QueryGenerator {
 
-    private final QueryDomainGenerator queryDomainGenerator;
-    private final BenchmarkContext benchContext;
-
-    public RasdamanQueryGenerator(BenchmarkContext benchContext, int noOfDimensions, int noOfQueries) {
-        queryDomainGenerator = new QueryDomainGenerator(benchContext, noOfDimensions, noOfQueries);
-        this.benchContext = benchContext;
-        this.noOfDimensions = noOfDimensions;
+    public RasdamanQueryGenerator(BenchmarkContext benchmarkContext) {
+        super(benchmarkContext);
     }
 
     @Override
