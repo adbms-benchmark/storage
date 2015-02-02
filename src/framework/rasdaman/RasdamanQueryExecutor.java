@@ -69,7 +69,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
         long chunkSize = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long tileSize = (long) Math.pow(chunkSize + 1l, noOfDimensions);
 //
-        dataGenerator = new DataGenerator(fileSize);
+        dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
         String filePath = dataGenerator.getFilePath();
 
         List<Pair<Long, Long>> tileStructureDomain = new ArrayList<>();
@@ -120,7 +120,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                DataGenerator dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
                 String filePath = dataGenerator.getFilePath();
 
                 Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
@@ -161,7 +161,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                DataGenerator dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
                 String filePath = dataGenerator.getFilePath();
 
                 Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
@@ -211,7 +211,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                DataGenerator dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
                 String filePath = dataGenerator.getFilePath();
 
                 Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
@@ -264,7 +264,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                DataGenerator dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
                 String filePath = dataGenerator.getFilePath();
 
                 Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
@@ -323,7 +323,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                DataGenerator dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
                 String filePath = dataGenerator.getFilePath();
 
                 Pair<Long, Long> axis0Domain = domainBoundaries.get(0);
@@ -392,7 +392,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
                 List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(newFileSize);
                 long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-                DataGenerator dataGenerator = new DataGenerator(fileSize);
+                DataGenerator dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
                 String filePath = dataGenerator.getFilePath();
 
                 Pair<Long, Long> axis0Domain = domainBoundaries.get(0);

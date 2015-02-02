@@ -3,6 +3,7 @@ package data;
 import framework.AdbmsSystem;
 import java.io.File;
 import java.io.IOException;
+import util.IO;
 
 /**
  *
@@ -13,10 +14,12 @@ public class DataGenerator {
     public static final String FILE_PREFIX = "benchmark_data";
 
     private final long fileSize;
+    private final String dataDir;
     private File file;
 
-    public DataGenerator(long fileSize) {
+    public DataGenerator(long fileSize, String dataDir) {
         this.fileSize = fileSize;
+        this.dataDir = dataDir;
     }
 
     public String getFilePath() throws IOException {
@@ -27,16 +30,8 @@ public class DataGenerator {
     }
 
     private void generate() throws IOException {
-        file = new File("/e/data/" + fileSize);
+        file = new File(IO.concatPaths(dataDir, String.valueOf(fileSize)));
         if (file.exists()) {
-//            long currSize = file.length();
-//            if (currSize > fileSize) {
-//                AdbmsSystem.executeShellCommandRedirect(file.getAbsolutePath(),
-//                        "truncate", "-s", "" + fileSize);
-//            } else {
-//                AdbmsSystem.executeShellCommand(
-//                        "/bin/sh", "-c", "head -c " + (fileSize - currSize) + " /dev/urandom | tee -a " + file.getAbsolutePath());
-//            }
             return;
         }
         AdbmsSystem.executeShellCommandRedirect(file.getAbsolutePath(),

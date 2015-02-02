@@ -209,7 +209,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private void write(int j, long... indexes) throws IOException {
         if (j > input.to) {
             input = getWriter(j);
-            dataGenerator = new DataGenerator(input.size);
+            dataGenerator = new DataGenerator(input.size, benchContext.getDataDir());
             String filePath = dataGenerator.getFilePath();
             data = IO.readFile(filePath);
             System.out.println("read file of size " + data.length);

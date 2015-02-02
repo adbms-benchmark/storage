@@ -1,16 +1,14 @@
 package framework.scidb;
 
 import data.DataGenerator;
-import framework.context.BenchmarkContext;
-import framework.QueryExecutor;
 import framework.AdbmsSystem;
-
+import framework.QueryExecutor;
+import framework.context.BenchmarkContext;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import util.DomainUtil;
 import util.IO;
 import util.Pair;
@@ -55,7 +53,7 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBSystem> {
 
         long chunkUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, benchContext.getCollTileSize());
         long chunkSize = chunkUpperBound + 1l;
-        dataGenerator = new DataGenerator(fileSize);
+        dataGenerator = new DataGenerator(fileSize, benchContext.getDataDir());
         String filePath = dataGenerator.getFilePath();
 
         StringBuilder createArrayQuery = new StringBuilder();
