@@ -1,5 +1,0 @@
-To set up locally:
- - mkdir conf
- - cp conf.in/* conf
- - adapt properties files in conf
- - do not commit conf to the repo
