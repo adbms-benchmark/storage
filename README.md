@@ -5,18 +5,20 @@ This is a framework for benchmarking storage management capabilities in
 Array Database Systems.
 
 Supported systems
-=================
+-----------------
 Currently the following systems are supported:
 * rasdaman (http://www.rasdaman.org/)
 * SciDB (http://www.scidb.org/)
 * SciQL (https://www.monetdb.org, unreleased branch SciQL-2 at http://dev.monetdb.org/hg/MonetDB/branches)
+
+Contributions for further systems are welcome.
 
 Getting started
 ===============
 * `cp -r conf.in conf`, and adapt properties files in conf
 * Build code: `ant jar`
 * Execute with `./run.sh [OPTIONS]`
-* Benchmark results are written in CSV format in `$HOME/results`.
+* Benchmark results are written in CSV format in `$HOME/results`
 
 Command-line usage help
 -----------------------
@@ -82,3 +84,9 @@ rasdaman, SciDB, SciQL.
   [-v|--verbose]
         Print extra information.
 ```
+
+Copyright and license
+=====================
+Copyright (c) 2014-2015 George Merticariu, Dimitar Misev, Peter Baumann.
+
+Code released under [the MIT license] (https://raw.githubusercontent.com/adbms-benchmark/storage/master/LICENSE).
