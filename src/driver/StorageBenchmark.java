@@ -112,18 +112,21 @@ public class StorageBenchmark {
             throw new IllegalArgumentException(systems.length + " systems specified, but " + configs.length + " system configuration files.");
         }
         int configInd = 0;
-        Pair<Long, String>[] sizes = DomainUtil.parseSizes(config.getStringArray("size"));
+        String[] arraySizes = config.getStringArray("size");
+        Pair<Long, String>[] sizes = DomainUtil.parseSizes(arraySizes);
         int[] dimensions = config.getIntArray("dimension");
 
         for (String system : systems) {
             String configFile = configs[configInd++];
             AdbmsSystem systemController = AdbmsSystem.getSystemController(system, configFile);
 
+            int sizeInd = 0;
             for (Pair<Long, String> size : sizes) {
+                String arraySizeShort = arraySizes[sizeInd++];
                 for (int dimension : dimensions) {
                     benchmarkContext.setArrayDimensionality(dimension);
                     benchmarkContext.setArraySize(size.getFirst());
-                    benchmarkContext.setArraySizeShort(size.getSecond());
+                    benchmarkContext.setArraySizeShort(arraySizeShort);
                     benchmarkContext.updateArrayName();
 
                     QueryGenerator queryGenerator = systemController.getQueryGenerator(benchmarkContext);
