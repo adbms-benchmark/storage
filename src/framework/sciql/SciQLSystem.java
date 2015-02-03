@@ -50,7 +50,10 @@ public class SciQLSystem extends AdbmsSystem {
     private void startSystem() throws Exception {
         log.debug("Starting " + systemName);
         if (executeShellCommand(startCommand) != 0) {
-            throw new Exception("Failed starting monetdb.");
+            Thread.sleep(500);
+            if (executeShellCommand(startCommand) != 0) {
+                throw new Exception("Failed starting monetdb.");
+            }
         }
         Thread.sleep(500);
         SciQLConnection.open(this);

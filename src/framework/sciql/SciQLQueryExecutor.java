@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.asqldb.util.TimerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static util.DomainUtil.SIZE_100MB;
 import util.IO;
 import util.Pair;
@@ -21,6 +23,8 @@ import util.Pair;
  * @author Dimitar Misev
  */
 public class SciQLQueryExecutor extends QueryExecutor {
+
+    private static final Logger log = LoggerFactory.getLogger(SciQLQueryExecutor.class);
 
     private final SciQLSystem systemController;
     //
