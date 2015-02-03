@@ -13,6 +13,6 @@ package util;
 public class BenchmarkUtil {
 
     public static String getArrayName(int dimension, String size) {
-        return "benchmark_" + dimension + "d_" + size.toLowerCase();
+        return "colD" + dimension + "S" + size;
     }
 }
