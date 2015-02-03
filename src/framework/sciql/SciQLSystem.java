@@ -15,24 +15,17 @@ import util.IO;
  */
 public class SciQLSystem extends AdbmsSystem {
 
-    public static final String KEY_SCIQL_HOME = "sciql.home";
-    public static final String KEY_SCIQL_DBFARM = "sciql.dbfarm";
-
-    protected String sciqlHome;
-    protected String sciqlDbfarm;
     protected String sciqlBinDir;
     protected String sciqlMclientPath;
     protected String merovingianLockFile;
 
     public SciQLSystem(String propertiesPath) throws IOException {
         super(propertiesPath, "SciQL");
-        this.sciqlHome = getValue(KEY_SCIQL_HOME);
-        this.sciqlDbfarm = getValue(KEY_SCIQL_DBFARM);
-        this.sciqlBinDir = IO.concatPaths(sciqlHome, "bin");
+        this.sciqlBinDir = IO.concatPaths(installDir, "bin");
         this.sciqlMclientPath = IO.concatPaths(sciqlBinDir, "mclient");
-        this.startCommand = new String[]{sciqlBinDir + "/monetdbd", "start", sciqlDbfarm};
-        this.stopCommand = new String[]{sciqlBinDir + "/monetdbd", "stop", sciqlDbfarm};
-        this.merovingianLockFile = IO.concatPaths(sciqlDbfarm, ".merovingian_lock");
+        this.startCommand = new String[]{IO.concatPaths(sciqlBinDir, "monetdbd"), "start", dataDir};
+        this.stopCommand = new String[]{IO.concatPaths(sciqlBinDir, "monetdbd"), "stop", dataDir};
+        this.merovingianLockFile = IO.concatPaths(dataDir, ".merovingian_lock");
     }
 
     @Override
@@ -46,14 +39,9 @@ public class SciQLSystem extends AdbmsSystem {
             // ignore, it may be already stopped
         }
         waitUntilLockRemoved();
-        Thread.sleep(500);
 
         if (executeShellCommand(startCommand) != 0) {
-            executeShellCommand(stopCommand);
-            waitUntilLockRemoved();
-            if (executeShellCommand(startCommand) != 0) {
-                throw new Exception("Failed starting monetdb.");
-            }
+            throw new Exception("Failed starting monetdb.");
         }
         Thread.sleep(500);
 
@@ -64,22 +52,9 @@ public class SciQLSystem extends AdbmsSystem {
 
     private void waitUntilLockRemoved() throws Exception {
         File lock = new File(merovingianLockFile);
-        int count = 0;
         while (lock.exists()) {
             Thread.sleep(500);
-            ++count;
-            if (count > 60) {
-                throw new Exception("Failed restarting monetdb after 30s.");
-            }
         }
-    }
-
-    public String getSciqlHome() {
-        return sciqlHome;
-    }
-
-    public String getSciqlDbfarm() {
-        return sciqlDbfarm;
     }
 
     public String getMclientPath() {
