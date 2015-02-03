@@ -6,14 +6,18 @@ import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import java.io.File;
 import java.io.IOException;
-import org.asqldb.util.TimerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.IO;
 
 /**
+ * SciQL system manager.
  *
- * @author George Merticariu
+ * @author Dimitar Misev
  */
 public class SciQLSystem extends AdbmsSystem {
+
+    private static final Logger log = LoggerFactory.getLogger(SciQLSystem.class);
 
     protected String sciqlBinDir;
     protected String sciqlMclientPath;
@@ -30,24 +34,26 @@ public class SciQLSystem extends AdbmsSystem {
 
     @Override
     public void restartSystem() throws Exception {
-        TimerUtil.clearTimers();
-        TimerUtil.startTimer("time");
-        System.out.print("restarting monetdb... ");
-        SciQLConnection.close();
+        stopSystem();
+        startSystem();
+    }
 
+    private void stopSystem() throws Exception {
+        log.debug("Stopping " + systemName);
+        SciQLConnection.close();
         if (executeShellCommand(stopCommand) != 0) {
             // ignore, it may be already stopped
         }
         waitUntilLockRemoved();
+    }
 
+    private void startSystem() throws Exception {
+        log.debug("Starting " + systemName);
         if (executeShellCommand(startCommand) != 0) {
             throw new Exception("Failed starting monetdb.");
         }
         Thread.sleep(500);
-
         SciQLConnection.open(this);
-        String res = TimerUtil.stopTimer("time");
-        System.out.println("ok, " + res + ".");
     }
 
     private void waitUntilLockRemoved() throws Exception {

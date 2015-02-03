@@ -5,6 +5,7 @@ public class StopWatch {
     private long startTime;
 
     public StopWatch() {
+        reset();
     }
 
     public void reset() {

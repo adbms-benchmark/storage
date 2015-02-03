@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.IO;
 import util.Pair;
 
@@ -17,6 +19,8 @@ import util.Pair;
  * @author Dimitar Misev
  */
 public class RasdamanSystem extends AdbmsSystem {
+
+    private static final Logger log = LoggerFactory.getLogger(RasdamanSystem.class);
 
     private static final String RASDL_BIN_KEY = "bin.rasdl";
 
@@ -36,6 +40,7 @@ public class RasdamanSystem extends AdbmsSystem {
 
     @Override
     public void restartSystem() throws Exception {
+        log.debug("restarting " + systemName);
         if (executeShellCommand(stopCommand) != 0) {
             throw new Exception("Failed to stop the system.");
         }

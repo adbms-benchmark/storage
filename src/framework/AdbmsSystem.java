@@ -6,9 +6,12 @@ import framework.context.SystemContext;
 import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLSystem;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.StopWatch;
+import util.StringUtil;
 
 /**
  * Wrapps Array DBMS system-specific functionality, like restarting the system.
@@ -17,6 +20,8 @@ import java.io.IOException;
  * @author George Merticariu
  */
 public abstract class AdbmsSystem extends SystemContext {
+
+    private static final Logger log = LoggerFactory.getLogger(AdbmsSystem.class);
 
     public static final String RASDAMAN_SYSTEM_NAME = "rasdaman";
     public static final String SCIDB_SYSTEM_NAME = "SciDB";
@@ -41,58 +46,15 @@ public abstract class AdbmsSystem extends SystemContext {
 
     public abstract void restartSystem() throws Exception;
 
-    public static int executeShellCommand(String... command) {
-        return executeShellCommandRedirect("/dev/null", command);
-    }
-
-    public static int executeShellCommandRedirect(String output, String... command) {
-        ProcessExecutor processExecutor = new ProcessExecutor(command);
-        try {
-            processExecutor.executeRedirectOutput(output);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (processExecutor.getExitStatus() != 0) {
-            System.err.println("----------------------------------------");
-            System.err.println("Command failed");
-            System.err.print("Command:");
-            for (int i = 0; i < command.length; i++) {
-                System.err.print(" ");
-                System.err.print(command[i]);
-            }
-            System.err.println("");
-            System.err.println("");
-            System.err.println(processExecutor.getError());
-            System.err.println("----------------------------------------------------------");
-        }
-
-        return processExecutor.getExitStatus();
-    }
-
-    public String getSystemName() {
-        return systemName;
-    }
-
-    private String arrayToString(String[] array) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < array.length; i++) {
-            if (i > 0) {
-                sb.append(' ');
-            }
-            sb.append(array[i]);
-        }
-        return sb.toString();
-    }
-
     public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
 
     public abstract QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException;
 
     @Override
     public String toString() {
-        return systemName + "System Controller:" + "\n startSystemCommand=" + arrayToString(startCommand) +
-                "\n stopSystemCommand=" + arrayToString(stopCommand);
+        return systemName + " System:"
+                + "\n startSystemCommand=" + StringUtil.arrayToString(startCommand)
+                + "\n stopSystemCommand=" + StringUtil.arrayToString(stopCommand);
     }
 
     public static AdbmsSystem getSystemController(String system, String configFile) throws IOException {
@@ -108,5 +70,34 @@ public abstract class AdbmsSystem extends SystemContext {
             default:
                 throw new IllegalArgumentException("System " + system + " not supported.");
         }
+    }
+
+    public static int executeShellCommand(String... command) {
+        return executeShellCommandRedirect("/dev/null", command);
+    }
+
+    public static int executeShellCommandRedirect(String output, String... command) {
+        String cmd = StringUtil.arrayToString(command) + " > " + output;
+        log.debug("executing shell command: " + cmd);
+
+        ProcessExecutor processExecutor = new ProcessExecutor(command);
+        try {
+            StopWatch timer = new StopWatch();
+            processExecutor.executeRedirectOutput(output);
+            log.trace(" -> finished in " + timer.getElapsedTime() + " ms.");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (processExecutor.getExitStatus() != 0) {
+            log.error("shell command failed: " + cmd);
+            log.error(" -> error: " + processExecutor.getError());
+        }
+
+        return processExecutor.getExitStatus();
+    }
+
+    public String getSystemName() {
+        return systemName;
     }
 }
