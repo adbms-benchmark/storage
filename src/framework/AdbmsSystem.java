@@ -6,10 +6,8 @@ import framework.context.SystemContext;
 import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLSystem;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.StopWatch;
@@ -99,7 +97,7 @@ public abstract class AdbmsSystem extends SystemContext {
         return processExecutor.getExitStatus();
     }
 
-    public static String executeShellCommandOutput(String... command) {
+    public static String executeShellCommandOutput(boolean ignoreError, String... command) {
         String cmd = StringUtil.arrayToString(command);
         log.debug("executing shell command: " + cmd);
 
@@ -112,9 +110,11 @@ public abstract class AdbmsSystem extends SystemContext {
             e.printStackTrace();
         }
 
-        if (processExecutor.getExitStatus() != 0) {
-            log.error("shell command failed: " + cmd);
-            log.error(" -> error: " + processExecutor.getError());
+        if (processExecutor.getExitStatus() != 0 && !ignoreError) {
+            log.error("shell command failed (exit code " + processExecutor.getExitStatus() + ": " + cmd);
+            if (!"".equals(processExecutor.getError())) {
+                log.error(" -> error: " + processExecutor.getError());
+            }
         }
 
         return processExecutor.getOutput();

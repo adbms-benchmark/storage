@@ -88,6 +88,7 @@ public class StorageBenchmark {
         } else {
             System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
         }
+        System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true");
         log = LoggerFactory.getLogger(StorageBenchmark.class);
     }
 

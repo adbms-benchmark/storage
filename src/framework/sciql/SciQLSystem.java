@@ -66,7 +66,7 @@ public class SciQLSystem extends AdbmsSystem {
             Thread.sleep(500);
         }
         // just in case
-        String pid = executeShellCommandOutput("pgrep", "mserver5");
+        String pid = executeShellCommandOutput(true, "pgrep", "mserver5");
         if (!"".equals(pid)) {
             executeShellCommand("pkill", "mserver5");
         }

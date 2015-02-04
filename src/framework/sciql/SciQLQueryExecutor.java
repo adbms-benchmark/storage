@@ -69,20 +69,19 @@ public class SciQLQueryExecutor extends QueryExecutor {
     @Override
     public void createCollection() throws Exception {
 
-        String collName = benchContext.getArrayName();
-        if (SciQLConnection.tableExists(collName)) {
-            System.out.println("Collection " + collName + " found, not reingesting.");
+        String arrayName = benchContext.getArrayName();
+        if (SciQLConnection.tableExists(arrayName)) {
+            log.info("Array " + arrayName + " found, not reingesting.");
             return;
         }
-        System.out.println("--------------------------------------------------------------------------");
-        System.out.println("Creating collection " + collName);
+        log.info("Creating array " + arrayName);
 
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
         StringBuilder createArrayQuery = new StringBuilder();
         createArrayQuery.append("CREATE ARRAY ");
-        createArrayQuery.append(collName);
+        createArrayQuery.append(arrayName);
         createArrayQuery.append(" (");
 
         for (int i = 0; i < domainBoundaries.size(); i++) {
@@ -102,10 +101,10 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
         executeTimedQueryUpdate(createArrayQuery.toString());
 
-        String outFilePath = IO.concatPaths(benchContext.getDataDir(), collName + "-1.sql");
+        String outFilePath = IO.concatPaths(benchContext.getDataDir(), arrayName + "-1.sql");
         File outFile = new File(outFilePath);
         if (!outFile.exists()) {
-            System.out.print("generating data... ");
+            log.debug("Generating random data...");
 
             updateWriters(fileSize);
             input = new SciQLInputData(null, 0, -1, -1, "");
@@ -195,10 +194,12 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
         TimerUtil.clearTimers();
         TimerUtil.startTimer("up");
+        SciQLConnection.close();
         for (SciQLInputData in : inputs) {
             ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
             executor.executeRedirectInput(in.file);
         }
+        SciQLConnection.open(systemController);
         executeTimedQueryUpdate("DELETE FROM " + benchContext.getArrayName().toLowerCase() + " WHERE v is NULL");
         long insertTime = TimerUtil.getElapsedMilli("up");
         TimerUtil.clearTimers();
@@ -216,7 +217,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
             dataGenerator = new DataGenerator(input.size, benchContext.getDataDir());
             String filePath = dataGenerator.getFilePath();
             data = IO.readFile(filePath);
-            System.out.println("read file of size " + data.length);
+            log.trace(" -> read file of size " + data.length);
             dataIndex = 0;
         }
 
@@ -234,9 +235,9 @@ public class SciQLQueryExecutor extends QueryExecutor {
     private void updateWriters(long fileSize) throws IOException {
         inputs.clear();
         long partsNo = fileSize / SIZE_100MB;
-        System.out.println("updating writers, file size " + fileSize);
+        log.trace("Updating writers, file size " + fileSize);
         if (partsNo == 0) {
-            System.out.println("single part");
+            log.trace(" -> single part");
             String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getArrayName() + "-1.sql");
             File check = new File(partFileName);
             BufferedWriter writer = null;
@@ -248,7 +249,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
             SciQLInputData input = new SciQLInputData(writer, 0, fileSize - 1, fileSize, partFileName);
             inputs.add(input);
         } else {
-            System.out.println(partsNo + " number of files");
+            log.trace(" -> " + partsNo + " number of files");
             for (int i = 1; i <= partsNo; i++) {
                 String partFileName = IO.concatPaths(benchContext.getDataDir(), benchContext.getArrayName() + "-" + i + ".sql");
                 File check = new File(partFileName);
@@ -266,7 +267,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
                     size += (fileSize % SIZE_100MB);
                 }
                 SciQLInputData input = new SciQLInputData(writer, from, to, size, partFileName);
-                System.out.println("new input: " + input);
+                log.trace(" -> new input: " + input);
                 inputs.add(input);
             }
         }
@@ -315,6 +316,6 @@ class SciQLInputData {
 
     @Override
     public String toString() {
-        return "SciQLInputData{" + "from=" + from + ", to=" + to + ", size=" + size + ", file=" + file + '}';
+        return "SciQLInputData{ " + "from=" + from + ", to=" + to + ", size=" + size + ", file=" + file + " }";
     }
 }

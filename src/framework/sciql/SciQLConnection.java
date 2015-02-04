@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manage SciQL connection: connect/disconnect, as well as query execution.
@@ -15,6 +17,8 @@ import java.util.List;
  * @author Dimitar Misev
  */
 public class SciQLConnection {
+
+    private static final Logger log = LoggerFactory.getLogger(SciQLConnection.class);
 
     public static final String SCIQL_JDBC_DRIVER = "nl.cwi.monetdb.jdbc.MonetDriver";
 
@@ -50,14 +54,13 @@ public class SciQLConnection {
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean executeQuery(final String query) {
-//        System.out.print("  executing query: " + query);
+        log.trace("Executing query: " + query);
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             final ResultSet rs = stmt.executeQuery(query);
         } catch (SQLException e) {
-//            System.out.println(" ... failed.");
-            e.printStackTrace();
+            log.warn(" -> failed.", e);
             return false;
         } finally {
             if (stmt != null) {
@@ -67,7 +70,7 @@ public class SciQLConnection {
                 }
             }
         }
-//        System.out.println(" ... ok.");
+        log.trace(" -> ok.");
         return true;
     }
 
@@ -75,6 +78,7 @@ public class SciQLConnection {
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean tableExists(final String table) {
+        log.trace("Check if table " + table + " exists in SciQL...");
         Statement stmt = null;
         final String query = "select count(tables.name) from tables where name = '" + table.toLowerCase() + "';";
         try {
@@ -82,6 +86,7 @@ public class SciQLConnection {
             final ResultSet rs = stmt.executeQuery(query);
             rs.next();
             int res = rs.getInt(1);
+            log.trace(" -> " + (res > 0 ? "found" : "not found"));
             return res > 0;
         } catch (SQLException e) {
         } finally {
@@ -99,14 +104,13 @@ public class SciQLConnection {
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean executeUpdateQuery(final String query) {
-        System.out.print("  executing query: " + query);
+        log.trace("Executing update query: " + query);
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            System.out.println(" ... failed.");
-            e.printStackTrace();
+            log.warn(" -> failed.", e);
             return false;
         } finally {
             if (stmt != null) {
@@ -116,7 +120,7 @@ public class SciQLConnection {
                 }
             }
         }
-        System.out.println(" ... ok.");
+        log.trace(" -> ok.");
         return true;
     }
 
@@ -141,7 +145,7 @@ public class SciQLConnection {
      * @return a list of the results from the first returned row, as objects.
      */
     public static List<Object> executeQuerySingleResult(final String query, int columnCount) throws SQLException {
-        System.out.print("  executing query: " + query);
+        log.trace("Executing query: " + query);
         List<Object> ret = new ArrayList<Object>();
         Statement stmt = null;
         try {
@@ -153,7 +157,7 @@ public class SciQLConnection {
                 }
             }
         } catch (SQLException e) {
-            System.out.println(" ... failed.");
+            log.warn(" -> failed.", e);
             throw e;
         } finally {
             if (stmt != null) {
@@ -163,7 +167,7 @@ public class SciQLConnection {
                 }
             }
         }
-        System.out.println(" ... ok.");
+            log.warn(" -> ok.");
         return ret;
     }
 
