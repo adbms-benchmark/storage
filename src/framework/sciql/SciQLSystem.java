@@ -58,6 +58,7 @@ public class SciQLSystem extends AdbmsSystem {
             waitUntilLockRemoved();
         }
         SciQLConnection.open(this);
+        log.debug(" -> SciQL started.");
     }
 
     private void waitUntilLockRemoved() throws Exception {

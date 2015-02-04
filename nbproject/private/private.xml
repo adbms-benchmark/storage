@@ -11,16 +11,6 @@
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group name="petascope">
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/rasdaman/RasdamanQueryExecutor.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/driver/RasdamanSciDB.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/sciql/SciQLQueryExecutor.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/ProcessExecutor.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/data/DomainGenerator.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/data/DataGenerator.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/Benchmark.java</file>
-            <file>file:/home/dimitar/research/lsis/src/arraybench/src/driver/SciQL.java</file>
-        </group>
         <group name="rasdaman">
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/scidb/SciDBQueryExecutor.java</file>
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/sciql/SciQLQueryExecutor.java</file>
@@ -28,6 +18,15 @@
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/driver/BenchmarkMain.java</file>
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/data/DataGenerator.java</file>
             <file>file:/home/dimitar/research/lsis/src/arraybench/src/framework/Benchmark.java</file>
+        </group>
+        <group name="petascope">
+            <file>file:/home/dimitar/projects/storage-benchmark/src/framework/sciql/SciQLSystem.java</file>
+            <file>file:/home/dimitar/projects/storage-benchmark/src/framework/AdbmsSystem.java</file>
+            <file>file:/home/dimitar/projects/storage-benchmark/src/framework/ProcessExecutor.java</file>
+            <file>file:/home/dimitar/projects/storage-benchmark/src/framework/sciql/SciQLQueryExecutor.java</file>
+            <file>file:/home/dimitar/projects/storage-benchmark/src/driver/StorageBenchmark.java</file>
+            <file>file:/home/dimitar/projects/storage-benchmark/src/framework/Benchmark.java</file>
+            <file>file:/home/dimitar/projects/storage-benchmark/src/framework/rasdaman/RasdamanQueryExecutor.java</file>
         </group>
     </open-files>
 </project-private>

@@ -197,6 +197,7 @@ public class SciQLQueryExecutor extends QueryExecutor {
         SciQLConnection.close();
         for (SciQLInputData in : inputs) {
             ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
+            log.debug(" -> inserting file " + in.file);
             executor.executeRedirectInput(in.file);
         }
         SciQLConnection.open(systemController);
