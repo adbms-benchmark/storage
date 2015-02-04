@@ -49,13 +49,8 @@ public class SciQLSystem extends AdbmsSystem {
 
     private void startSystem() throws Exception {
         log.debug("Starting " + systemName);
-        int retry = 0;
         while (executeShellCommand(startCommand) != 0) {
-            if (retry++ == 5) {
-                throw new Exception("Failed starting monetdb.");
-            }
-            executeShellCommand(stopCommand);
-            waitUntilLockRemoved();
+            throw new Exception("Failed starting monetdb.");
         }
         SciQLConnection.open(this);
         log.debug(" -> SciQL started.");
@@ -63,13 +58,9 @@ public class SciQLSystem extends AdbmsSystem {
 
     private void waitUntilLockRemoved() throws Exception {
         File lock = new File(merovingianLockFile);
-        while (lock.exists()) {
+        while (lock.exists() || !"".equals(executeShellCommandOutput(true, "pgrep", "mserver5"))) {
+            log.debug("lock exists " + lock.exists() + ", sleeping 500ms: " + lock.getAbsolutePath());
             Thread.sleep(500);
-        }
-        // just in case
-        String pid = executeShellCommandOutput(true, "pgrep", "mserver5");
-        if (!"".equals(pid)) {
-            executeShellCommand("pkill", "mserver5");
         }
     }
 
