@@ -8,7 +8,8 @@ import java.util.TimerTask;
 import util.StopWatch;
 
 public class ProcessExecutor {
-    private static final String DEV_NULL = "/dev/null";
+    
+    public static final String DEV_NULL = "/dev/null";
     private static final int EXIT_SUCCESS = 0;
 
     private long maxExecutionTime = -1;
@@ -19,6 +20,7 @@ public class ProcessExecutor {
     private boolean interrupted = false;
     private boolean executeWithTimeLimit = false;
     private String error = "";
+    private String output = "";
 
     public ProcessExecutor(String... command) {
         this.command = command;
@@ -26,9 +28,13 @@ public class ProcessExecutor {
 
     public ProcessExecutor(int executionTimeLimit, String... command) {
         this(command);
-
         this.maxExecutionTime = ((long) executionTimeLimit) * 1000l;
         this.executeWithTimeLimit = true;
+    }
+
+    public void execute() throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        execute(processBuilder);
     }
 
     public void executeRedirectOutput(String filePath) throws IOException, InterruptedException {
@@ -55,7 +61,6 @@ public class ProcessExecutor {
         exitStatus = process.exitValue();
 
         StringBuilder error = new StringBuilder();
-
         if (!interrupted && exitStatus != EXIT_SUCCESS) {
             try (Scanner scan = new Scanner(process.getErrorStream())) {
                 while (scan.hasNextLine()) {
@@ -65,13 +70,17 @@ public class ProcessExecutor {
                 this.error = error.toString();
             }
         }
+        StringBuilder output = new StringBuilder();
+        try (Scanner scan = new Scanner(process.getInputStream())) {
+            while (scan.hasNextLine()) {
+                output.append(scan.nextLine());
+                output.append("\n");
+            }
+            this.output = output.toString();
+        }
 
         timer.cancel();
 
-    }
-
-    public void execute() throws IOException, InterruptedException {
-        executeRedirectOutput(DEV_NULL);
     }
 
     public int getExitStatus() {
@@ -88,6 +97,10 @@ public class ProcessExecutor {
 
     public String getError() {
         return error;
+    }
+
+    public String getOutput() {
+        return output;
     }
 
     private class TerminateProcessJob extends TimerTask {

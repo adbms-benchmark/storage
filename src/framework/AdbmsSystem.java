@@ -6,8 +6,10 @@ import framework.context.SystemContext;
 import framework.rasdaman.RasdamanSystem;
 import framework.scidb.SciDBSystem;
 import framework.sciql.SciQLSystem;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.StopWatch;
@@ -73,7 +75,7 @@ public abstract class AdbmsSystem extends SystemContext {
     }
 
     public static int executeShellCommand(String... command) {
-        return executeShellCommandRedirect("/dev/null", command);
+        return executeShellCommandRedirect(ProcessExecutor.DEV_NULL, command);
     }
 
     public static int executeShellCommandRedirect(String output, String... command) {
@@ -95,6 +97,27 @@ public abstract class AdbmsSystem extends SystemContext {
         }
 
         return processExecutor.getExitStatus();
+    }
+
+    public static String executeShellCommandOutput(String... command) {
+        String cmd = StringUtil.arrayToString(command);
+        log.debug("executing shell command: " + cmd);
+
+        ProcessExecutor processExecutor = new ProcessExecutor(command);
+        try {
+            StopWatch timer = new StopWatch();
+            processExecutor.execute();
+            log.trace(" -> finished in " + timer.getElapsedTime() + " ms.");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (processExecutor.getExitStatus() != 0) {
+            log.error("shell command failed: " + cmd);
+            log.error(" -> error: " + processExecutor.getError());
+        }
+
+        return processExecutor.getOutput();
     }
 
     public String getSystemName() {

@@ -49,13 +49,14 @@ public class SciQLSystem extends AdbmsSystem {
 
     private void startSystem() throws Exception {
         log.debug("Starting " + systemName);
-        if (executeShellCommand(startCommand) != 0) {
-            Thread.sleep(500);
-            if (executeShellCommand(startCommand) != 0) {
+        int retry = 0;
+        while (executeShellCommand(startCommand) != 0) {
+            if (retry++ == 5) {
                 throw new Exception("Failed starting monetdb.");
             }
+            executeShellCommand(stopCommand);
+            waitUntilLockRemoved();
         }
-        Thread.sleep(500);
         SciQLConnection.open(this);
     }
 
@@ -63,6 +64,11 @@ public class SciQLSystem extends AdbmsSystem {
         File lock = new File(merovingianLockFile);
         while (lock.exists()) {
             Thread.sleep(500);
+        }
+        // just in case
+        String pid = executeShellCommandOutput("pgrep", "mserver5");
+        if (!"".equals(pid)) {
+            executeShellCommand("pkill", "mserver5");
         }
     }
 
