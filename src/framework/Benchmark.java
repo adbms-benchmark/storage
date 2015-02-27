@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.DomainUtil;
 import util.IO;
 
 /**
@@ -58,10 +57,12 @@ public class Benchmark {
 
             List<BenchmarkQuery> benchmarkQueries = new ArrayList<>();
             // if collections size is 100MB or 1GB run all classes
-            if (arraysSize > DomainUtil.SIZE_100MB) {
+            if (benchmarkContext.isSqlMdaBenchmark()) {
+                benchmarkQueries.addAll(queryGenerator.getSqlMdaBenchmarkQueries());
+            } else if (benchmarkContext.isStorageBenchmark()) {
                 benchmarkQueries.addAll(queryGenerator.getBenchmarkQueries());
+                benchmarkQueries.add(queryGenerator.getMiddlePointQuery());
             }
-            benchmarkQueries.add(queryGenerator.getMiddlePointQuery());
 
             for (BenchmarkQuery query : benchmarkQueries) {
                 log.info("Executing query: " + query.getQueryString());
@@ -105,6 +106,7 @@ public class Benchmark {
             }
         } finally {
             if (benchmarkContext.isDropData()) {
+                systemController.restartSystem();
                 queryExecutor.dropCollection();
             }
         }

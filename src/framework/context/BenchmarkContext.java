@@ -8,6 +8,9 @@ import util.BenchmarkUtil;
  */
 public class BenchmarkContext {
 
+    public static final String TYPE_STORAGE = "storage";
+    public static final String TYPE_SQLMDA = "sql/mda";
+
     private String arrayName;
     private long arraySize;
     private String arraySizeShort;
@@ -23,6 +26,10 @@ public class BenchmarkContext {
     private boolean disableBenchmark;
     private boolean createData;
     private boolean dropData;
+    private String benchmarkType;
+
+    private String baseType;
+    private BenchmarkContext join;
 
     public BenchmarkContext(double maxSelectSizePercent, long collTileSize, int queryNumber, int repeatNumber, String dataDir, int timeout) {
         this.maxSelectSizePercent = maxSelectSizePercent;
@@ -31,6 +38,8 @@ public class BenchmarkContext {
         this.repeatNumber = repeatNumber;
         this.dataDir = dataDir;
         this.timeout = timeout;
+        this.benchmarkType = TYPE_STORAGE;
+        this.join = null;
     }
 
     public String getArrayName() {
@@ -119,6 +128,54 @@ public class BenchmarkContext {
 
     public void setDropData(boolean dropData) {
         this.dropData = dropData;
+    }
+
+    public String getBenchmarkType() {
+        return benchmarkType;
+    }
+
+    public void setBenchmarkType(String benchmarkType) {
+        this.benchmarkType = benchmarkType;
+    }
+
+    public boolean isStorageBenchmark() {
+        return TYPE_STORAGE.equalsIgnoreCase(benchmarkType);
+    }
+
+    public boolean isSqlMdaBenchmark() {
+        return TYPE_SQLMDA.equalsIgnoreCase(benchmarkType);
+    }
+
+    public String getBaseType() {
+        return baseType;
+    }
+
+    public void setBaseType(String baseType) {
+        this.baseType = baseType;
+    }
+
+    public BenchmarkContext getJoin() {
+        return join;
+    }
+
+    public void setJoin(BenchmarkContext join) {
+        this.join = join;
+    }
+
+    @Override
+    public BenchmarkContext clone() {
+        BenchmarkContext ret = new BenchmarkContext(maxSelectSizePercent, collTileSize, queryNumber, repeatNumber, dataDir, timeout);
+        ret.setArrayDimensionality(arrayDimensionality);
+        ret.setArrayName(arrayName);
+        ret.setArraySize(arraySize);
+        ret.setArraySizeShort(arraySizeShort);
+        ret.setBenchmarkType(benchmarkType);
+        ret.setCreateData(createData);
+        ret.setDisableBenchmark(disableBenchmark);
+        ret.setDropData(dropData);
+        ret.setBaseType(baseType);
+        ret.setJoin(join);
+        return ret;
     }
 
     @Override

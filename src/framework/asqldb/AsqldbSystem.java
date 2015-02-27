@@ -5,7 +5,6 @@ import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanSystem;
 import java.io.IOException;
-import util.Pair;
 
 /**
  *
@@ -18,15 +17,15 @@ public class AsqldbSystem extends RasdamanSystem {
         systemName = "ASQLDB";
     }
 
-    @Override
-    public Pair<String, String> createRasdamanType(int noOfDimensions, String typeType) throws Exception {
-        throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
-    }
-
-    @Override
-    public void deleteRasdamanType(String mddTypeName, String setTypeName) {
-        throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
-    }
+//    @Override
+//    public Pair<String, String> createRasdamanType(int noOfDimensions, String typeType) throws Exception {
+//        throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
+//    }
+//
+//    @Override
+//    public void deleteRasdamanType(String mddTypeName, String setTypeName) {
+//        throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
+//    }
 
     @Override
     public void restartSystem() throws Exception {

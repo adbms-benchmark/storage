@@ -1,9 +1,13 @@
 package framework.sciql;
 
 import data.DataGenerator;
+import data.DomainGenerator;
 import framework.ProcessExecutor;
 import framework.QueryExecutor;
+import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
+import framework.context.BenchmarkContextGenerator;
+import framework.context.BenchmarkContextJoin;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -69,147 +73,135 @@ public class SciQLQueryExecutor extends QueryExecutor {
     @Override
     public void createCollection() throws Exception {
 
-        String arrayName = benchContext.getArrayName();
-        if (SciQLConnection.tableExists(arrayName)) {
-            log.info("Array " + arrayName + " found, not reingesting.");
-            return;
-        }
-        log.info("Creating array " + arrayName);
+        QueryGenerator queryGenerator = systemController.getQueryGenerator(benchContext);
+        List<Pair<String, BenchmarkContext>> createQueries = queryGenerator.getCreateQueries();
 
-        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchContext.getArraySize());
-        long fileSize = domainGenerator.getFileSize(domainBoundaries);
+        for (Pair<String, BenchmarkContext> createQuery : createQueries) {
+            BenchmarkContext bc = createQuery.getSecond();
+            noOfDimensions = bc.getArrayDimensionality();
+            String arrayName = bc.getArrayName();
+            if (SciQLConnection.tableExists(arrayName)) {
+                log.info("Array " + arrayName + " found, not reingesting.");
+                return;
+            }
+            log.info("Creating array " + arrayName);
 
-        StringBuilder createArrayQuery = new StringBuilder();
-        createArrayQuery.append("CREATE ARRAY ");
-        createArrayQuery.append(arrayName);
-        createArrayQuery.append(" (");
+            DomainGenerator dg = new DomainGenerator(bc.getArrayDimensionality());
+            List<Pair<Long, Long>> domainBoundaries = dg.getDomainBoundaries(bc.getArraySize());
+            long fileSize = dg.getFileSize(domainBoundaries);
 
-        for (int i = 0; i < domainBoundaries.size(); i++) {
-            createArrayQuery.append("axis");
-            createArrayQuery.append(i);
-            createArrayQuery.append(" INT DIMENSION [");
-            Pair<Long, Long> axisDomain = domainBoundaries.get(i);
-            createArrayQuery.append(axisDomain.getFirst());
-            createArrayQuery.append(":1:");
-            createArrayQuery.append(axisDomain.getSecond());
-            createArrayQuery.append("]");
-            createArrayQuery.append(", ");
-        }
+            executeTimedQueryUpdate(createQuery.getFirst());
 
-        createArrayQuery.append(" v TINYINT");
-        createArrayQuery.append(')');
+            String outFilePath = IO.concatPaths(bc.getDataDir(), arrayName + "-1.sql");
+            File outFile = new File(outFilePath);
+            if (!outFile.exists()) {
+                log.debug("Generating random data...");
 
-        executeTimedQueryUpdate(createArrayQuery.toString());
+                updateWriters(bc, fileSize);
+                input = new SciQLInputData(null, 0, -1, -1, "");
 
-        String outFilePath = IO.concatPaths(benchContext.getDataDir(), arrayName + "-1.sql");
-        File outFile = new File(outFilePath);
-        if (!outFile.exists()) {
-            log.debug("Generating random data...");
-
-            updateWriters(fileSize);
-            input = new SciQLInputData(null, 0, -1, -1, "");
-
-            int j = 0;
-            if (noOfDimensions == 1) {
-                Pair<Long, Long> d1 = domainBoundaries.get(0);
-                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                    write(j++, i1);
-                }
-            } else if (noOfDimensions == 2) {
-                Pair<Long, Long> d1 = domainBoundaries.get(0);
-                Pair<Long, Long> d2 = domainBoundaries.get(1);
-                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                        write(j++, i1, i2);
+                int j = 0;
+                if (noOfDimensions == 1) {
+                    Pair<Long, Long> d1 = domainBoundaries.get(0);
+                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                        write(j++, i1);
                     }
-                }
-            } else if (noOfDimensions == 3) {
-                Pair<Long, Long> d1 = domainBoundaries.get(0);
-                Pair<Long, Long> d2 = domainBoundaries.get(1);
-                Pair<Long, Long> d3 = domainBoundaries.get(2);
-                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                            write(j++, i1, i2, i3);
+                } else if (noOfDimensions == 2) {
+                    Pair<Long, Long> d1 = domainBoundaries.get(0);
+                    Pair<Long, Long> d2 = domainBoundaries.get(1);
+                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                            write(j++, i1, i2);
                         }
                     }
-                }
-            } else if (noOfDimensions == 4) {
-                Pair<Long, Long> d1 = domainBoundaries.get(0);
-                Pair<Long, Long> d2 = domainBoundaries.get(1);
-                Pair<Long, Long> d3 = domainBoundaries.get(2);
-                Pair<Long, Long> d4 = domainBoundaries.get(3);
-                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                            for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
-                                write(j++, i1, i2, i3, i4);
+                } else if (noOfDimensions == 3) {
+                    Pair<Long, Long> d1 = domainBoundaries.get(0);
+                    Pair<Long, Long> d2 = domainBoundaries.get(1);
+                    Pair<Long, Long> d3 = domainBoundaries.get(2);
+                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                                write(j++, i1, i2, i3);
                             }
                         }
                     }
-                }
-            } else if (noOfDimensions == 5) {
-                Pair<Long, Long> d1 = domainBoundaries.get(0);
-                Pair<Long, Long> d2 = domainBoundaries.get(1);
-                Pair<Long, Long> d3 = domainBoundaries.get(2);
-                Pair<Long, Long> d4 = domainBoundaries.get(3);
-                Pair<Long, Long> d5 = domainBoundaries.get(4);
-                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                            for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
-                                for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
-                                    write(j++, i1, i2, i3, i4, i5);
+                } else if (noOfDimensions == 4) {
+                    Pair<Long, Long> d1 = domainBoundaries.get(0);
+                    Pair<Long, Long> d2 = domainBoundaries.get(1);
+                    Pair<Long, Long> d3 = domainBoundaries.get(2);
+                    Pair<Long, Long> d4 = domainBoundaries.get(3);
+                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                                for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
+                                    write(j++, i1, i2, i3, i4);
                                 }
                             }
                         }
                     }
-                }
-            } else if (noOfDimensions == 6) {
-                Pair<Long, Long> d1 = domainBoundaries.get(0);
-                Pair<Long, Long> d2 = domainBoundaries.get(1);
-                Pair<Long, Long> d3 = domainBoundaries.get(2);
-                Pair<Long, Long> d4 = domainBoundaries.get(3);
-                Pair<Long, Long> d5 = domainBoundaries.get(4);
-                Pair<Long, Long> d6 = domainBoundaries.get(5);
-                for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
-                    for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
-                        for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
-                            for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
-                                for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
-                                    for (long i6 = d6.getFirst(); i6 <= d6.getSecond(); i6++) {
-                                        write(j++, i1, i2, i3, i4, i5, i6);
+                } else if (noOfDimensions == 5) {
+                    Pair<Long, Long> d1 = domainBoundaries.get(0);
+                    Pair<Long, Long> d2 = domainBoundaries.get(1);
+                    Pair<Long, Long> d3 = domainBoundaries.get(2);
+                    Pair<Long, Long> d4 = domainBoundaries.get(3);
+                    Pair<Long, Long> d5 = domainBoundaries.get(4);
+                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                                for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
+                                    for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
+                                        write(j++, i1, i2, i3, i4, i5);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (noOfDimensions == 6) {
+                    Pair<Long, Long> d1 = domainBoundaries.get(0);
+                    Pair<Long, Long> d2 = domainBoundaries.get(1);
+                    Pair<Long, Long> d3 = domainBoundaries.get(2);
+                    Pair<Long, Long> d4 = domainBoundaries.get(3);
+                    Pair<Long, Long> d5 = domainBoundaries.get(4);
+                    Pair<Long, Long> d6 = domainBoundaries.get(5);
+                    for (long i1 = d1.getFirst(); i1 <= d1.getSecond(); i1++) {
+                        for (long i2 = d2.getFirst(); i2 <= d2.getSecond(); i2++) {
+                            for (long i3 = d3.getFirst(); i3 <= d3.getSecond(); i3++) {
+                                for (long i4 = d4.getFirst(); i4 <= d4.getSecond(); i4++) {
+                                    for (long i5 = d5.getFirst(); i5 <= d5.getSecond(); i5++) {
+                                        for (long i6 = d6.getFirst(); i6 <= d6.getSecond(); i6++) {
+                                            write(j++, i1, i2, i3, i4, i5, i6);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+                System.out.println("ok.");
+            } else {
+                updateWriters(bc, fileSize);
             }
-            System.out.println("ok.");
-        } else {
-            updateWriters(fileSize);
-        }
-        closeWriters();
+            closeWriters();
 
-        TimerUtil.clearTimers();
-        TimerUtil.startTimer("up");
-        SciQLConnection.close();
-        for (SciQLInputData in : inputs) {
-            ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
-            log.debug(" -> inserting file " + in.file);
-            executor.executeRedirectInput(in.file);
-        }
-        SciQLConnection.open(systemController);
-        executeTimedQueryUpdate("DELETE FROM " + benchContext.getArrayName().toLowerCase() + " WHERE v is NULL");
-        long insertTime = TimerUtil.getElapsedMilli("up");
-        TimerUtil.clearTimers();
-        System.out.println("time: " + insertTime + " ms");
+            TimerUtil.clearTimers();
+            TimerUtil.startTimer("up");
+            SciQLConnection.close();
+            for (SciQLInputData in : inputs) {
+                ProcessExecutor executor = new ProcessExecutor(systemController.getMclientPath(), "-d", "benchmark");
+                log.debug(" -> inserting file " + in.file);
+                executor.executeRedirectInput(in.file);
+            }
+            SciQLConnection.open(systemController);
+            executeTimedQueryUpdate("DELETE FROM " + bc.getArrayName().toLowerCase() + " WHERE v is NULL");
+            long insertTime = TimerUtil.getElapsedMilli("up");
+            TimerUtil.clearTimers();
+            System.out.println("time: " + insertTime + " ms");
 
-        File resultsDir = IO.getResultsDir();
-        File insertResultFile = new File(resultsDir.getAbsolutePath(), "SciQL_insert_results.csv");
-        IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"",
-                benchContext.getArrayName(), fileSize, -1, noOfDimensions, insertTime));
+            File resultsDir = IO.getResultsDir();
+            File insertResultFile = new File(resultsDir.getAbsolutePath(), "SciQL_insert_results.csv");
+            IO.appendLineToFile(insertResultFile.getAbsolutePath(), String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"",
+                    bc.getArrayName(), fileSize, -1, bc.getArrayDimensionality(), insertTime));
+        }
     }
 
     private void write(int j, long... indexes) throws IOException {
@@ -227,13 +219,15 @@ public class SciQLQueryExecutor extends QueryExecutor {
             b.append(index).append(' ');
         }
         byte val = data[dataIndex++];
-        if (val == -128) val = -127;
+        if (val == -128) {
+            val = -127;
+        }
         b.append(val);
         input.writer.write(b.toString());
         input.writer.newLine();
     }
 
-    private void updateWriters(long fileSize) throws IOException {
+    private void updateWriters(BenchmarkContext benchContext, long fileSize) throws IOException {
         inputs.clear();
         long partsNo = fileSize / SIZE_100MB;
         log.trace("Updating writers, file size " + fileSize);
@@ -284,14 +278,27 @@ public class SciQLQueryExecutor extends QueryExecutor {
 
     private SciQLInputData getWriter(long size) {
         long partNo = size / SIZE_100MB;
-        if (partNo == inputs.size())
+        if (partNo == inputs.size()) {
             --partNo;
+        }
         return inputs.get((int) partNo);
     }
 
     @Override
     public void dropCollection() {
-
+        if (benchContext.isSqlMdaBenchmark()) {
+            List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchContext);
+            for (BenchmarkContext bc : benchContexts) {
+                if (bc instanceof BenchmarkContextJoin) {
+                    BenchmarkContext[] joinedContexts = ((BenchmarkContextJoin) bc).getBenchmarkContexts();
+                    for (BenchmarkContext joinedContext : joinedContexts) {
+                        executeTimedQueryUpdate("DROP ARRAY " + joinedContext.getArrayName());
+                    }
+                } else {
+                    executeTimedQueryUpdate("DROP ARRAY " + bc.getArrayName());
+                }
+            }
+        }
     }
 }
 

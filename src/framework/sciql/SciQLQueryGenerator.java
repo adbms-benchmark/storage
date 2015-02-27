@@ -1,9 +1,11 @@
 package framework.sciql;
 
 import data.BenchmarkQuery;
-import data.QueryDomainGenerator;
+import data.DomainGenerator;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
+import framework.context.BenchmarkContextGenerator;
+import framework.context.BenchmarkContextJoin;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,66 @@ public class SciQLQueryGenerator extends QueryGenerator {
     public BenchmarkQuery getMiddlePointQuery() {
         List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
         return BenchmarkQuery.middlePoint(generateSciQLQuery(middlePointQueryDomain), noOfDimensions);
+    }
+
+    @Override
+    public Pair<String, BenchmarkContext> getCreateQuery(BenchmarkContext bc) {
+        DomainGenerator domainGenerator = new DomainGenerator(bc.getArrayDimensionality());
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(bc.getArraySize());
+
+        StringBuilder createArrayQuery = new StringBuilder();
+        createArrayQuery.append("CREATE ARRAY ");
+        createArrayQuery.append(bc.getArrayName());
+        createArrayQuery.append(" (");
+
+        for (int i = 0; i < domainBoundaries.size(); i++) {
+            createArrayQuery.append("axis");
+            createArrayQuery.append(i);
+            createArrayQuery.append(" INT DIMENSION [");
+            Pair<Long, Long> axisDomain = domainBoundaries.get(i);
+            createArrayQuery.append(axisDomain.getFirst());
+            createArrayQuery.append(":1:");
+            createArrayQuery.append(axisDomain.getSecond());
+            createArrayQuery.append("]");
+            createArrayQuery.append(", ");
+        }
+
+        createArrayQuery.append(" v ").append(benchContext.getBaseType());
+        createArrayQuery.append(')');
+        return Pair.of(createArrayQuery.toString(), bc);
+    }
+
+    @Override
+    public List<BenchmarkQuery> getSqlMdaBenchmarkQueries() {
+        List<BenchmarkQuery> ret = new ArrayList<>();
+
+        List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchContext);
+
+        // query 1:
+        //SELECT ADD_CELLS(
+        // POW(STDDEV_POP(z.image) -
+        //     STDDEV_SAMP(d.image), 2
+        // )[t($time)]
+        //) as costFunction
+        //FROM Dynamics AS d, Zygotic AS z,
+        //     embryo_blastoderm AS eb
+        //WHERE eb.zygotic_name = '$zygoticName' AND
+        //      eb.id = z.id AND d.id = eb.id
+        BenchmarkContextJoin bc1 = (BenchmarkContextJoin) benchContexts.get(0);
+        BenchmarkContext bcd1 = bc1.getBenchmarkContexts()[0];
+        BenchmarkContext bcz1 = bc1.getBenchmarkContexts()[1];
+        StringBuilder query1 = new StringBuilder();
+        query1.append("select abs(")
+                .append("power(stddev_pop(z.v), 2)")
+                .append(" - ")
+                .append("power(stddev_samp(d.v), 2)")
+                .append(")")
+                .append(" from ")
+                .append(bcd1.getArrayName()).append(" AS d, ")
+                .append(bcz1.getArrayName()).append(" AS z where z.axis0 = d.axis0 and z.axis1 = d.axis1;");
+        ret.add(BenchmarkQuery.unknown(query1.toString(), bcd1.getArrayDimensionality()));
+
+        return ret;
     }
 
     private String generateSciQLQuery(List<Pair<Long, Long>> domain) {

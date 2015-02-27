@@ -2,16 +2,25 @@ package framework.asqldb;
 
 import data.DataGenerator;
 import data.DomainGenerator;
-import static util.IO.HOME_DIR;
-import framework.context.BenchmarkContext;
-import framework.context.SystemContext;
+import framework.AdbmsSystem;
 import framework.QueryExecutor;
-import java.io.FileWriter;
+import framework.QueryGenerator;
+import framework.context.BenchmarkContext;
+import framework.context.BenchmarkContextGenerator;
+import framework.context.BenchmarkContextJoin;
+import framework.context.SystemContext;
+import framework.rasdaman.RasdamanQueryGenerator;
+import java.io.File;
 import java.io.InputStream;
-import java.io.PrintWriter;
+import java.util.List;
+import org.asqldb.ras.RasUtil;
 import org.asqldb.util.AsqldbConnection;
 import org.asqldb.util.TimerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.BenchmarkUtil;
 import util.IO;
+import util.Pair;
 
 /**
  *
@@ -19,7 +28,7 @@ import util.IO;
  */
 public class AsqldbQueryExecutor extends QueryExecutor {
 
-    public static final String TMP_TIFF_FILE = "/tmp/tiff2d.tif";
+    private static final Logger log = LoggerFactory.getLogger(AsqldbQueryExecutor.class);
 
     private final AsqldbSystem systemController;
 
@@ -53,62 +62,69 @@ public class AsqldbQueryExecutor extends QueryExecutor {
 
     @Override
     public void createCollection() throws Exception {
-        String benchmarkFilename = HOME_DIR + "/benchmark_insert.csv";
-        IO.deleteFile(benchmarkFilename);
 
-        try (PrintWriter pr = new PrintWriter(new FileWriter(benchmarkFilename, true))) {
+        QueryGenerator queryGenerator = systemController.getQueryGenerator(benchContext);
+        List<Pair<String, BenchmarkContext>> createQueries = queryGenerator.getCreateQueries();
 
-            pr.println("system_name,query,data_size,time_in_ms");
-            pr.flush();
-//            for (TableContext tableContext : BenchmarkContext.dataSizes) {
-//                executeTimedQuery("CREATE TABLE " + tableContext.asqldbTable1 + " (a CHAR MDARRAY [x,y])");
-//                executeTimedQuery("CREATE TABLE " + tableContext.asqldbTable2 + " (a CHAR MDARRAY [x,y])");
-//
-//                String query1 = "insert into " + tableContext.rasqlTable1 + " values decode($1)";
-//                String query2 = "insert into " + tableContext.rasqlTable2 + " values decode($1)";
-//                String fileName1 = benchContext.getDataDir() + tableContext.fileName1;
-//                String fileName2 = benchContext.getDataDir() + tableContext.fileName2;
-//
-//                TimerUtil.clearTimers();
-//                TimerUtil.startTimer("insert");
-//                SystemController.executeShellCommand(systemController.getRasqlBinary(), "-q",
-//                        query1, "-f", fileName1, "--user", "rasadmin", "--passwd", "rasadmin");
-//                long time1 = TimerUtil.getElapsedMilli("insert");
-//
-//                TimerUtil.clearTimers();
-//                TimerUtil.startTimer("insert");
-//                SystemController.executeShellCommand(systemController.getRasqlBinary(), "-q",
-//                        query2, "-f", fileName2, "--user", "rasadmin", "--passwd", "rasadmin");
-//                long time2 = TimerUtil.getElapsedMilli("insert");
-//
-//
-//                pr.println(report(systemController.getSystemName(), query1, tableContext.dataSize, time1));
-//                pr.println(report(systemController.getSystemName(), query2, tableContext.dataSize, time2));
-//
-//                Integer oid1 = ((Double) RasUtil.head(RasUtil.executeRasqlQuery("select oid(c) from " + tableContext.rasqlTable1 + " as c", true, true))).intValue();
-//                Integer oid2 = ((Double) RasUtil.head(RasUtil.executeRasqlQuery("select oid(c) from " + tableContext.rasqlTable2 + " as c", true, true))).intValue();
-//                AsqldbConnection.executeQuery("insert into " + tableContext.asqldbTable1 + " values (" + oid1 + ");");
-//                AsqldbConnection.executeQuery("insert into " + tableContext.asqldbTable2 + " values (" + oid2 + ");");
-//
-//                pr.flush();
-//            }
+        for (Pair<String, BenchmarkContext> createQuery : createQueries) {
+            BenchmarkContext bc = createQuery.getSecond();
+            noOfDimensions = bc.getArrayDimensionality();
+            String asqldbTableName = bc.getArrayName();
+            String rasCollName = BenchmarkUtil.getAsqldbCollectionNameInRasdaman(asqldbTableName, "v");
+            if (RasUtil.collectionExists(rasCollName)) {
+                log.info("Array " + asqldbTableName + " found, not reingesting.");
+                return;
+            }
+            AsqldbConnection.executeUpdateQuery(createQuery.getFirst());
 
-        } catch (Exception ex) {
-            dropCollection();
-            throw ex;
-        } finally {
+            String insertQuery = "insert into " + rasCollName + " values $1";
+            Pair<String, String> rasType = systemController.createRasdamanType(noOfDimensions, "char");
+            List<Pair<Long, Long>> domainBoundaries = new DomainGenerator(
+                    bc.getArrayDimensionality()).getDomainBoundaries(bc.getArraySize());
+            dataGenerator = new DataGenerator(bc.getArraySize(), bc.getDataDir());
+            String filePath = dataGenerator.getFilePath();
+
+            TimerUtil.clearTimers();
+            TimerUtil.startTimer("insert");
+            AdbmsSystem.executeShellCommand(
+                    systemController.getQueryCommand(),
+                    "-q", insertQuery,
+                    "--user", "rasadmin",
+                    "--passwd", "rasadmin",
+                    "--mddtype", rasType.getFirst(),
+                    "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
+                    "-f", filePath);
+            Integer oid = ((Double) RasUtil.head(RasUtil.executeRasqlQuery(
+                    "select oid(c) from " + rasCollName + " as c", true, true))).intValue();
+            AsqldbConnection.executeQuery("insert into " + asqldbTableName + " values (" + oid + ");");
             AsqldbConnection.commit();
+            long insertTime = TimerUtil.getElapsedMilli("insert");
+
+            File resultsDir = IO.getResultsDir();
+            File insertResultFile = new File(resultsDir.getAbsolutePath(), "asqldb_insert_results.csv");
+            IO.appendLineToFile(insertResultFile.getAbsolutePath(),
+                    String.format("\"%s\", \"%d\", \"%d\", \"%d\", \"%d\"",
+                            asqldbTableName, bc.getArraySize(), -1, noOfDimensions, insertTime));
         }
     }
 
     @Override
     public void dropCollection() {
         try {
-//            for (TableContext tableContext : BenchmarkContext.dataSizes) {
-//                executeTimedQuery("DROP TABLE " + tableContext.asqldbTable1);
-//                executeTimedQuery("DROP TABLE " + tableContext.asqldbTable2);
-//            }
-            AsqldbConnection.commit();
+            if (benchContext.isSqlMdaBenchmark()) {
+                List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchContext);
+                for (BenchmarkContext bc : benchContexts) {
+                    if (bc instanceof BenchmarkContextJoin) {
+                        BenchmarkContext[] joinedContexts = ((BenchmarkContextJoin) bc).getBenchmarkContexts();
+                        for (BenchmarkContext joinedContext : joinedContexts) {
+                            AsqldbConnection.executeUpdateQuery("DROP TABLE " + joinedContext.getArrayName());
+                        }
+                    } else {
+                        AsqldbConnection.executeUpdateQuery("DROP TABLE " + bc.getArrayName());
+                    }
+                }
+                AsqldbConnection.commit();
+            }
         } catch (Exception ex) {
         }
     }

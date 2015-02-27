@@ -1,10 +1,11 @@
 package framework.asqldb;
 
-
 import data.BenchmarkQuery;
-import data.QueryDomainGenerator;
-import framework.context.BenchmarkContext;
+import data.DomainGenerator;
 import framework.QueryGenerator;
+import framework.context.BenchmarkContext;
+import framework.context.BenchmarkContextGenerator;
+import framework.context.BenchmarkContextJoin;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -40,6 +41,68 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     public BenchmarkQuery getMiddlePointQuery() {
         List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
         return BenchmarkQuery.middlePoint(generateRasdamanQuery(middlePointQueryDomain), noOfDimensions);
+    }
+
+    @Override
+    public Pair<String, BenchmarkContext> getCreateQuery(BenchmarkContext bc) {
+        DomainGenerator domainGenerator = new DomainGenerator(bc.getArrayDimensionality());
+        List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(bc.getArraySize());
+
+        StringBuilder ret = new StringBuilder();
+        ret.append("CREATE TABLE ");
+        ret.append(bc.getArrayName());
+        ret.append(" (v ").append(bc.getBaseType());
+        ret.append(" MDARRAY[");
+
+        for (int i = 0; i < domainBoundaries.size(); i++) {
+            if (i > 0) {
+                ret.append(", ");
+            }
+            ret.append("axis");
+            ret.append(i);
+            ret.append("(");
+            Pair<Long, Long> axisDomain = domainBoundaries.get(i);
+            ret.append(axisDomain.getFirst());
+            ret.append(":");
+            ret.append(axisDomain.getSecond());
+            ret.append(")");
+        }
+
+        ret.append(']').append(')');
+        return Pair.of(ret.toString(), bc);
+    }
+
+    @Override
+    public List<BenchmarkQuery> getSqlMdaBenchmarkQueries() {
+        List<BenchmarkQuery> ret = new ArrayList<>();
+
+        List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchContext);
+
+        // query 1:
+        //SELECT ADD_CELLS(
+        // POW(STDDEV_POP(z.image) -
+        //     STDDEV_SAMP(d.image), 2
+        // )[t($time)]
+        //) as costFunction
+        //FROM Dynamics AS d, Zygotic AS z,
+        //     embryo_blastoderm AS eb
+        //WHERE eb.zygotic_name = '$zygoticName' AND
+        //      eb.id = z.id AND d.id = eb.id
+        BenchmarkContextJoin bc1 = (BenchmarkContextJoin) benchContexts.get(0);
+        BenchmarkContext bcd1 = bc1.getBenchmarkContexts()[0];
+        BenchmarkContext bcz1 = bc1.getBenchmarkContexts()[1];
+        StringBuilder query1 = new StringBuilder();
+        query1.append("select abs(")
+                .append("add_cells(pow(z.v - avg_cells(z.v), 2))/(count_cells(z.v > -1))")
+                .append(" - ")
+                .append("add_cells(pow(d.v - avg_cells(d.v), 2))/(count_cells(z.v > -1) - 1)")
+                .append(")")
+                .append(" from ")
+                .append(bcd1.getArrayName()).append(" as d, ")
+                .append(bcz1.getArrayName()).append(" AS z");
+        ret.add(BenchmarkQuery.unknown(query1.toString(), bcd1.getArrayDimensionality()));
+
+        return ret;
     }
 
     public static String convertToRasdamanDomain(List<Pair<Long, Long>> domain) {
