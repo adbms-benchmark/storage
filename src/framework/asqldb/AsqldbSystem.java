@@ -5,6 +5,7 @@ import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanSystem;
 import java.io.IOException;
+import org.asqldb.util.AsqldbConnection;
 
 /**
  *
@@ -29,9 +30,10 @@ public class AsqldbSystem extends RasdamanSystem {
 
     @Override
     public void restartSystem() throws Exception {
-//        AsqldbConnection.close();
+        super.restartSystem();
+        AsqldbConnection.close();
         // nop
-//        AsqldbConnection.open(connContext.getUrl());
+        AsqldbConnection.open(getUrl());
     }
 
     @Override
