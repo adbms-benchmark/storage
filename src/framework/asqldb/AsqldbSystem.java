@@ -1,13 +1,16 @@
 package framework.asqldb;
 
+import framework.DataManager;
 import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanSystem;
+import framework.sciql.SciQLSqlMdaBenchmarkDataManager;
 import java.io.IOException;
 import org.asqldb.util.AsqldbConnection;
 
 /**
+ * ASQLDB system manager.
  *
  * @author Dimitar Misev
  */
@@ -17,16 +20,6 @@ public class AsqldbSystem extends RasdamanSystem {
         super(propertiesPath);
         systemName = "ASQLDB";
     }
-
-//    @Override
-//    public Pair<String, String> createRasdamanType(int noOfDimensions, String typeType) throws Exception {
-//        throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
-//    }
-//
-//    @Override
-//    public void deleteRasdamanType(String mddTypeName, String setTypeName) {
-//        throw new UnsupportedOperationException("Default rasdaman datatypes (1-3D) only supported.");
-//    }
 
     @Override
     public void restartSystem() throws Exception {
@@ -43,7 +36,16 @@ public class AsqldbSystem extends RasdamanSystem {
 
     @Override
     public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
-        return new AsqldbQueryExecutor(this, benchmarkContext, this);
+        return new AsqldbQueryExecutor(this, benchmarkContext);
+    }
+
+    @Override
+    public DataManager getDataManager(BenchmarkContext benchmarkContext, QueryExecutor queryExecutor) {
+        if (benchmarkContext.isSqlMdaBenchmark()) {
+            return new AsqldbSqlMdaBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+        } else {
+            throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
+        }
     }
 
 }

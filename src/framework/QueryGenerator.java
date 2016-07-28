@@ -1,6 +1,8 @@
 package framework;
 
+import data.Benchmark;
 import data.BenchmarkQuery;
+import data.BenchmarkSession;
 import data.QueryDomainGenerator;
 import framework.context.BenchmarkContext;
 import framework.context.BenchmarkContextGenerator;
@@ -10,28 +12,26 @@ import java.util.List;
 import util.Pair;
 
 /**
+ * Generate benchmark sessions. Subclasses override it with details for specific
+ * systems.
  *
  * @author George Merticariu
+ * @author Dimitar Misev
  */
 public abstract class QueryGenerator {
 
-    protected int noOfDimensions;
     protected QueryDomainGenerator queryDomainGenerator;
-    protected BenchmarkContext benchContext;
+    protected BenchmarkContext benchmarkContext;
 
     public QueryGenerator(BenchmarkContext benchmarkContext) {
         this.queryDomainGenerator = new QueryDomainGenerator(benchmarkContext);
-        this.benchContext = benchmarkContext;
+        this.benchmarkContext = benchmarkContext;
     }
-
-    public abstract List<BenchmarkQuery> getBenchmarkQueries();
-
-    public abstract BenchmarkQuery getMiddlePointQuery();
 
     public List<Pair<String, BenchmarkContext>> getCreateQueries() {
         List<Pair<String, BenchmarkContext>> ret = new ArrayList<>();
 
-        List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchContext);
+        List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchmarkContext);
         for (BenchmarkContext bc : benchContexts) {
             if (bc instanceof BenchmarkContextJoin) {
                 BenchmarkContext[] joinedContexts = ((BenchmarkContextJoin) bc).getBenchmarkContexts();
@@ -45,11 +45,31 @@ public abstract class QueryGenerator {
         return ret;
     }
 
-    public List<BenchmarkQuery> getSqlMdaBenchmarkQueries() {
+    public Pair<String, BenchmarkContext> getCreateQuery(BenchmarkContext bc) {
         throw new UnsupportedOperationException("must be implemented by the subclass");
     }
 
-    public Pair<String, BenchmarkContext> getCreateQuery(BenchmarkContext bc) {
+    public Benchmark getBenchmark() {
+        if (this.benchmarkContext.isSqlMdaBenchmark()) {
+            return getSqlMdaBenchmark();
+        } else if (this.benchmarkContext.isStorageBenchmark()) {
+            return getStorageBenchmark();
+        } else if (this.benchmarkContext.isCachingBenchmark()) {
+            return getCachingBenchmark();
+        } else {
+            throw new RuntimeException("unknown benchmark type: " + this.benchmarkContext.getBenchmarkType());
+        }
+    }
+    
+    public Benchmark getStorageBenchmark() {
+        throw new UnsupportedOperationException("must be implemented by the subclass");
+    }
+
+    public Benchmark getSqlMdaBenchmark() {
+        throw new UnsupportedOperationException("must be implemented by the subclass");
+    }
+
+    public Benchmark getCachingBenchmark() {
         throw new UnsupportedOperationException("must be implemented by the subclass");
     }
 }

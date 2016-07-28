@@ -4,6 +4,7 @@ import framework.AdbmsSystem;
 import java.io.File;
 import java.io.IOException;
 import util.IO;
+import util.ProcessExecutor;
 
 /**
  *
@@ -34,7 +35,7 @@ public class DataGenerator {
         if (file.exists()) {
             return;
         }
-        AdbmsSystem.executeShellCommandRedirect(file.getAbsolutePath(),
+        ProcessExecutor.executeShellCommandRedirect(file.getAbsolutePath(),
                 "head", "-c", "" + fileSize, "/dev/urandom");
     }
 }

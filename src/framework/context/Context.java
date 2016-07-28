@@ -6,6 +6,8 @@ import java.util.Properties;
 import java.io.FileInputStream;
 
 /**
+ * Properties file management.
+ * 
  * @author Dimitar Misev
  * @author George Merticariu
  */
@@ -26,7 +28,7 @@ public abstract class Context {
         properties.load(propertiesFileAsStream);
     }
 
-    public String getValue(final String key) {
+    protected String getValue(final String key) {
         String ret = properties.getProperty(key);
         if (ret == null) {
             ret = "";
@@ -34,7 +36,7 @@ public abstract class Context {
         return ret;
     }
 
-    public long getValueLong(final String key) {
+    protected long getValueLong(final String key) {
         try {
             return Long.parseLong(getValue(key));
         } catch (Exception ex) {
@@ -42,7 +44,7 @@ public abstract class Context {
         }
     }
 
-    public int getValueInteger(final String key) {
+    protected int getValueInteger(final String key) {
         try {
             return Integer.parseInt(getValue(key));
         } catch (Exception ex) {

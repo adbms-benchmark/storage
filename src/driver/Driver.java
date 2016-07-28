@@ -8,11 +8,11 @@ import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.Switch;
 import framework.AdbmsSystem;
-import framework.Benchmark;
+import framework.BenchmarkExecutor;
+import framework.DataManager;
 import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
-import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ import util.Pair;
  * @author George Merticariu
  * @author Dimitar Misev
  */
-public abstract class Driver {
+public class Driver {
 
     protected static Logger log;
 
@@ -37,7 +37,8 @@ public abstract class Driver {
                     new FlaggedOption("system", JSAP.STRING_PARSER, "rasdaman,scidb,sciql", JSAP.REQUIRED,
                             's', "systems", "Array DBMS to target in this run.").setList(true).setListSeparator(','),
                     new FlaggedOption("type", JSAP.STRING_PARSER, BenchmarkContext.TYPE_STORAGE, JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
-                            "type", "Benchmark type (" + BenchmarkContext.TYPE_STORAGE + ", " + BenchmarkContext.TYPE_SQLMDA + ").").setList(true).setListSeparator(','),
+                            "type", "Benchmark type (" + BenchmarkContext.TYPE_STORAGE + ", " + BenchmarkContext.TYPE_SQLMDA 
+                                    + ", " + BenchmarkContext.TYPE_CACHING + ").").setList(true).setListSeparator(','),
                     new FlaggedOption("config", JSAP.STRING_PARSER, "conf/rasdaman.properties,conf/scidb.properties,conf/sciql.properties", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
                             "system-configs", "System configuration (connection details, directories, etc).").setList(true).setListSeparator(','),
                     new FlaggedOption("dimension", JSAP.INTEGER_PARSER, "1,2,3,4,5,6", JSAP.REQUIRED,
@@ -70,7 +71,7 @@ public abstract class Driver {
     }
 
     protected static String getMainName(Class c) {
-        return new File(c.getProtectionDomain().getCodeSource().getLocation().getFile()).getName();
+        return "run.sh";
     }
 
     protected static void setupLogger(boolean verbose, Class c) {
@@ -111,7 +112,7 @@ public abstract class Driver {
 
         for (String system : systems) {
             String configFile = configs[configInd++];
-            AdbmsSystem systemController = AdbmsSystem.getSystemController(system, configFile);
+            AdbmsSystem adbmsSystem = AdbmsSystem.getAdbmsSystem(system, configFile);
 
             int sizeInd = 0;
             for (Pair<Long, String> size : sizes) {
@@ -123,13 +124,15 @@ public abstract class Driver {
                     benchmarkContext.setBenchmarkType(type);
                     if (benchmarkContext.isSqlMdaBenchmark()) {
                         benchmarkContext.setArrayDimensionality(2);
-                        exitCode += runBenchmark(benchmarkContext, systemController);
+                        exitCode += runBenchmark(benchmarkContext, adbmsSystem);
                     } else if (benchmarkContext.isStorageBenchmark()) {
                         for (int dimension : dimensions) {
                             benchmarkContext.setArrayDimensionality(dimension);
                             benchmarkContext.updateArrayName();
-                            exitCode += runBenchmark(benchmarkContext, systemController);
+                            exitCode += runBenchmark(benchmarkContext, adbmsSystem);
                         }
+                    } else if (benchmarkContext.isCachingBenchmark()) {
+                        exitCode += runBenchmark(benchmarkContext, adbmsSystem);
                     }
                 }
             }
@@ -142,7 +145,8 @@ public abstract class Driver {
         int exitCode = 0;
         QueryGenerator queryGenerator = systemController.getQueryGenerator(benchmarkContext);
         QueryExecutor queryExecutor = systemController.getQueryExecutor(benchmarkContext);
-        Benchmark benchmark = new Benchmark(benchmarkContext, queryGenerator, queryExecutor, systemController);
+        DataManager dataManager = systemController.getDataManager(benchmarkContext, queryExecutor);
+        BenchmarkExecutor benchmark = new BenchmarkExecutor(benchmarkContext, queryGenerator, queryExecutor, dataManager, systemController);
         try {
             benchmark.runBenchmark();
         } catch (Exception ex) {
@@ -150,6 +154,17 @@ public abstract class Driver {
             exitCode = 1;
         }
         return exitCode;
+    }
+
+    public static void main(String... args) throws Exception {
+        SimpleJSAP jsap = getCmdLineConfig(Driver.class);
+        JSAPResult config = jsap.parse(args);
+        if (jsap.messagePrinted()) {
+            System.exit(1);
+        }
+        setupLogger(config.getBoolean("verbose"), Driver.class);
+
+        System.exit(runBenchmark(config));
     }
 
 }

@@ -3,7 +3,8 @@ package framework.context;
 import java.io.IOException;
 
 /**
- *
+ * System configuration context.
+ * 
  * @author George Merticariu
  * @author Dimitar Misev
  */

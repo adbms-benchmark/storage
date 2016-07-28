@@ -1,5 +1,10 @@
 package data;
 
+/**
+ * Wraps a benchmark query including the query string, type and dimension.
+ * 
+ * @author Dimitar Misev <misev@rasdaman.com>
+ */
 public class BenchmarkQuery {
 
     public enum QueryType {

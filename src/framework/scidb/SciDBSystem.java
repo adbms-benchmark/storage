@@ -1,14 +1,18 @@
 package framework.scidb;
 
 import framework.AdbmsSystem;
+import framework.DataManager;
 import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
+import framework.rasdaman.RasdamanCachingBenchmarkDataManager;
+import framework.rasdaman.RasdamanStorageBenchmarkDataManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.IO;
+import util.ProcessExecutor;
 
 /**
  *
@@ -36,11 +40,11 @@ public class SciDBSystem extends AdbmsSystem {
     @Override
     public void restartSystem() throws Exception {
         log.debug("restarting " + systemName);
-        if (executeShellCommand(stopCommand) != 0) {
+        if (ProcessExecutor.executeShellCommand(stopCommand) != 0) {
             throw new Exception("Failed to stop the system.");
         }
 
-        if (executeShellCommand(startCommand) != 0) {
+        if (ProcessExecutor.executeShellCommand(startCommand) != 0) {
             throw new Exception("Failed to start the system.");
         }
     }
@@ -53,5 +57,16 @@ public class SciDBSystem extends AdbmsSystem {
     @Override
     public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
         return new SciDBQueryExecutor(benchmarkContext, this);
+    }
+
+    @Override
+    public DataManager getDataManager(BenchmarkContext benchmarkContext, QueryExecutor queryExecutor) {
+        if (benchmarkContext.isCachingBenchmark()) {
+            return new SciDBCachingBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+        } else if (benchmarkContext.isStorageBenchmark()) {
+            return new SciDBStorageBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+        } else {
+            throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
+        }
     }
 }

@@ -1,6 +1,7 @@
 package framework.rasdaman;
 
 
+import data.Benchmark;
 import data.BenchmarkQuery;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
@@ -21,9 +22,14 @@ public class RasdamanQueryGenerator extends QueryGenerator {
     }
 
     @Override
-    public List<BenchmarkQuery> getBenchmarkQueries() {
+    public Benchmark getCachingBenchmark() {
+        Benchmark ret = new Benchmark();
+        return ret;
+    }
 
-        List<BenchmarkQuery> queries = new ArrayList<>();
+    @Override
+    public Benchmark getStorageBenchmark() {
+        Benchmark ret = new Benchmark();
 
         List<List<Pair<Long, Long>>> sizeQueryDomain = queryDomainGenerator.getSizeQueryDomain();
         List<List<Pair<Long, Long>>> positionQueryDomain = queryDomainGenerator.getPositionQueryDomain();
@@ -31,29 +37,26 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
 
         for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-            queries.add(BenchmarkQuery.size(generateRasdamanQuery(queryDomain), noOfDimensions));
+            ret.add(BenchmarkQuery.size(generateRasdamanQuery(queryDomain), benchmarkContext.getArrayDimensionality()));
         }
 
         for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-            queries.add(BenchmarkQuery.position(generateRasdamanQuery(queryDomain), noOfDimensions));
+            ret.add(BenchmarkQuery.position(generateRasdamanQuery(queryDomain), benchmarkContext.getArrayDimensionality()));
         }
 
         for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-            queries.add(BenchmarkQuery.shape(generateRasdamanQuery(queryDomain), noOfDimensions));
+            ret.add(BenchmarkQuery.shape(generateRasdamanQuery(queryDomain), benchmarkContext.getArrayDimensionality()));
         }
 
         for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
-            queries.add(BenchmarkQuery.multipleSelect(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()), noOfDimensions));
+            ret.add(BenchmarkQuery.multipleSelect(generateMultiDomainQuery(multiAccessDomains.getFirst(), 
+                    multiAccessDomains.getSecond()), benchmarkContext.getArrayDimensionality()));
         }
-
-        return queries;
-    }
-
-    @Override
-    public BenchmarkQuery getMiddlePointQuery() {
-
+        
         List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
-        return BenchmarkQuery.middlePoint(generateRasdamanQuery(middlePointQueryDomain), noOfDimensions);
+        ret.add(BenchmarkQuery.middlePoint(generateRasdamanQuery(middlePointQueryDomain), benchmarkContext.getArrayDimensionality()));
+
+        return ret;
     }
 
     public static String convertToRasdamanDomain(List<Pair<Long, Long>> domain) {
@@ -79,10 +82,11 @@ public class RasdamanQueryGenerator extends QueryGenerator {
 
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", benchContext.getArrayName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+        return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", 
+                benchmarkContext.getArrayName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT {0}{1} FROM {0}", benchContext.getArrayName(), convertToRasdamanDomain(domain));
+        return MessageFormat.format("SELECT {0}{1} FROM {0}", benchmarkContext.getArrayName(), convertToRasdamanDomain(domain));
     }
 }

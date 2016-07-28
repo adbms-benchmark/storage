@@ -12,7 +12,7 @@ import util.Pair;
 public class DomainGenerator {
 
     public static final long DEFAULT_DOMAIN_LOWER_BOUND = 0l;
-    private int noOfDimensions;
+    private final int noOfDimensions;
 
     public DomainGenerator(int noOfDimensions) {
         this.noOfDimensions = noOfDimensions;

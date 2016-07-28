@@ -1,6 +1,7 @@
 package framework.rasdaman;
 
 import framework.AdbmsSystem;
+import framework.DataManager;
 import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.IO;
 import util.Pair;
+import util.ProcessExecutor;
 
 /**
  *
@@ -22,17 +24,9 @@ public class RasdamanSystem extends AdbmsSystem {
 
     private static final Logger log = LoggerFactory.getLogger(RasdamanSystem.class);
 
-    private static final String RASDL_BIN_KEY = "bin.rasdl";
-
-    private final String rasdlCommand;
-
     public RasdamanSystem(String propertiesPath) throws IOException {
         super(propertiesPath, RASDAMAN_SYSTEM_NAME);
-
         String binDir = IO.concatPaths(installDir, "bin");
-        String rasdlBin = getValue(RASDL_BIN_KEY);
-
-        this.rasdlCommand = IO.concatPaths(binDir, rasdlBin);
         this.queryCommand = IO.concatPaths(binDir, queryBin);
         this.startCommand = new String[]{IO.concatPaths(binDir, startBin)};
         this.stopCommand = new String[]{IO.concatPaths(binDir, stopBin)};
@@ -41,52 +35,61 @@ public class RasdamanSystem extends AdbmsSystem {
     @Override
     public void restartSystem() throws Exception {
         log.debug("restarting " + systemName);
-        if (executeShellCommand(stopCommand) != 0) {
+        if (ProcessExecutor.executeShellCommand(stopCommand) != 0) {
             throw new Exception("Failed to stop the system.");
         }
 
-        if (executeShellCommand(startCommand) != 0) {
+        if (ProcessExecutor.executeShellCommand(startCommand) != 0) {
             throw new Exception("Failed to start the system.");
         }
     }
-
-    public Pair<String, String> createRasdamanType(int noOfDimensions, String typeType) throws Exception {
-
-        String mddTypeName = MessageFormat.format("B_MDD_{0}_{1}", typeType, noOfDimensions);
-        String setTypeName = MessageFormat.format("B_SET_{0}_{1}", typeType, noOfDimensions);
-
-        String mddTypeDefinition = MessageFormat.format("typedef marray <{0}, {1}> {2};", typeType, noOfDimensions, mddTypeName);
-        String setTypeDefinition = MessageFormat.format("typedef set<{0}> {1};", mddTypeName, setTypeName);
-
-        File typeFile = File.createTempFile("rasdaman_type", null);
-        typeFile.deleteOnExit();
-
-        try (PrintWriter pr = new PrintWriter(typeFile)) {
-            pr.println(mddTypeDefinition);
-            pr.println(setTypeDefinition);
+    
+    private String getDimNames(int noOfDimensions) {
+        StringBuilder dimNames = new StringBuilder("");
+        for (int i = 0; i < noOfDimensions; i++) {
+            if (i > 0) {
+                dimNames.append(",");
+            }
+            dimNames.append("d" + i);
         }
-
-        if (executeShellCommand(rasdlCommand, "--insert", "--read", typeFile.getAbsolutePath()) != 0) {
-
+        return dimNames.toString();
+    }
+    
+    private String getBands(String... baseTypes) {
+        StringBuilder bands = new StringBuilder("");
+        for (int i = 0; i < baseTypes.length; i++) {
+            if (i > 0) {
+                bands.append(",");
+            }
+            bands.append("att").append(i).append(" ").append(baseTypes[i]);
         }
-
+        return bands.toString();
+    }
+    
+    public Pair<String, String> createRasdamanType(int noOfDimensions, String... baseTypes) throws Exception {
+        String baseType = baseTypes[0];
+        if (baseTypes.length > 0) {
+            baseType = MessageFormat.format("{0}{1}", baseType, baseTypes.length);
+            String baseTypeDefinition = MessageFormat.format("create type {0} as ({1})", baseType, getBands(baseTypes));
+            ProcessExecutor.executeShellCommand(queryCommand, "-q", baseTypeDefinition);
+        }
+        
+        String mddTypeName = MessageFormat.format("B_MDD_{0}_{1}", baseType, noOfDimensions);
+        String setTypeName = MessageFormat.format("B_SET_{0}_{1}", baseType, noOfDimensions);
+        String mddTypeDefinition = MessageFormat.format("create type {0} as {1} mdarray [ {2} ]", mddTypeName, baseType, getDimNames(noOfDimensions));
+        String setTypeDefinition = MessageFormat.format("create type {0} as set ({1})", setTypeName, mddTypeName);
+        ProcessExecutor.executeShellCommand(queryCommand, "-q", mddTypeDefinition);
+        ProcessExecutor.executeShellCommand(queryCommand, "-q", setTypeDefinition);
         return Pair.of(mddTypeName, setTypeName);
     }
 
     public void deleteRasdamanType(String mddTypeName, String setTypeName) {
-
-        if (executeShellCommand(rasdlCommand, "--delsettype", setTypeName) != 0) {
+        if (ProcessExecutor.executeShellCommand(queryCommand, "-q", "drop type " + setTypeName) != 0) {
             System.out.printf("Faild to delete set type");
         }
-
-        if (executeShellCommand(rasdlCommand, "--delmddtype", mddTypeName) != 0) {
-            System.out.printf("Failed to delete mdd type");
+        if (ProcessExecutor.executeShellCommand(queryCommand, "-q", "drop type " + mddTypeName) != 0) {
+            System.out.printf("Faild to delete set type");
         }
-
-    }
-
-    public String getRasdlCommand() {
-        return rasdlCommand;
     }
 
     @Override
@@ -96,7 +99,17 @@ public class RasdamanSystem extends AdbmsSystem {
 
     @Override
     public QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException {
-        return new RasdamanQueryExecutor(benchmarkContext, this);
+        return new RasdamanQueryExecutor(this, benchmarkContext);
     }
 
+    @Override
+    public DataManager getDataManager(BenchmarkContext benchmarkContext, QueryExecutor queryExecutor) {
+        if (benchmarkContext.isCachingBenchmark()) {
+            return new RasdamanCachingBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+        } else if (benchmarkContext.isStorageBenchmark()) {
+            return new RasdamanStorageBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+        } else {
+            throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
+        }
+    }
 }

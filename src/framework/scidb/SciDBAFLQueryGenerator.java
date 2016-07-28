@@ -1,5 +1,6 @@
 package framework.scidb;
 
+import data.Benchmark;
 import data.BenchmarkQuery;
 import data.QueryDomainGenerator;
 import framework.QueryGenerator;
@@ -20,9 +21,9 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
     }
 
     @Override
-    public List<BenchmarkQuery> getBenchmarkQueries() {
+    public Benchmark getStorageBenchmark() {
 
-        List<BenchmarkQuery> queries = new ArrayList<>();
+        Benchmark queries = new Benchmark();
 
         List<List<Pair<Long, Long>>> sizeQueryDomain = queryDomainGenerator.getSizeQueryDomain();
         List<List<Pair<Long, Long>>> positionQueryDomain = queryDomainGenerator.getPositionQueryDomain();
@@ -30,36 +31,33 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         List<Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>>> multiAccessQueryDomain = queryDomainGenerator.getMultiAccessQueryDomain();
 
         for (List<Pair<Long, Long>> queryDomain : sizeQueryDomain) {
-            queries.add(BenchmarkQuery.size(generateSciDBQuery(queryDomain), noOfDimensions));
+            queries.add(BenchmarkQuery.size(generateSciDBQuery(queryDomain), benchmarkContext.getArrayDimensionality()));
         }
 
         for (List<Pair<Long, Long>> queryDomain : positionQueryDomain) {
-            queries.add(BenchmarkQuery.position(generateSciDBQuery(queryDomain), noOfDimensions));
+            queries.add(BenchmarkQuery.position(generateSciDBQuery(queryDomain), benchmarkContext.getArrayDimensionality()));
         }
 
         for (List<Pair<Long, Long>> queryDomain : shapeQueryDomain) {
-            queries.add(BenchmarkQuery.shape(generateSciDBQuery(queryDomain), noOfDimensions));
+            queries.add(BenchmarkQuery.shape(generateSciDBQuery(queryDomain), benchmarkContext.getArrayDimensionality()));
         }
 
         for (Pair<List<Pair<Long, Long>>, List<Pair<Long, Long>>> multiAccessDomains : multiAccessQueryDomain) {
-            queries.add(BenchmarkQuery.multipleSelect(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()), noOfDimensions));
+            queries.add(BenchmarkQuery.multipleSelect(generateMultiDomainQuery(multiAccessDomains.getFirst(), multiAccessDomains.getSecond()), benchmarkContext.getArrayDimensionality()));
         }
+        
+        List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
+        queries.add(BenchmarkQuery.middlePoint(generateSciDBQuery(middlePointQueryDomain), benchmarkContext.getArrayDimensionality()));
 
         return queries;
     }
 
-    @Override
-    public BenchmarkQuery getMiddlePointQuery() {
-        List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
-        return BenchmarkQuery.middlePoint(generateSciDBQuery(middlePointQueryDomain), noOfDimensions);
-    }
-
     private String generateSciDBQuery(List<Pair<Long, Long>> domain) {
-        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBBetween(benchContext.getArrayName(), domain));
+        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBBetween(benchmarkContext.getArrayName(), domain));
     }
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
-        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBDomain(benchContext.getArrayName(), domain1, domain2));
+        return MessageFormat.format("SELECT * FROM consume((SELECT * FROM {0}))", convertToSciDBDomain(benchmarkContext.getArrayName(), domain1, domain2));
     }
 
     public static String convertToSciDBBetween(String collectionName, List<Pair<Long, Long>> domain) {

@@ -1,6 +1,8 @@
 package framework.asqldb;
 
+import data.Benchmark;
 import data.BenchmarkQuery;
+import data.BenchmarkSession;
 import data.DomainGenerator;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
@@ -24,23 +26,6 @@ public class AsqldbQueryGenerator extends QueryGenerator {
 
     public AsqldbQueryGenerator(BenchmarkContext benchmarkContext) {
         super(benchmarkContext);
-    }
-
-    @Override
-    public List<BenchmarkQuery> getBenchmarkQueries() {
-        List<BenchmarkQuery> queries = new ArrayList<>();
-//        for (TableContext tableContext : BenchmarkContext.dataSizes) {
-//            String query = "select count_cells(a >= 30 and b < 30) from " + tableContext.asqldbTable1 + " as a, "
-//                    + tableContext.asqldbTable2 + " as b";
-//            queries.add(BenchmarkQuery.unknown(query, noOfDimensions));
-//        }
-        return queries;
-    }
-
-    @Override
-    public BenchmarkQuery getMiddlePointQuery() {
-        List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
-        return BenchmarkQuery.middlePoint(generateRasdamanQuery(middlePointQueryDomain), noOfDimensions);
     }
 
     @Override
@@ -73,10 +58,18 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     }
 
     @Override
-    public List<BenchmarkQuery> getSqlMdaBenchmarkQueries() {
-        List<BenchmarkQuery> ret = new ArrayList<>();
+    public Benchmark getStorageBenchmark() {
+        Benchmark ret = new Benchmark();
+        List<Pair<Long, Long>> middlePointQueryDomain = queryDomainGenerator.getMiddlePointQueryDomain();
+        ret.add(BenchmarkQuery.middlePoint(generateRasdamanQuery(middlePointQueryDomain), benchmarkContext.getArrayDimensionality()));
+        return ret;
+    }
 
-        List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchContext);
+    @Override
+    public Benchmark getSqlMdaBenchmark() {
+        Benchmark ret = new Benchmark();
+
+        List<BenchmarkContext> benchContexts = BenchmarkContextGenerator.generate(benchmarkContext);
 
         // query 1:
         //SELECT ADD_CELLS(
@@ -129,12 +122,12 @@ public class AsqldbQueryGenerator extends QueryGenerator {
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
 //        return MessageFormat.format("SELECT count_cells(A{1} >= 0) + count_cells(A{2} >= 0) FROM {0}",
         return MessageFormat.format("SELECT avg_cells(A{1}) + avg_cells(A{2}) FROM {0}",
-                benchContext.getArrayName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
+                benchmarkContext.getArrayName(), convertToRasdamanDomain(domain1), convertToRasdamanDomain(domain2));
     }
 
     private String generateRasdamanQuery(List<Pair<Long, Long>> domain) {
         return MessageFormat.format("SELECT A{1} FROM {0}",
-                benchContext.getArrayName(), convertToRasdamanDomain(domain));
+                benchmarkContext.getArrayName(), convertToRasdamanDomain(domain));
     }
 
     public static String convertToRasdamanMddType(int noOfDimensions) {

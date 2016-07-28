@@ -1,5 +1,6 @@
 package framework;
 
+import util.ProcessExecutor;
 import framework.asqldb.AsqldbSystem;
 import framework.context.BenchmarkContext;
 import framework.context.SystemContext;
@@ -14,7 +15,8 @@ import util.StopWatch;
 import util.StringUtil;
 
 /**
- * Wrapps Array DBMS system-specific functionality, like restarting the system.
+ * Wrapps Array DBMS system-specific functionality, like restarting the system,
+ * executing queries and creating/dropping data.
  *
  * @author Dimitar Misev
  * @author George Merticariu
@@ -24,9 +26,9 @@ public abstract class AdbmsSystem extends SystemContext {
     private static final Logger log = LoggerFactory.getLogger(AdbmsSystem.class);
 
     public static final String RASDAMAN_SYSTEM_NAME = "rasdaman";
-    public static final String SCIDB_SYSTEM_NAME = "SciDB";
-    public static final String SCIQL_SYSTEM_NAME = "SciQL";
-    public static final String ASQLDB_SYSTEM_NAME = "ASQLDB";
+    public static final String SCIDB_SYSTEM_NAME = "scidb";
+    public static final String SCIQL_SYSTEM_NAME = "sciql";
+    public static final String ASQLDB_SYSTEM_NAME = "asqldb";
 
     protected String systemName;
 
@@ -49,78 +51,39 @@ public abstract class AdbmsSystem extends SystemContext {
     public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
 
     public abstract QueryExecutor getQueryExecutor(BenchmarkContext benchmarkContext) throws IOException;
+    
+    public abstract DataManager getDataManager(BenchmarkContext benchmarkContext, QueryExecutor queryExecutor);
 
-    @Override
-    public String toString() {
-        return systemName + " System:"
-                + "\n startSystemCommand=" + StringUtil.arrayToString(startCommand)
-                + "\n stopSystemCommand=" + StringUtil.arrayToString(stopCommand);
-    }
-
-    public static AdbmsSystem getSystemController(String system, String configFile) throws IOException {
+    /**
+     * Factory method for getting a concrete ADBMS system controller.
+     * @param system system identifier
+     * @param configFile system configuration file
+     * @return the concrete ADBMS controller
+     * @throws IOException if reading the config file fails.
+     */
+    public static AdbmsSystem getAdbmsSystem(String system, String configFile) throws IOException {
         switch (system) {
-            case "rasdaman":
+            case RASDAMAN_SYSTEM_NAME:
                 return new RasdamanSystem(configFile);
-            case "sciql":
+            case SCIQL_SYSTEM_NAME:
                 return new SciQLSystem(configFile);
-            case "scidb":
-            return new SciDBSystem(configFile);
-            case "asqldb":
+            case SCIDB_SYSTEM_NAME:
+                return new SciDBSystem(configFile);
+            case ASQLDB_SYSTEM_NAME:
                 return new AsqldbSystem(configFile);
             default:
                 throw new IllegalArgumentException("System " + system + " not supported.");
         }
     }
 
-    public static int executeShellCommand(String... command) {
-        return executeShellCommandRedirect(ProcessExecutor.DEV_NULL, command);
-    }
-
-    public static int executeShellCommandRedirect(String output, String... command) {
-        String cmd = StringUtil.arrayToString(command) + " > " + output;
-        log.debug("executing shell command: " + cmd);
-
-        ProcessExecutor processExecutor = new ProcessExecutor(command);
-        try {
-            StopWatch timer = new StopWatch();
-            processExecutor.executeRedirectOutput(output);
-            log.trace(" -> finished in " + timer.getElapsedTime() + " ms.");
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (processExecutor.getExitStatus() != 0) {
-            log.error("shell command failed: " + cmd);
-            log.error(" -> error: " + processExecutor.getError());
-        }
-
-        return processExecutor.getExitStatus();
-    }
-
-    public static String executeShellCommandOutput(boolean ignoreError, String... command) {
-        String cmd = StringUtil.arrayToString(command);
-        log.debug("executing shell command: " + cmd);
-
-        ProcessExecutor processExecutor = new ProcessExecutor(command);
-        try {
-            StopWatch timer = new StopWatch();
-            processExecutor.execute();
-            log.trace(" -> finished in " + timer.getElapsedTime() + " ms.");
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (processExecutor.getExitStatus() != 0 && !ignoreError) {
-            log.error("shell command failed (exit code " + processExecutor.getExitStatus() + ": " + cmd);
-            if (!"".equals(processExecutor.getError())) {
-                log.error(" -> error: " + processExecutor.getError());
-            }
-        }
-
-        return processExecutor.getOutput();
-    }
-
     public String getSystemName() {
         return systemName;
+    }
+
+    @Override
+    public String toString() {
+        return systemName + " System:"
+                + "\n startSystemCommand=" + StringUtil.arrayToString(startCommand)
+                + "\n stopSystemCommand=" + StringUtil.arrayToString(stopCommand);
     }
 }

@@ -10,6 +10,7 @@ public class BenchmarkContext {
 
     public static final String TYPE_STORAGE = "storage";
     public static final String TYPE_SQLMDA = "sql/mda";
+    public static final String TYPE_CACHING = "caching";
 
     private String arrayName;
     private long arraySize;
@@ -144,6 +145,10 @@ public class BenchmarkContext {
 
     public boolean isSqlMdaBenchmark() {
         return TYPE_SQLMDA.equalsIgnoreCase(benchmarkType);
+    }
+
+    public boolean isCachingBenchmark() {
+        return TYPE_CACHING.equalsIgnoreCase(benchmarkType);
     }
 
     public String getBaseType() {
