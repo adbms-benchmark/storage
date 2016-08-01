@@ -92,18 +92,14 @@ public class RasdamanSystem extends AdbmsSystem {
         return Pair.of(mddTypeName, setTypeName);
     }
 
-    public void deleteRasdamanType(String mddTypeName, String setTypeName) {
-        if (ProcessExecutor.executeShellCommand(queryCommand,
-                "-q", "drop type " + setTypeName,
-                "--user", getUser(),
-                "--passwd", getPassword()) != 0) {
-            System.out.printf("Faild to delete set type");
-        }
-        if (ProcessExecutor.executeShellCommand(queryCommand,
-                "-q", "drop type " + mddTypeName,
-                "--user", getUser(),
-                "--passwd", getPassword()) != 0) {
-            System.out.printf("Faild to delete set type");
+    public void deleteRasdamanType(String... typeNames) {
+        for (String typeName : typeNames) {
+            if (ProcessExecutor.executeShellCommand(queryCommand,
+                    "-q", "drop type " + typeName,
+                    "--user", getUser(),
+                    "--passwd", getPassword()) != 0) {
+                System.out.printf("Failed to delete set type");
+            }
         }
     }
 

@@ -42,7 +42,8 @@ public class BenchmarkExecutor {
     }
 
     public void runBenchmark() throws Exception {
-        log.info("Executing benchmark on " + systemController.getSystemName() + ", "
+        log.info("Executing " + benchmarkContext.getBenchmarkType() + 
+                " benchmark on " + systemController.getSystemName() + ", "
                 + benchmarkContext.getArrayDimensionality() + "D data of size "
                 + benchmarkContext.getArraySizeShort() + " (" + benchmarkContext.getArraySize() + "B)");
 
