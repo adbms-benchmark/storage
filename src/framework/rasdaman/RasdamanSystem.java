@@ -43,14 +43,6 @@ public class RasdamanSystem extends AdbmsSystem {
             throw new Exception("Failed to start the system.");
         }
     }
-    
-    public int executeRasqlQuery(String query) {
-        log.debug("executing rasql cmd: " + query);
-        return ProcessExecutor.executeShellCommand(queryCommand,
-                "-q", query,
-                "--user", getUser(),
-                "--passwd", getPassword());
-    }
 
     @Override
     public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
@@ -65,9 +57,9 @@ public class RasdamanSystem extends AdbmsSystem {
     @Override
     public DataManager getDataManager(BenchmarkContext benchmarkContext, QueryExecutor queryExecutor) {
         if (benchmarkContext.isCachingBenchmark()) {
-            return new RasdamanCachingBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+            return new RasdamanCachingBenchmarkDataManager(this, (RasdamanQueryExecutor) queryExecutor, benchmarkContext);
         } else if (benchmarkContext.isStorageBenchmark()) {
-            return new RasdamanStorageBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+            return new RasdamanStorageBenchmarkDataManager(this, (RasdamanQueryExecutor) queryExecutor, benchmarkContext);
         } else {
             throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
         }

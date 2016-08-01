@@ -21,9 +21,9 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
     private final RasdamanTypeManager typeManager;
 
     public RasdamanStorageBenchmarkDataManager(RasdamanSystem systemController, 
-            QueryExecutor<RasdamanSystem> queryExecutor, BenchmarkContext benchmarkContext) {
+            RasdamanQueryExecutor queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
-        typeManager = new RasdamanTypeManager(systemController);
+        typeManager = new RasdamanTypeManager(queryExecutor);
     }
 
     @Override

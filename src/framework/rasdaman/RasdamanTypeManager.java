@@ -5,6 +5,7 @@
  */
 package framework.rasdaman;
 
+import framework.QueryExecutor;
 import java.text.MessageFormat;
 import util.Pair;
 
@@ -15,10 +16,10 @@ import util.Pair;
  */
 public class RasdamanTypeManager {
     
-    private final RasdamanSystem systemController;
+    private final RasdamanQueryExecutor queryExecutor;
 
-    public RasdamanTypeManager(RasdamanSystem systemController) {
-        this.systemController = systemController;
+    public RasdamanTypeManager(RasdamanQueryExecutor queryExecutor) {
+        this.queryExecutor = queryExecutor;
     }
     
     private String getDimNames(int noOfDimensions) {
@@ -51,11 +52,11 @@ public class RasdamanTypeManager {
         return baseTypeName;
     }
     
-    public String createBaseType(String... baseTypes) {
+    public String createBaseType(String... baseTypes) throws Exception {
         String baseTypeName = getBaseTypeName(baseTypes);
         if (baseTypes.length > 0) {
             String baseTypeDefinition = MessageFormat.format("create type {0} as ({1})", baseTypeName, getBands(baseTypes));
-            systemController.executeRasqlQuery(baseTypeDefinition);
+            queryExecutor.executeTimedQuery(baseTypeDefinition);
         }
         return baseTypeName;
     }
@@ -65,10 +66,10 @@ public class RasdamanTypeManager {
         return mddTypeName;
     }
     
-    public String createMddType(int noOfDimensions, String baseTypeName) {
+    public String createMddType(int noOfDimensions, String baseTypeName) throws Exception {
         String mddTypeName = getMddTypeName(noOfDimensions, baseTypeName);
         String mddTypeDefinition = MessageFormat.format("create type {0} as {1} mdarray [ {2} ]", mddTypeName, baseTypeName, getDimNames(noOfDimensions));
-        systemController.executeRasqlQuery(mddTypeDefinition);
+        queryExecutor.executeTimedQuery(mddTypeDefinition);
         return mddTypeName;
     }
     
@@ -77,10 +78,10 @@ public class RasdamanTypeManager {
         return setTypeName;
     }
     
-    public String createSetType(int noOfDimensions, String baseTypeName, String mddTypeName) {
+    public String createSetType(int noOfDimensions, String baseTypeName, String mddTypeName) throws Exception {
         String setTypeName = getSetTypeName(noOfDimensions, baseTypeName);
         String setTypeDefinition = MessageFormat.format("create type {0} as set ({1})", setTypeName, mddTypeName);
-        systemController.executeRasqlQuery(setTypeDefinition);
+        queryExecutor.executeTimedQuery(setTypeDefinition);
         return setTypeName;
     }
     
@@ -91,9 +92,9 @@ public class RasdamanTypeManager {
         return Pair.of(mddTypeName, setTypeName);
     }
 
-    public void deleteTypes(String... typeNames) {
+    public void deleteTypes(String... typeNames) throws Exception {
         for (String typeName : typeNames) {
-            if (systemController.executeRasqlQuery("drop type " + typeName) != 0) {
+            if (queryExecutor.executeTimedQuery("drop type " + typeName) != 0) {
                 System.out.printf("Failed to delete set type");
             }
         }

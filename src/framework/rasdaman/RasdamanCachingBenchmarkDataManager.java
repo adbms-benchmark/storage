@@ -1,7 +1,6 @@
 package framework.rasdaman;
 
 import framework.CachingBenchmarkDataManager;
-import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
 import java.text.MessageFormat;
 import java.util.List;
@@ -15,9 +14,9 @@ public class RasdamanCachingBenchmarkDataManager extends CachingBenchmarkDataMan
     private final RasdamanTypeManager typeManager;
 
     public RasdamanCachingBenchmarkDataManager(RasdamanSystem systemController,
-            QueryExecutor<RasdamanSystem> queryExecutor, BenchmarkContext benchmarkContext) {
+            RasdamanQueryExecutor queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
-        typeManager = new RasdamanTypeManager(systemController);
+        typeManager = new RasdamanTypeManager(queryExecutor);
     }
 
     @Override

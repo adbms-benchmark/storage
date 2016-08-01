@@ -13,6 +13,7 @@ import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 import framework.context.BenchmarkContextGenerator;
 import framework.context.BenchmarkContextJoin;
+import framework.rasdaman.RasdamanQueryExecutor;
 import framework.rasdaman.RasdamanQueryGenerator;
 import framework.rasdaman.RasdamanTypeManager;
 import java.io.File;
@@ -40,7 +41,7 @@ public class AsqldbSqlMdaBenchmarkDataManager extends DataManager<AsqldbSystem> 
     public AsqldbSqlMdaBenchmarkDataManager(AsqldbSystem systemController, 
             QueryExecutor<AsqldbSystem> queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
-        typeManager = new RasdamanTypeManager(systemController);
+        typeManager = new RasdamanTypeManager(new RasdamanQueryExecutor(systemController, benchmarkContext));
     }
     
     @Override
