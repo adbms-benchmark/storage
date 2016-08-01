@@ -10,8 +10,11 @@ import framework.context.BenchmarkContext;
 import framework.rasdaman.RasdamanCachingBenchmarkDataManager;
 import static framework.rasdaman.RasdamanCachingBenchmarkDataManager.MAX_SLICE_NO;
 import static framework.rasdaman.RasdamanCachingBenchmarkDataManager.SLICE_EXT;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.IO;
 
 /**
  *
@@ -21,6 +24,13 @@ import org.slf4j.LoggerFactory;
 public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
 
     private static final Logger log = LoggerFactory.getLogger(CachingBenchmarkDataManager.class);
+    
+    public static final int MAX_SLICE_NO = 100;
+    public static final int BAND_NO = 11;
+    public static final int BAND_WIDTH = 8000;
+    public static final int BAND_HEIGHT = 8000;
+    public static final long SLICE_SIZE = 8000 * 8000 * 11 * 2;
+    public static final String SLICE_EXT = ".bin";
     
     public CachingBenchmarkDataManager(T systemController, QueryExecutor<T> queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
@@ -37,5 +47,18 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
                 log.debug("Generated benchmark data slice: " + filePath);
             }
         }
+    }
+    
+    protected List<String> getSliceFilePaths(BenchmarkContext benchmarkContext) {
+        List<String> ret = new ArrayList<>();
+        for (int i = 0; i <= MAX_SLICE_NO; i++) {
+            String sliceFileName = i + SLICE_EXT;
+            String sliceFilePath = IO.concatPaths(benchmarkContext.getDataDir(), sliceFileName);
+            if (!IO.fileExists(sliceFilePath)) {
+                break;
+            }
+            ret.add(sliceFilePath);
+        }
+        return ret;
     }
 }

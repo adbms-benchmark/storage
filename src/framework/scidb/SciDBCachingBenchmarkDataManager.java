@@ -1,7 +1,6 @@
 package framework.scidb;
 
 import framework.CachingBenchmarkDataManager;
-import framework.rasdaman.*;
 import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
 import java.text.MessageFormat;
@@ -21,10 +20,10 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
     public long loadData() throws Exception {
         long totalTime = 0;
         
-        String attributes = getAttributes(RasdamanCachingBenchmarkDataManager.BAND_NO);
+        String attributes = getAttributes(BAND_NO);
         createColl(attributes);
         
-        List<String> sliceFilePaths = RasdamanCachingBenchmarkDataManager.getSliceFilePaths(benchmarkContext);
+        List<String> sliceFilePaths = getSliceFilePaths(benchmarkContext);
         for (int i = 0; i < sliceFilePaths.size(); i++) {
             String insertDataQuery = MessageFormat.format(
                       "INSERT("
@@ -47,7 +46,7 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
     
     private void createColl(String attributes) throws Exception {
         String createQuery = String.format("CREATE ARRAY %s <%s> [ d0=0:%d,1,0, d1=0:7999,500,0, d2=0:7999,500,0 ]", 
-                benchmarkContext.getArrayName(), attributes, RasdamanCachingBenchmarkDataManager.MAX_SLICE_NO);
+                benchmarkContext.getArrayName(), attributes, MAX_SLICE_NO);
         queryExecutor.executeTimedQuery(createQuery);
     }
     
