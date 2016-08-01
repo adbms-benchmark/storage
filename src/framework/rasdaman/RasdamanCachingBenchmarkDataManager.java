@@ -20,7 +20,7 @@ public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSys
     public static final int BAND_HEIGHT = 8000;
     public static final String SLICE_EXT = ".bin";
     
-    private static final String CELL_TYPE_NAME = "ushort11";
+    private static final String BASE_TYPE_NAME = "ushort11";
     private static final String MDD_TYPE_NAME = "B_MDD_ushort11_3";
     private static final String SET_TYPE_NAME = "B_SET_ushort11_3";
 
@@ -104,7 +104,7 @@ public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSys
         long ret = queryExecutor.executeTimedQuery(dropQuery,
                 "--user", systemController.getUser(),
                 "--passwd", systemController.getPassword());
-        systemController.deleteRasdamanType(SET_TYPE_NAME, MDD_TYPE_NAME, CELL_TYPE_NAME);
+        systemController.deleteRasdamanType(SET_TYPE_NAME, MDD_TYPE_NAME, BASE_TYPE_NAME);
         return ret;
     }
 

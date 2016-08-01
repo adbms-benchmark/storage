@@ -56,58 +56,56 @@ public class BenchmarkExecutor {
                 systemController.restartSystem();
                 dataManager.loadData();
             }
-            if (benchmarkContext.isDisableBenchmark()) {
-                return;
-            }
+            if (!benchmarkContext.isDisableBenchmark()) {
+                long arraysSize = benchmarkContext.getArraySize();
+                long maxSelectSize = benchmarkContext.getMaxSelectSize();
 
-            long arraysSize = benchmarkContext.getArraySize();
-            long maxSelectSize = benchmarkContext.getMaxSelectSize();
+                Benchmark benchmark = queryGenerator.getBenchmark();
+                for (BenchmarkSession session : benchmark.getBenchmarkSessions()) {
+                    pr.println("# Benchmark session: " + session.getDescription());
+                    long totalQueryExecutionTime = 0;
+                    for (BenchmarkQuery query : session.getBenchmarkQueries()) {
+                        List<Long> queryExecutionTimes = new ArrayList<>();
+                        log.info("Executing query: " + query.getQueryString());
+                        for (int repeatIndex = 0; repeatIndex < benchmarkContext.getRepeatNumber(); ++repeatIndex) {
+                            boolean failed = true;
+                            long time = -1;
 
-            Benchmark benchmark = queryGenerator.getBenchmark();
-            for (BenchmarkSession session : benchmark.getBenchmarkSessions()) {
-                pr.println("# Benchmark session: " + session.getDescription());
-                long totalQueryExecutionTime = 0;
-                for (BenchmarkQuery query : session.getBenchmarkQueries()) {
-                    List<Long> queryExecutionTimes = new ArrayList<>();
-                    log.info("Executing query: " + query.getQueryString());
-                    for (int repeatIndex = 0; repeatIndex < benchmarkContext.getRepeatNumber(); ++repeatIndex) {
-                        boolean failed = true;
-                        long time = -1;
-
-                        for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
-                            try {
-                                systemController.restartSystem();
-                                time = queryExecutor.executeTimedQuery(query.getQueryString());
-                                log.debug(" -> " + time + "ms");
-                                failed = false;
-                            } catch (Exception ex) {
-                                log.warn(" query \"" + query.getQueryString() + "\" failed on try " + (retryIndex + 1) + ". Retrying.");
+                            for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
+                                try {
+                                    systemController.restartSystem();
+                                    time = queryExecutor.executeTimedQuery(query.getQueryString());
+                                    log.debug(" -> " + time + "ms");
+                                    failed = false;
+                                } catch (Exception ex) {
+                                    log.warn(" query \"" + query.getQueryString() + "\" failed on try " + (retryIndex + 1) + ". Retrying.");
+                                }
                             }
+                            queryExecutionTimes.add(time);
                         }
-                        queryExecutionTimes.add(time);
+
+                        StringBuilder resultLine = new StringBuilder();
+                        resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ",
+                                systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(),
+                                query.getDimensionality(), arraysSize, maxSelectSize));
+
+                        boolean isFirst = true;
+                        for (Long queryExecutionTime : queryExecutionTimes) {
+                            if (!isFirst) {
+                                resultLine.append(", ");
+                                isFirst = false;
+                            } else {
+                                totalQueryExecutionTime += queryExecutionTime;
+                            }
+                            resultLine.append(queryExecutionTime);
+                        }
+
+                        pr.println(resultLine.toString());
+                        pr.flush();
                     }
 
-                    StringBuilder resultLine = new StringBuilder();
-                    resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ",
-                            systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(),
-                            query.getDimensionality(), arraysSize, maxSelectSize));
-
-                    boolean isFirst = true;
-                    for (Long queryExecutionTime : queryExecutionTimes) {
-                        if (!isFirst) {
-                            resultLine.append(", ");
-                            isFirst = false;
-                        } else {
-                            totalQueryExecutionTime += queryExecutionTime;
-                        }
-                        resultLine.append(queryExecutionTime);
-                    }
-
-                    pr.println(resultLine.toString());
-                    pr.flush();
+                    pr.println("Benchmark session '" + session.getDescription() + "' execution time (ms): " + totalQueryExecutionTime);
                 }
-                
-                pr.println("Benchmark session '" + session.getDescription() + "' execution time (ms): " + totalQueryExecutionTime);
             }
         } finally {
             if (benchmarkContext.isDropData()) {
