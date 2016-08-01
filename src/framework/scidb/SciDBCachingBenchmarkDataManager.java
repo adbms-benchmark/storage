@@ -39,7 +39,7 @@ public class SciDBCachingBenchmarkDataManager extends DataManager<SciDBSystem> {
                     + ");",
                     benchmarkContext.getArrayName(), sliceFilePaths.get(i), i, attributes);
 
-            totalTime += queryExecutor.executeTimedQuery(insertDataQuery, "-n");
+            totalTime += queryExecutor.executeTimedQuery(insertDataQuery, "-n", "-a");
         }
         
         return totalTime;

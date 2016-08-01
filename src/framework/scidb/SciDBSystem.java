@@ -5,8 +5,6 @@ import framework.DataManager;
 import framework.QueryExecutor;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
-import framework.rasdaman.RasdamanCachingBenchmarkDataManager;
-import framework.rasdaman.RasdamanStorageBenchmarkDataManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.slf4j.Logger;
