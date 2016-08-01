@@ -25,13 +25,11 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
 
     @Override
     public long dropData() throws Exception {
-        StopWatch timer = new StopWatch();
         String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchmarkContext.getArrayName());
-        queryExecutor.executeTimedQuery(dropCollectionQuery, new String[]{
+        return queryExecutor.executeTimedQuery(dropCollectionQuery, new String[]{
                 "--user", systemController.getUser(),
                 "--passwd", systemController.getPassword()
         });
-        return timer.getElapsedTime();
     }
 
     @Override

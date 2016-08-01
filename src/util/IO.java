@@ -44,6 +44,11 @@ public class IO {
         return f.delete();
     }
 
+    public static boolean fileExists(String filePath) {
+        File f = new File(filePath);
+        return f.exists();
+    }
+
     public static void appendLineToFile(String filePath, String line) throws IOException {
         try (PrintWriter printWriter = new PrintWriter(new FileWriter(filePath, true))) {
             printWriter.println(line);
