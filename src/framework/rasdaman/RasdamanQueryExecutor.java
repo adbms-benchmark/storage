@@ -29,6 +29,10 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
         commandList.add(systemController.getQueryCommand());
         commandList.add("-q");
         commandList.add(query);
+        commandList.add("--user");
+        commandList.add(systemController.getUser());
+        commandList.add("--passwd");
+        commandList.add(systemController.getPassword());
         Collections.addAll(commandList, args);
 
         StopWatch timer = new StopWatch();

@@ -22,11 +22,15 @@ public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSys
     
     private static final String BASE_TYPE_NAME = "ushort11";
     private static final String MDD_TYPE_NAME = "B_MDD_ushort11_3";
+    private static final String MDD_TYPE_NAME_2D = "B_MDD_ushort11_2";
     private static final String SET_TYPE_NAME = "B_SET_ushort11_3";
+    
+    private final RasdamanTypeManager typeManager;
 
     public RasdamanCachingBenchmarkDataManager(RasdamanSystem systemController,
             QueryExecutor<RasdamanSystem> queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
+        typeManager = new RasdamanTypeManager(systemController);
     }
 
     @Override
@@ -43,7 +47,7 @@ public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSys
             String mddType = null;
             String mddDomain = null;
             if (i == 0) {
-                updateQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED [0:0,0:499,0:499] TILE SIZE 5500000", benchmarkContext.getArrayName());
+                updateQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:0,0:499,0:499] TILE SIZE 5500000", benchmarkContext.getArrayName());
                 mddDomain = "[0:0," + xy + "]";
                 mddType = mddTypeName;
             } else {
@@ -52,8 +56,6 @@ public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSys
                 mddType = mddTypeName2D;
             }
             totalTime += queryExecutor.executeTimedQuery(updateQuery,
-                    "--user", systemController.getUser(),
-                    "--passwd", systemController.getPassword(),
                     "-f", sliceFilePaths.get(i),
                     "--mdddomain", mddDomain,
                     "--mddtype", mddType
@@ -83,28 +85,31 @@ public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSys
      * @throws Exception
      */
     private String createColl() throws Exception {
-        Pair<String, String> type = systemController.createRasdamanType(3, "ushort", "ushort",
+        Pair<String, String> type = typeManager.createType(3, "ushort", "ushort",
                 "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort");
         String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchmarkContext.getArrayName(), type.getSecond());
-        queryExecutor.executeTimedQuery(createCollectionQuery,
-                "--user", systemController.getUser(),
-                "--passwd", systemController.getPassword());
+        queryExecutor.executeTimedQuery(createCollectionQuery);
         return type.getFirst();
     }
     
     private String create2DType() throws Exception {
-        Pair<String, String> type = systemController.createRasdamanType(2, "ushort", "ushort",
+        String baseTypeName = typeManager.getBaseTypeName("ushort", "ushort",
                 "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort");
-        return type.getFirst();
+        String mddTypeName = typeManager.createMddType(2, baseTypeName);
+        return mddTypeName;
     }
 
     @Override
     public long dropData() throws Exception {
         String dropQuery = MessageFormat.format("DROP COLLECTION {0}", benchmarkContext.getArrayName());
-        long ret = queryExecutor.executeTimedQuery(dropQuery,
-                "--user", systemController.getUser(),
-                "--passwd", systemController.getPassword());
-        systemController.deleteRasdamanType(SET_TYPE_NAME, MDD_TYPE_NAME, BASE_TYPE_NAME);
+        long ret = queryExecutor.executeTimedQuery(dropQuery);
+        
+        String baseTypeName = typeManager.getBaseTypeName("ushort", "ushort",
+                "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort", "ushort");
+        typeManager.deleteTypes(
+                typeManager.getSetTypeName(3, baseTypeName),
+                typeManager.getMddTypeName(2, baseTypeName),
+                typeManager.getMddTypeName(3, baseTypeName), baseTypeName);
         return ret;
     }
 

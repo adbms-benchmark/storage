@@ -44,63 +44,12 @@ public class RasdamanSystem extends AdbmsSystem {
         }
     }
     
-    private String getDimNames(int noOfDimensions) {
-        StringBuilder dimNames = new StringBuilder("");
-        for (int i = 0; i < noOfDimensions; i++) {
-            if (i > 0) {
-                dimNames.append(",");
-            }
-            dimNames.append("d" + i);
-        }
-        return dimNames.toString();
-    }
-    
-    private String getBands(String... baseTypes) {
-        StringBuilder bands = new StringBuilder("");
-        for (int i = 0; i < baseTypes.length; i++) {
-            if (i > 0) {
-                bands.append(",");
-            }
-            bands.append("att").append(i).append(" ").append(baseTypes[i]);
-        }
-        return bands.toString();
-    }
-    
-    public Pair<String, String> createRasdamanType(int noOfDimensions, String... baseTypes) throws Exception {
-        String baseType = baseTypes[0];
-        if (baseTypes.length > 0) {
-            baseType = MessageFormat.format("{0}{1}", baseType, baseTypes.length);
-            String baseTypeDefinition = MessageFormat.format("create type {0} as ({1})", baseType, getBands(baseTypes));
-            ProcessExecutor.executeShellCommand(queryCommand,
-                    "-q", baseTypeDefinition,
-                    "--user", getUser(),
-                    "--passwd", getPassword());
-        }
-        
-        String mddTypeName = MessageFormat.format("B_MDD_{0}_{1}", baseType, noOfDimensions);
-        String setTypeName = MessageFormat.format("B_SET_{0}_{1}", baseType, noOfDimensions);
-        String mddTypeDefinition = MessageFormat.format("create type {0} as {1} mdarray [ {2} ]", mddTypeName, baseType, getDimNames(noOfDimensions));
-        String setTypeDefinition = MessageFormat.format("create type {0} as set ({1})", setTypeName, mddTypeName);
-        ProcessExecutor.executeShellCommand(queryCommand,
-                "-q", mddTypeDefinition,
+    public int executeRasqlQuery(String query) {
+        log.debug("executing rasql cmd: " + query);
+        return ProcessExecutor.executeShellCommand(queryCommand,
+                "-q", query,
                 "--user", getUser(),
                 "--passwd", getPassword());
-        ProcessExecutor.executeShellCommand(queryCommand,
-                "-q", setTypeDefinition,
-                "--user", getUser(),
-                "--passwd", getPassword());
-        return Pair.of(mddTypeName, setTypeName);
-    }
-
-    public void deleteRasdamanType(String... typeNames) {
-        for (String typeName : typeNames) {
-            if (ProcessExecutor.executeShellCommand(queryCommand,
-                    "-q", "drop type " + typeName,
-                    "--user", getUser(),
-                    "--passwd", getPassword()) != 0) {
-                System.out.printf("Failed to delete set type");
-            }
-        }
     }
 
     @Override

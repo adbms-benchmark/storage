@@ -14,6 +14,7 @@ import framework.context.BenchmarkContext;
 import framework.context.BenchmarkContextGenerator;
 import framework.context.BenchmarkContextJoin;
 import framework.rasdaman.RasdamanQueryGenerator;
+import framework.rasdaman.RasdamanTypeManager;
 import java.io.File;
 import java.util.List;
 import org.asqldb.ras.RasUtil;
@@ -33,10 +34,13 @@ import util.StopWatch;
 public class AsqldbSqlMdaBenchmarkDataManager extends DataManager<AsqldbSystem> {
     
     private static final Logger log = LoggerFactory.getLogger(AsqldbSqlMdaBenchmarkDataManager.class);
+    
+    private final RasdamanTypeManager typeManager;
 
     public AsqldbSqlMdaBenchmarkDataManager(AsqldbSystem systemController, 
             QueryExecutor<AsqldbSystem> queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
+        typeManager = new RasdamanTypeManager(systemController);
     }
     
     @Override
@@ -57,7 +61,7 @@ public class AsqldbSqlMdaBenchmarkDataManager extends DataManager<AsqldbSystem> 
             AsqldbConnection.executeUpdateQuery(createQuery.getFirst());
 
             String insertQuery = "insert into " + rasCollName + " values $1";
-            Pair<String, String> rasType = systemController.createRasdamanType(bc.getArrayDimensionality(), "char");
+            Pair<String, String> rasType = typeManager.createType(bc.getArrayDimensionality(), "char");
             List<Pair<Long, Long>> domainBoundaries = new DomainGenerator(
                     bc.getArrayDimensionality()).getDomainBoundaries(bc.getArraySize());
             dataGenerator = new DataGenerator(bc.getArraySize(), bc.getDataDir());
@@ -67,8 +71,6 @@ public class AsqldbSqlMdaBenchmarkDataManager extends DataManager<AsqldbSystem> 
             ProcessExecutor.executeShellCommand(
                     systemController.getQueryCommand(),
                     "-q", insertQuery,
-                    "--user", "rasadmin",
-                    "--passwd", "rasadmin",
                     "--mddtype", rasType.getFirst(),
                     "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
                     "-f", filePath);

@@ -41,9 +41,9 @@ public class Driver {
                                     + ", " + BenchmarkContext.TYPE_CACHING + ").").setList(true).setListSeparator(','),
                     new FlaggedOption("config", JSAP.STRING_PARSER, "conf/rasdaman.properties,conf/scidb.properties,conf/sciql.properties", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
                             "system-configs", "System configuration (connection details, directories, etc).").setList(true).setListSeparator(','),
-                    new FlaggedOption("dimension", JSAP.INTEGER_PARSER, "1,2,3,4,5,6", JSAP.REQUIRED,
+                    new FlaggedOption("dimension", JSAP.INTEGER_PARSER, "2", JSAP.REQUIRED,
                             'd', "dimensions", "Data dimensionality to be tested.").setList(true).setListSeparator(','),
-                    new FlaggedOption("size", JSAP.STRING_PARSER, "1kB,100kB,1MB,100MB,1GB", JSAP.REQUIRED,
+                    new FlaggedOption("size", JSAP.STRING_PARSER, "1kB", JSAP.REQUIRED,
                             'b', "sizes", "Data sizes to be tested, as a number followed by B,kB,MB,GB,TB,PB,EB.").setList(true).setListSeparator(','),
                     new FlaggedOption("repeat", JSAP.INTEGER_PARSER, "5", JSAP.REQUIRED,
                             'r', "repeat", "Times to repeat each test query."),
@@ -99,6 +99,7 @@ public class Driver {
         benchmarkContext.setDropData(config.getBoolean("drop"));
         benchmarkContext.setDisableBenchmark(config.getBoolean("nobenchmark"));
 
+        String[] benchmarkTypes = config.getStringArray("type");
         String[] systems = config.getStringArray("system");
         String[] configs = config.getStringArray("config");
         if (systems.length != configs.length) {
@@ -108,7 +109,6 @@ public class Driver {
         String[] arraySizes = config.getStringArray("size");
         Pair<Long, String>[] sizes = DomainUtil.parseSizes(arraySizes);
         int[] dimensions = config.getIntArray("dimension");
-        String[] benchmarkTypes = config.getStringArray("type");
 
         for (String system : systems) {
             String configFile = configs[configInd++];

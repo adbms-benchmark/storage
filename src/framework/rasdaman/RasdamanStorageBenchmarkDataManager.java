@@ -17,19 +17,19 @@ import util.StopWatch;
  * @author Dimitar Misev <misev@rasdaman.com>
  */
 public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSystem> {
+    
+    private final RasdamanTypeManager typeManager;
 
     public RasdamanStorageBenchmarkDataManager(RasdamanSystem systemController, 
             QueryExecutor<RasdamanSystem> queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);
+        typeManager = new RasdamanTypeManager(systemController);
     }
 
     @Override
     public long dropData() throws Exception {
         String dropCollectionQuery = MessageFormat.format("DROP COLLECTION {0}", benchmarkContext.getArrayName());
-        return queryExecutor.executeTimedQuery(dropCollectionQuery, new String[]{
-                "--user", systemController.getUser(),
-                "--passwd", systemController.getPassword()
-        });
+        return queryExecutor.executeTimedQuery(dropCollectionQuery);
     }
 
     @Override
@@ -64,22 +64,18 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
             tileStructureDomain.add(Pair.of(0l, chunkSize));
         }
 
-        Pair<String, String> aChar = systemController.createRasdamanType(benchmarkContext.getArrayDimensionality(), "char");
+        Pair<String, String> aChar = typeManager.createType(benchmarkContext.getArrayDimensionality(), "char");
 
         String createCollectionQuery = String.format("CREATE COLLECTION %s %s", benchmarkContext.getArrayName(), aChar.getSecond());
-        queryExecutor.executeTimedQuery(createCollectionQuery, new String[]{
-                "--user", systemController.getUser(),
-                "--passwd", systemController.getPassword()});
+        queryExecutor.executeTimedQuery(createCollectionQuery);
 
         String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING ALIGNED %s TILE SIZE %d", 
                 benchmarkContext.getArrayName(), RasdamanQueryGenerator.convertToRasdamanDomain(tileStructureDomain), tileSize);
         System.out.println("Executing insert query: " + insertQuery);
-        insertTime = queryExecutor.executeTimedQuery(insertQuery, new String[]{
-                "--user", systemController.getUser(),
-                "--passwd", systemController.getPassword(),
+        insertTime = queryExecutor.executeTimedQuery(insertQuery,
                 "--mddtype", aChar.getFirst(),
                 "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(domainBoundaries),
-                "--file", filePath});
+                "--file", filePath);
 
         File resultsDir = IO.getResultsDir();
         File insertResultFile = new File(resultsDir.getAbsolutePath(), "rasdaman_insert_results.csv");
@@ -99,7 +95,7 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
      * @throws Exception
      */
     public long updateCollection(int slices) throws Exception {
-        Pair<String, String> aChar = systemController.createRasdamanType(benchmarkContext.getArrayDimensionality(), "char");
+        Pair<String, String> aChar = typeManager.createType(benchmarkContext.getArrayDimensionality(), "char");
         long executionTime = 1;
         switch (benchmarkContext.getArrayDimensionality()) {
             case 1: {
@@ -126,12 +122,10 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
 
                     while (!success) {
                         try {
-                            executionTime = queryExecutor.executeTimedQuery(updateQuery, new String[]{
-                                    "--user", systemController.getUser(),
-                                    "--passwd", systemController.getPassword(),
+                            executionTime = queryExecutor.executeTimedQuery(updateQuery,
                                     "--mddtype", aChar.getFirst(),
                                     "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
-                                    "--file", filePath});
+                                    "--file", filePath);
                             success = true;
                             systemController.restartSystem();
                         } catch (Exception ex) {
@@ -172,12 +166,10 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
 
                         while (!success) {
                             try {
-                                executionTime = queryExecutor.executeTimedQuery(updateQuery, new String[]{
-                                        "--user", systemController.getUser(),
-                                        "--passwd", systemController.getPassword(),
+                                executionTime = queryExecutor.executeTimedQuery(updateQuery,
                                         "--mddtype", aChar.getFirst(),
                                         "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
-                                        "--file", filePath});
+                                        "--file", filePath);
                                 success = true;
                                 systemController.restartSystem();
                             } catch (Exception ex) {
@@ -228,12 +220,10 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
 
                             while (!success) {
                                 try {
-                                    executionTime = queryExecutor.executeTimedQuery(updateQuery, new String[]{
-                                            "--user", systemController.getUser(),
-                                            "--passwd", systemController.getPassword(),
+                                    executionTime = queryExecutor.executeTimedQuery(updateQuery,
                                             "--mddtype", aChar.getFirst(),
                                             "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
-                                            "--file", filePath});
+                                            "--file", filePath);
                                     success = true;
                                 } catch (Exception ex) {
                                     systemController.restartSystem();
@@ -286,12 +276,10 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
 
                                 while (!success) {
                                     try {
-                                        executionTime = queryExecutor.executeTimedQuery(updateQuery, new String[]{
-                                                "--user", systemController.getUser(),
-                                                "--passwd", systemController.getPassword(),
+                                        executionTime = queryExecutor.executeTimedQuery(updateQuery,
                                                 "--mddtype", aChar.getFirst(),
                                                 "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
-                                                "--file", filePath});
+                                                "--file", filePath);
                                         success = true;
                                     } catch (Exception ex) {
                                         systemController.restartSystem();
@@ -352,12 +340,10 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
                                     System.out.println("Performing insert: " + insertNo);
                                     while (!success) {
                                         try {
-                                            executionTime = queryExecutor.executeTimedQuery(updateQuery, new String[]{
-                                                    "--user", systemController.getUser(),
-                                                    "--passwd", systemController.getPassword(),
+                                            executionTime = queryExecutor.executeTimedQuery(updateQuery,
                                                     "--mddtype", aChar.getFirst(),
                                                     "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
-                                                    "--file", filePath});
+                                                    "--file", filePath);
                                             success = true;
 
                                             systemController.restartSystem();
@@ -426,12 +412,10 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
                                         System.out.println("Performing insert: " + insertNo);
                                         while (!success) {
                                             try {
-                                                executionTime = queryExecutor.executeTimedQuery(updateQuery, new String[]{
-                                                        "--user", systemController.getUser(),
-                                                        "--passwd", systemController.getPassword(),
+                                                executionTime = queryExecutor.executeTimedQuery(updateQuery,
                                                         "--mddtype", aChar.getFirst(),
                                                         "--mdddomain", RasdamanQueryGenerator.convertToRasdamanDomain(shiftedAxis),
-                                                        "--file", filePath});
+                                                        "--file", filePath);
                                                 success = true;
                                                 systemController.restartSystem();
                                             } catch (Exception ex) {
