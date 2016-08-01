@@ -46,16 +46,20 @@ public class BenchmarkExecutor {
                 " benchmark on " + systemController.getSystemName() + ", "
                 + benchmarkContext.getArrayDimensionality() + "D data of size "
                 + benchmarkContext.getArraySizeShort() + " (" + benchmarkContext.getArraySize() + "B)");
+        
+        boolean alreadyDropped = false;
 
         File resultsDir = IO.getResultsDir();
         File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
 
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
-            // the query executor should check whether a collection is already created
+            
             if (benchmarkContext.isCreateData()) {
                 systemController.restartSystem();
-                dataManager.loadData();
+                long loadDataTime = dataManager.loadData();
+                pr.println("Loaded benchmark data in (ms): " + loadDataTime);
             }
+            
             if (!benchmarkContext.isDisableBenchmark()) {
                 long arraysSize = benchmarkContext.getArraySize();
                 long maxSelectSize = benchmarkContext.getMaxSelectSize();
@@ -107,10 +111,18 @@ public class BenchmarkExecutor {
                     pr.println("Benchmark session '" + session.getDescription() + "' execution time (ms): " + totalQueryExecutionTime);
                 }
             }
-        } finally {
+            
             if (benchmarkContext.isDropData()) {
                 systemController.restartSystem();
-                dataManager.dropData();
+                long dropDataTime = dataManager.dropData();
+                pr.println("Dropped benchmark data in (ms): " + dropDataTime);
+                alreadyDropped = true;
+            }
+        } finally {
+            if (benchmarkContext.isDropData() && !alreadyDropped) {
+                systemController.restartSystem();
+                long dropDataTime = dataManager.dropData();
+                log.info("Dropped benchmark data in (ms): " + dropDataTime);
             }
         }
     }
