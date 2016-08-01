@@ -78,16 +78,28 @@ public class RasdamanSystem extends AdbmsSystem {
         String setTypeName = MessageFormat.format("B_SET_{0}_{1}", baseType, noOfDimensions);
         String mddTypeDefinition = MessageFormat.format("create type {0} as {1} mdarray [ {2} ]", mddTypeName, baseType, getDimNames(noOfDimensions));
         String setTypeDefinition = MessageFormat.format("create type {0} as set ({1})", setTypeName, mddTypeName);
-        ProcessExecutor.executeShellCommand(queryCommand, "-q", mddTypeDefinition);
-        ProcessExecutor.executeShellCommand(queryCommand, "-q", setTypeDefinition);
+        ProcessExecutor.executeShellCommand(queryCommand,
+                "-q", mddTypeDefinition,
+                "--user", getUser(),
+                "--passwd", getPassword());
+        ProcessExecutor.executeShellCommand(queryCommand,
+                "-q", setTypeDefinition,
+                "--user", getUser(),
+                "--passwd", getPassword());
         return Pair.of(mddTypeName, setTypeName);
     }
 
     public void deleteRasdamanType(String mddTypeName, String setTypeName) {
-        if (ProcessExecutor.executeShellCommand(queryCommand, "-q", "drop type " + setTypeName) != 0) {
+        if (ProcessExecutor.executeShellCommand(queryCommand,
+                "-q", "drop type " + setTypeName,
+                "--user", getUser(),
+                "--passwd", getPassword()) != 0) {
             System.out.printf("Faild to delete set type");
         }
-        if (ProcessExecutor.executeShellCommand(queryCommand, "-q", "drop type " + mddTypeName) != 0) {
+        if (ProcessExecutor.executeShellCommand(queryCommand,
+                "-q", "drop type " + mddTypeName,
+                "--user", getUser(),
+                "--passwd", getPassword()) != 0) {
             System.out.printf("Faild to delete set type");
         }
     }

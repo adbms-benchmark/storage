@@ -132,6 +132,10 @@ public class Driver {
                             exitCode += runBenchmark(benchmarkContext, adbmsSystem);
                         }
                     } else if (benchmarkContext.isCachingBenchmark()) {
+                        benchmarkContext.setArrayDimensionality(3);
+                        benchmarkContext.setArraySize(138875408);
+                        benchmarkContext.setArraySizeShort("133GB");
+                        benchmarkContext.updateArrayName();
                         exitCode += runBenchmark(benchmarkContext, adbmsSystem);
                     }
                 }
