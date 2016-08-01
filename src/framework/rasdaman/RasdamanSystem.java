@@ -71,7 +71,10 @@ public class RasdamanSystem extends AdbmsSystem {
         if (baseTypes.length > 0) {
             baseType = MessageFormat.format("{0}{1}", baseType, baseTypes.length);
             String baseTypeDefinition = MessageFormat.format("create type {0} as ({1})", baseType, getBands(baseTypes));
-            ProcessExecutor.executeShellCommand(queryCommand, "-q", baseTypeDefinition);
+            ProcessExecutor.executeShellCommand(queryCommand,
+                    "-q", baseTypeDefinition,
+                    "--user", getUser(),
+                    "--passwd", getPassword());
         }
         
         String mddTypeName = MessageFormat.format("B_MDD_{0}_{1}", baseType, noOfDimensions);
