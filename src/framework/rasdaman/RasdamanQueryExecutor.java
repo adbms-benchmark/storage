@@ -33,6 +33,10 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
         commandList.add(systemController.getUser());
         commandList.add("--passwd");
         commandList.add(systemController.getPassword());
+        if (systemController.getQueryCommand().contains("directql")) {
+            commandList.add("-d");
+            commandList.add(benchmarkContext.getDataDir());
+        }
         Collections.addAll(commandList, args);
 
         StopWatch timer = new StopWatch();
