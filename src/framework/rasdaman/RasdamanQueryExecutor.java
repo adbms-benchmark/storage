@@ -35,7 +35,7 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
         commandList.add(systemController.getPassword());
         if (systemController.getQueryCommand().contains("directql")) {
             commandList.add("-d");
-            commandList.add(IO.concatPaths(benchmarkContext.getDataDir(), "RASBASE"));
+            commandList.add(IO.concatPaths(systemController.getDataDir(), "RASBASE"));
         }
         Collections.addAll(commandList, args);
 
