@@ -1,7 +1,7 @@
 package framework.scidb;
 
+import framework.CachingBenchmarkDataManager;
 import framework.rasdaman.*;
-import framework.DataManager;
 import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
 import java.text.MessageFormat;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Dimitar Misev <misev@rasdaman.com>
  */
-public class SciDBCachingBenchmarkDataManager extends DataManager<SciDBSystem> {
+public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManager<SciDBSystem> {
 
     public SciDBCachingBenchmarkDataManager(SciDBSystem systemController, 
             QueryExecutor<SciDBSystem> queryExecutor, BenchmarkContext benchmarkContext) {

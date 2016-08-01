@@ -1,5 +1,6 @@
 package framework.rasdaman;
 
+import framework.CachingBenchmarkDataManager;
 import framework.DataManager;
 import framework.QueryExecutor;
 import framework.context.BenchmarkContext;
@@ -12,12 +13,13 @@ import util.Pair;
 /**
  * @author Dimitar Misev <misev@rasdaman.com>
  */
-public class RasdamanCachingBenchmarkDataManager extends DataManager<RasdamanSystem> {
+public class RasdamanCachingBenchmarkDataManager extends CachingBenchmarkDataManager<RasdamanSystem> {
 
     public static final int MAX_SLICE_NO = 100;
     public static final int BAND_NO = 11;
     public static final int BAND_WIDTH = 8000;
     public static final int BAND_HEIGHT = 8000;
+    public static final long SLICE_SIZE = 8000 * 8000 * 11 * 2;
     public static final String SLICE_EXT = ".bin";
     
     private static final String BASE_TYPE_NAME = "ushort11";

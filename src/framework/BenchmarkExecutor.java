@@ -54,7 +54,7 @@ public class BenchmarkExecutor {
 
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
             
-            if (benchmarkContext.isCreateData()) {
+            if (benchmarkContext.isLoadData()) {
                 systemController.restartSystem();
                 long loadDataTime = dataManager.loadData();
                 pr.println("Loaded benchmark data in (ms): " + loadDataTime);

@@ -1,0 +1,41 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package framework;
+
+import data.DataGenerator;
+import framework.context.BenchmarkContext;
+import framework.rasdaman.RasdamanCachingBenchmarkDataManager;
+import static framework.rasdaman.RasdamanCachingBenchmarkDataManager.MAX_SLICE_NO;
+import static framework.rasdaman.RasdamanCachingBenchmarkDataManager.SLICE_EXT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author Dimitar Misev <misev@rasdaman.com>
+ * @param <T> ADBMS system
+ */
+public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(CachingBenchmarkDataManager.class);
+    
+    public CachingBenchmarkDataManager(T systemController, QueryExecutor<T> queryExecutor, BenchmarkContext benchmarkContext) {
+        super(systemController, queryExecutor, benchmarkContext);
+    }
+
+    @Override
+    public void generateData() throws Exception {
+        if (benchmarkContext.isGenerateData()) {
+            for (int i = 0; i <= MAX_SLICE_NO; i++) {
+                String fileName = i + SLICE_EXT;
+                DataGenerator dataGenerator = new DataGenerator(
+                        RasdamanCachingBenchmarkDataManager.SLICE_SIZE, fileName);
+                String filePath = dataGenerator.getFilePath();
+                log.debug("Generated benchmark data slice: " + filePath);
+            }
+        }
+    }
+}

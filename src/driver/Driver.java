@@ -57,10 +57,12 @@ public class Driver {
                             't', "tile-size", "Tile size, same format as for the --sizes option."),
                     new FlaggedOption("datadir", JSAP.STRING_PARSER, "/tmp", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
                             "datadir", "Data directory, for temporary and permanent data used in ingestion."),
-                    new Switch("create",
-                            'c', "create", "Create data."),
+                    new Switch("load", JSAP.NO_SHORTFLAG,
+                            "load", "Load data."),
                     new Switch("drop", JSAP.NO_SHORTFLAG,
                             "drop", "Drop data."),
+                    new Switch("generate", JSAP.NO_SHORTFLAG,
+                            "generate", "Generate benchmark data."),
                     new Switch("nobenchmark", JSAP.NO_SHORTFLAG,
                             "disable-benchmark", "Do not run benchmark, just create or drop data."),
                     new Switch("verbose",
@@ -95,8 +97,9 @@ public class Driver {
         int timeout = config.getInt("timeout");
 
         BenchmarkContext benchmarkContext = new BenchmarkContext(maxSelectSize, tileSize.getFirst(), queries, repeat, datadir, timeout);
-        benchmarkContext.setCreateData(config.getBoolean("create"));
+        benchmarkContext.setLoadData(config.getBoolean("load"));
         benchmarkContext.setDropData(config.getBoolean("drop"));
+        benchmarkContext.setGenerateData(config.getBoolean("generate"));
         benchmarkContext.setDisableBenchmark(config.getBoolean("nobenchmark"));
 
         String[] benchmarkTypes = config.getStringArray("type");

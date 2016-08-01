@@ -12,15 +12,22 @@ import util.ProcessExecutor;
  * @author Dimitar Misev
  */
 public class DataGenerator {
-    public static final String FILE_PREFIX = "benchmark_data";
 
     private final long fileSize;
     private final String dataDir;
+    private final String fileName;
     private File file;
 
     public DataGenerator(long fileSize, String dataDir) {
         this.fileSize = fileSize;
         this.dataDir = dataDir;
+        this.fileName = String.valueOf(fileSize);
+    }
+
+    public DataGenerator(long fileSize, String dataDir, String fileName) {
+        this.fileSize = fileSize;
+        this.dataDir = dataDir;
+        this.fileName = fileName;
     }
 
     public String getFilePath() throws IOException {
@@ -31,7 +38,8 @@ public class DataGenerator {
     }
 
     private void generate() throws IOException {
-        file = new File(IO.concatPaths(dataDir, String.valueOf(fileSize)));
+        String filePath = IO.concatPaths(dataDir, fileName);
+        file = new File(filePath);
         if (file.exists()) {
             return;
         }

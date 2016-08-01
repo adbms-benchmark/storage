@@ -25,8 +25,9 @@ public class BenchmarkContext {
     private final int timeout;
     
     private boolean disableBenchmark;
-    private boolean createData;
+    private boolean loadData;
     private boolean dropData;
+    private boolean generateData;
     private String benchmarkType;
 
     private String baseType;
@@ -115,12 +116,12 @@ public class BenchmarkContext {
         this.disableBenchmark = disableBenchmark;
     }
 
-    public boolean isCreateData() {
-        return createData;
+    public boolean isLoadData() {
+        return loadData;
     }
 
-    public void setCreateData(boolean createData) {
-        this.createData = createData;
+    public void setLoadData(boolean loadData) {
+        this.loadData = loadData;
     }
 
     public boolean isDropData() {
@@ -131,6 +132,14 @@ public class BenchmarkContext {
         this.dropData = dropData;
     }
 
+    public boolean isGenerateData() {
+        return generateData;
+    }
+
+    public void setGenerateData(boolean generateData) {
+        this.generateData = generateData;
+    }
+    
     public String getBenchmarkType() {
         return benchmarkType;
     }
@@ -175,7 +184,7 @@ public class BenchmarkContext {
         ret.setArraySize(arraySize);
         ret.setArraySizeShort(arraySizeShort);
         ret.setBenchmarkType(benchmarkType);
-        ret.setCreateData(createData);
+        ret.setLoadData(loadData);
         ret.setDisableBenchmark(disableBenchmark);
         ret.setDropData(dropData);
         ret.setBaseType(baseType);
