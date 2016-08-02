@@ -44,8 +44,12 @@ public class RasdamanQueryExecutor extends QueryExecutor<RasdamanSystem> {
         long result = timer.getElapsedTime();
 
         if (status != 0) {
-            System.out.println("failed, restarting system..,");
-            systemController.restartSystem();
+            if (!benchmarkContext.isCachingBenchmark()) {
+                System.out.println("failed, restarting system...");
+                systemController.restartSystem();
+            } else {
+                System.out.println("failed, retrying...");
+            }
             timer.reset();
             status = ProcessExecutor.executeShellCommand(commandList.toArray(new String[]{}));
             result = timer.getElapsedTime();

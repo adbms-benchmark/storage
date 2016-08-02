@@ -20,10 +20,16 @@ public class BenchmarkQuery {
     private final int dimensionality;
     private final QueryType queryType;
 
-    private BenchmarkQuery(String queryString, int dimensionality, QueryType queryType) {
+    public BenchmarkQuery(String queryString, int dimensionality, QueryType queryType) {
         this.queryString = queryString;
         this.dimensionality = dimensionality;
         this.queryType = queryType;
+    }
+
+    public BenchmarkQuery(String queryString) {
+        this.queryString = queryString;
+        this.dimensionality = 3;
+        this.queryType = QueryType.UNKNOWN;
     }
 
 

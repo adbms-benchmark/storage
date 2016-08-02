@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import util.IO;
 
 /**
- * Runs a benchmark, considering all the given ingredients (context, ADBMS system, 
- * query generator).
- * 
+ * Runs a benchmark, considering all the given ingredients (context, ADBMS
+ * system, query generator).
+ *
  * @author George Merticariu
  * @author Dimitar Misev
  */
@@ -42,88 +42,129 @@ public class BenchmarkExecutor {
     }
 
     public void runBenchmark() throws Exception {
-        log.info("Executing " + benchmarkContext.getBenchmarkType() + 
-                " benchmark on " + systemController.getSystemName() + ", "
+        log.info("Executing " + benchmarkContext.getBenchmarkType()
+                + " benchmark on " + systemController.getSystemName() + ", "
                 + benchmarkContext.getArrayDimensionality() + "D data of size "
                 + benchmarkContext.getArraySizeShort() + " (" + benchmarkContext.getArraySize() + "B)");
-        
+
         boolean alreadyDropped = false;
 
         File resultsDir = IO.getResultsDir();
         File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
 
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
-            
-            if (benchmarkContext.isLoadData()) {
-                systemController.restartSystem();
-                long loadDataTime = dataManager.loadData();
-                pr.println("Loaded benchmark data in (ms): " + loadDataTime);
+            loadData(pr);
+
+            runBenchmark(pr);
+
+            alreadyDropped = dropData(pr);
+        } finally {
+            if (!alreadyDropped) {
+                dropData(null);
             }
-            
-            if (!benchmarkContext.isDisableBenchmark()) {
-                long arraysSize = benchmarkContext.getArraySize();
-                long maxSelectSize = benchmarkContext.getMaxSelectSize();
+        }
+    }
 
-                Benchmark benchmark = queryGenerator.getBenchmark();
-                for (BenchmarkSession session : benchmark.getBenchmarkSessions()) {
-                    pr.println("# Benchmark session: " + session.getDescription());
-                    long totalQueryExecutionTime = 0;
-                    for (BenchmarkQuery query : session.getBenchmarkQueries()) {
-                        List<Long> queryExecutionTimes = new ArrayList<>();
-                        log.info("Executing query: " + query.getQueryString());
-                        for (int repeatIndex = 0; repeatIndex < benchmarkContext.getRepeatNumber(); ++repeatIndex) {
-                            boolean failed = true;
-                            long time = -1;
+    private boolean runBenchmark(PrintWriter pr) throws Exception {
+        if (benchmarkContext.isDisableBenchmark()) {
+            return false;
+        }
 
-                            for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
-                                try {
-                                    systemController.restartSystem();
-                                    time = queryExecutor.executeTimedQuery(query.getQueryString());
-                                    log.debug(" -> " + time + "ms");
-                                    failed = false;
-                                } catch (Exception ex) {
-                                    log.warn(" query \"" + query.getQueryString() + "\" failed on try " + (retryIndex + 1) + ". Retrying.");
-                                }
-                            }
-                            queryExecutionTimes.add(time);
-                        }
+        Benchmark benchmark = queryGenerator.getBenchmark();
+        long msElapsed = 0;
+        for (BenchmarkSession session : benchmark.getBenchmarkSessions()) {
+            msElapsed += runBenchmarkSession(session, pr);
+        }
 
-                        StringBuilder resultLine = new StringBuilder();
-                        resultLine.append(String.format("\"%s\", \"%s\", \"%s\", \"%d\", \"%d\", \"%d\", ",
-                                systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString(),
-                                query.getDimensionality(), arraysSize, maxSelectSize));
+        pr.println("----------------------------------------------------------------------------");
+        pr.println("# Total benchmark execution time (ms): " + msElapsed);
 
-                        boolean isFirst = true;
-                        for (Long queryExecutionTime : queryExecutionTimes) {
-                            if (!isFirst) {
-                                resultLine.append(", ");
-                                isFirst = false;
-                            } else {
-                                totalQueryExecutionTime += queryExecutionTime;
-                            }
-                            resultLine.append(queryExecutionTime);
-                        }
+        return true;
+    }
 
-                        pr.println(resultLine.toString());
-                        pr.flush();
-                    }
+    private long runBenchmarkSession(BenchmarkSession session, PrintWriter pr) throws Exception {
+        pr.println("----------------------------------------------------------------------------");
+        pr.println("# Benchmark session: " + session.getDescription());
 
-                    pr.println("Benchmark session '" + session.getDescription() + "' execution time (ms): " + totalQueryExecutionTime);
+        systemController.restartSystem();
+        long msElapsed = 0;
+        for (BenchmarkQuery query : session.getBenchmarkQueries()) {
+            msElapsed += runBenchmarkQuery(query, pr);
+        }
+        pr.println("# Benchmark session '" + session.getDescription() + "' execution time (ms): " + msElapsed);
+        pr.flush();
+        return msElapsed;
+    }
+
+    private long runBenchmarkQuery(BenchmarkQuery query, PrintWriter pr) {
+        log.info("Executing benchmark query: " + query.getQueryString());
+        
+        List<Long> queryExecutionTimes = new ArrayList<>();
+        
+        int repeatNumber = benchmarkContext.getRepeatNumber();
+        for (int repeatIndex = 0; repeatIndex < repeatNumber; ++repeatIndex) {
+            boolean failed = true;
+            long time = -1;
+            for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
+                try {
+                    time = queryExecutor.executeTimedQuery(query.getQueryString());
+                    log.debug(" -> " + time + "ms");
+                    failed = false;
+                } catch (Exception ex) {
+                    log.warn(" query \"" + query.getQueryString() + "\" failed on try " + (retryIndex + 1) + ". Retrying.");
                 }
             }
-            
-            if (benchmarkContext.isDropData()) {
-                systemController.restartSystem();
-                long dropDataTime = dataManager.dropData();
-                pr.println("Dropped benchmark data in (ms): " + dropDataTime);
-                alreadyDropped = true;
+            queryExecutionTimes.add(time);
+        }
+
+        StringBuilder resultLine = new StringBuilder();
+        resultLine.append(String.format("%s, %s, \"%s\", ",
+                systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString()));
+        
+        if (benchmarkContext.isCachingBenchmark()) {
+            resultLine.append(benchmarkContext.getCacheSize());
+        } else {
+            resultLine.append(String.format("%d, %d, %d",
+                    query.getDimensionality(), benchmarkContext.getArraySize(), benchmarkContext.getMaxSelectSize()));
+        }
+
+        long ret = 0;
+        for (Long queryExecutionTime : queryExecutionTimes) {
+            resultLine.append(", ");
+            resultLine.append(queryExecutionTime);
+            ret = queryExecutionTime;
+        }
+
+        pr.println(resultLine.toString());
+        pr.flush();
+        return ret;
+    }
+
+    private boolean loadData(PrintWriter pr) throws Exception {
+        if (benchmarkContext.isLoadData()) {
+            systemController.restartSystem();
+            long msElapsed = dataManager.loadData();
+            if (pr != null) {
+                pr.println("Loaded benchmark data in (ms): " + msElapsed);
+            } else {
+                log.info("Loaded benchmark data in (ms): " + msElapsed);
             }
-        } finally {
-            if (benchmarkContext.isDropData() && !alreadyDropped) {
-                systemController.restartSystem();
-                long dropDataTime = dataManager.dropData();
-                log.info("Dropped benchmark data in (ms): " + dropDataTime);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean dropData(PrintWriter pr) throws Exception {
+        if (benchmarkContext.isDropData()) {
+            systemController.restartSystem();
+            long msElapsed = dataManager.dropData();
+            if (pr != null) {
+                pr.println("Dropped benchmark data in (ms): " + msElapsed);
             }
+            return true;
+        } else {
+            return false;
         }
     }
 

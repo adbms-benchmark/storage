@@ -3,6 +3,7 @@ package framework.rasdaman;
 
 import data.Benchmark;
 import data.BenchmarkQuery;
+import data.BenchmarkSession;
 import framework.QueryGenerator;
 import framework.context.BenchmarkContext;
 
@@ -24,6 +25,39 @@ public class RasdamanQueryGenerator extends QueryGenerator {
     @Override
     public Benchmark getCachingBenchmark() {
         Benchmark ret = new Benchmark();
+        
+        BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
+        
+        // compute cloud-free pixel percent, returning a 1D array for all arrays
+        String cloudCoverQuery = String.format("SELECT MARRAY i IN [0:1] VALUES "
+                + "((float) count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0)) / 64000000.0 "
+                + "FROM %s AS c", benchmarkContext.getArrayName());
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
+        
+        // run ndvi
+        String ndviQueryFormat = "SELECT (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) > 0.2)"
+                + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.4)"
+                + " FROM {1} AS c";
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 0, benchmarkContext.getArrayName())));
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 1, benchmarkContext.getArrayName())));
+        
+        // run ndvi2
+        String ndviQueryFormat2 = "SELECT ((((float)c[{0},*:*,*:*].att4 - (float)c[{0},*:*,*:*].att3) / ((float)c[{0},*:*,*:*].att4 + (float)c[{0},*:*,*:*].att3)) > 0.22)"
+                + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.45)"
+                + " FROM {1} AS c";
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 0, benchmarkContext.getArrayName())));
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 1, benchmarkContext.getArrayName())));
+        
+        // calculate SAVI on a spatial subset
+        // savi = ((NIR-R) / (NIR + R + L)) * (1+L)
+        String saviQueryFormat = "SELECT (((float)c[{0},*:2999,500:2999].att4 - (float)c[{0},*:2999,500:2999].att3) / "
+                + "((float)c[{0},*:2999,500:2999].att4 + (float)c[{0},*:2999,500:2999].att3 + 0.5)) * 1.5 "
+                + "FROM {1} AS c";
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(saviQueryFormat, 0, benchmarkContext.getArrayName())));
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(saviQueryFormat, 1, benchmarkContext.getArrayName())));
+        
+        ret.add(domainBenchmark);
+        
         return ret;
     }
 

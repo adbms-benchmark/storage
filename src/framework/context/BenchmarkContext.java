@@ -29,6 +29,7 @@ public class BenchmarkContext {
     private boolean dropData;
     private boolean generateData;
     private String benchmarkType;
+    private long cacheSize;
 
     private String baseType;
     private BenchmarkContext join;
@@ -174,6 +175,14 @@ public class BenchmarkContext {
 
     public void setJoin(BenchmarkContext join) {
         this.join = join;
+    }
+
+    public long getCacheSize() {
+        return cacheSize;
+    }
+
+    public void setCacheSize(long cacheSize) {
+        this.cacheSize = cacheSize;
     }
 
     @Override

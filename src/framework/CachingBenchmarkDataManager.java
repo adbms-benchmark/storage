@@ -7,9 +7,6 @@ package framework;
 
 import data.DataGenerator;
 import framework.context.BenchmarkContext;
-import framework.rasdaman.RasdamanCachingBenchmarkDataManager;
-import static framework.rasdaman.RasdamanCachingBenchmarkDataManager.MAX_SLICE_NO;
-import static framework.rasdaman.RasdamanCachingBenchmarkDataManager.SLICE_EXT;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -41,9 +38,8 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
         if (benchmarkContext.isGenerateData()) {
             for (int i = 0; i <= MAX_SLICE_NO; i++) {
                 String fileName = i + SLICE_EXT;
-                DataGenerator dataGenerator = new DataGenerator(
-                        RasdamanCachingBenchmarkDataManager.SLICE_SIZE, fileName);
-                String filePath = dataGenerator.getFilePath();
+                DataGenerator dataGen = new DataGenerator(SLICE_SIZE, fileName);
+                String filePath = dataGen.getFilePath();
                 log.debug("Generated benchmark data slice: " + filePath);
             }
         }
