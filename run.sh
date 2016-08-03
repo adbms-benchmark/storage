@@ -16,9 +16,9 @@ fi
 
 driver=""
 case "$1" in
-    storage) driver="driver.StorageBenchmarkDriver";;
-    caching) driver="driver.CachingBenchmarkDriver";;
-    sqlmda)  driver="driver.SqlMdaBenchmarkDriver";;
+    storage) driver="benchmark.storage.StorageBenchmarkDriver";;
+    caching) driver="benchmark.caching.CachingBenchmarkDriver";;
+    sqlmda)  driver="benchmark.sqlmda.SqlMdaBenchmarkDriver";;
     *) unexpected_type_param "$1";;
 esac
 
