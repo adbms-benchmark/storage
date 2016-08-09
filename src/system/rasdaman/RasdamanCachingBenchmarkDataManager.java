@@ -1,6 +1,6 @@
 package system.rasdaman;
 
-import benchmark.CachingBenchmarkDataManager;
+import benchmark.caching.CachingBenchmarkDataManager;
 import benchmark.BenchmarkContext;
 import java.text.MessageFormat;
 import java.util.List;

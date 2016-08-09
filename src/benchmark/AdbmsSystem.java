@@ -44,6 +44,8 @@ public abstract class AdbmsSystem extends SystemContext {
     }
 
     public abstract void restartSystem() throws Exception;
+    
+    public abstract void setSystemCacheSize(long bytes) throws IOException;
 
     public abstract QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext);
 

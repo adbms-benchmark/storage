@@ -5,10 +5,10 @@ import benchmark.BenchmarkQuery;
 import data.DomainGenerator;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
-import benchmark.BenchmarkContextGenerator;
-import benchmark.BenchmarkContextJoin;
+import benchmark.sqlmda.BenchmarkContextGenerator;
+import benchmark.sqlmda.BenchmarkContextJoin;
+import benchmark.sqlmda.SqlMdaBenchmarkContext;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import util.Pair;
 
@@ -44,7 +44,7 @@ public class SciQLQueryGenerator extends QueryGenerator {
             createArrayQuery.append(", ");
         }
 
-        createArrayQuery.append(" v ").append(benchmarkContext.getBaseType());
+        createArrayQuery.append(" v ").append(((SqlMdaBenchmarkContext)benchmarkContext).getBaseType());
         createArrayQuery.append(')');
         return Pair.of(createArrayQuery.toString(), bc);
     }

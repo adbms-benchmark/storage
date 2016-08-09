@@ -1,5 +1,6 @@
-package benchmark;
+package benchmark.sqlmda;
 
+import benchmark.BenchmarkContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,7 @@ public class BenchmarkContextGenerator {
         //WHERE eb.zygotic_name = '$zygoticName' AND
         //      eb.id = z.id AND d.id = eb.id
         initial.setArrayDimensionality(2);
-        initial.setBaseType("TINYINT");
+        ((SqlMdaBenchmarkContext)initial).setBaseType("TINYINT");
         initial.updateArrayName();
         BenchmarkContext costFunctionDynamic = initial.clone();
         costFunctionDynamic.setArrayName(initial.getArrayName() + "_Dynamic");

@@ -28,34 +28,68 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
         
         // compute cloud-free pixel percent, returning a 1D array for all arrays
-        String cloudCoverQuery = String.format("SELECT MARRAY i IN [0:1] VALUES "
-                + "((float) count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0)) / 64000000.0 "
+        String cloudCoverQuery = String.format("SELECT min_cells(MARRAY i IN [0:1] VALUES "
+                + "((float) count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0)) / 64000000.0) "
                 + "FROM %s AS c", benchmarkContext.getArrayName());
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
         
         // run ndvi
-        String ndviQueryFormat = "SELECT (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) > 0.2)"
-                + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.4)"
+        String ndviQueryFormat = "SELECT min_cells((((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) > 0.2)"
+                + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.4))"
                 + " FROM {1} AS c";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 0, benchmarkContext.getArrayName())));
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 1, benchmarkContext.getArrayName())));
         
         // run ndvi2
-        String ndviQueryFormat2 = "SELECT ((((float)c[{0},*:*,*:*].att4 - (float)c[{0},*:*,*:*].att3) / ((float)c[{0},*:*,*:*].att4 + (float)c[{0},*:*,*:*].att3)) > 0.22)"
-                + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.45)"
+        String ndviQueryFormat2 = "SELECT min_cells(((((float)c[{0},*:*,*:*].att4 - (float)c[{0},*:*,*:*].att3) / ((float)c[{0},*:*,*:*].att4 + (float)c[{0},*:*,*:*].att3)) > 0.22)"
+                + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.45))"
                 + " FROM {1} AS c";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 0, benchmarkContext.getArrayName())));
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 1, benchmarkContext.getArrayName())));
         
         // calculate SAVI on a spatial subset
         // savi = ((NIR-R) / (NIR + R + L)) * (1+L)
-        String saviQueryFormat = "SELECT (((float)c[{0},*:2999,500:2999].att4 - (float)c[{0},*:2999,500:2999].att3) / "
-                + "((float)c[{0},*:2999,500:2999].att4 + (float)c[{0},*:2999,500:2999].att3 + 0.5)) * 1.5 "
+        String saviQueryFormat = "SELECT min_cells((((float)c[{0},*:2999,500:2999].att4 - (float)c[{0},*:2999,500:2999].att3) / "
+                + "((float)c[{0},*:2999,500:2999].att4 + (float)c[{0},*:2999,500:2999].att3 + 0.5)) * 1.5) "
                 + "FROM {1} AS c";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(saviQueryFormat, 0, benchmarkContext.getArrayName())));
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(saviQueryFormat, 1, benchmarkContext.getArrayName())));
         
         ret.add(domainBenchmark);
+        
+        
+        BenchmarkSession lowerLeftToLowerRight = new BenchmarkSession("tile benchmark session lower left to lower right");
+        String subsetQuery = "SELECT min_cells(c[0,%d:%d,%d:%d]) FROM %s as c";
+        for (int i = 0; i < 10; i++) {
+            int origin = i * 100;
+            lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                    subsetQuery, origin, 3999 + origin, 0, 3999, benchmarkContext.getArrayName())));
+        }
+        ret.add(lowerLeftToLowerRight);
+        
+        BenchmarkSession lowerLeftToUpperRight = new BenchmarkSession("tile benchmark session lower left to upper right");
+        for (int i = 0; i < 10; i++) {
+            int origin = i * 100;
+            lowerLeftToUpperRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                    subsetQuery, origin, 3999 + origin, origin, 3999 + origin, benchmarkContext.getArrayName())));
+        }
+        ret.add(lowerLeftToUpperRight);
+        
+        BenchmarkSession zoomIn = new BenchmarkSession("tile benchmark session zoom in");
+        for (int i = 0; i < 3; i++) {
+            int zoom = i * 500;
+            zoomIn.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                    subsetQuery, zoom, 3999 - zoom, zoom, 3999 - zoom, benchmarkContext.getArrayName())));
+        }
+        ret.add(zoomIn);
+        
+        BenchmarkSession zoomOut = new BenchmarkSession("tile benchmark session zoom out");
+        for (int i = 2; i >= 0; i--) {
+            int zoom = i * 500;
+            zoomOut.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                    subsetQuery, zoom, 3999 - zoom, zoom, 3999 - zoom, benchmarkContext.getArrayName())));
+        }
+        ret.add(zoomOut);
         
         return ret;
     }

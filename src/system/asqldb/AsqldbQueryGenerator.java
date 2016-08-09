@@ -5,8 +5,9 @@ import benchmark.BenchmarkQuery;
 import data.DomainGenerator;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
-import benchmark.BenchmarkContextGenerator;
-import benchmark.BenchmarkContextJoin;
+import benchmark.sqlmda.BenchmarkContextGenerator;
+import benchmark.sqlmda.BenchmarkContextJoin;
+import benchmark.sqlmda.SqlMdaBenchmarkContext;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
@@ -34,7 +35,7 @@ public class AsqldbQueryGenerator extends QueryGenerator {
         StringBuilder ret = new StringBuilder();
         ret.append("CREATE TABLE ");
         ret.append(bc.getArrayName());
-        ret.append(" (v ").append(bc.getBaseType());
+        ret.append(" (v ").append(((SqlMdaBenchmarkContext)bc).getBaseType());
         ret.append(" MDARRAY[");
 
         for (int i = 0; i < domainBoundaries.size(); i++) {

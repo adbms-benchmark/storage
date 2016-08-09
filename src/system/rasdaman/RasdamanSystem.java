@@ -6,6 +6,11 @@ import benchmark.QueryExecutor;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.IO;
@@ -19,10 +24,13 @@ import util.ProcessExecutor;
 public class RasdamanSystem extends AdbmsSystem {
 
     private static final Logger log = LoggerFactory.getLogger(RasdamanSystem.class);
+    
+    private final String rasmgrConf;
 
     public RasdamanSystem(String propertiesPath) throws IOException {
         super(propertiesPath, RASDAMAN_SYSTEM_NAME);
         String binDir = IO.concatPaths(installDir, "bin");
+        this.rasmgrConf = IO.concatPaths(installDir, "etc/rasmgr.conf");
         this.queryCommand = IO.concatPaths(binDir, queryBin);
         this.startCommand = new String[]{IO.concatPaths(binDir, startBin)};
         this.stopCommand = new String[]{IO.concatPaths(binDir, stopBin)};
@@ -59,5 +67,15 @@ public class RasdamanSystem extends AdbmsSystem {
         } else {
             throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
         }
+    }
+
+    @Override
+    public void setSystemCacheSize(long bytes) throws IOException {
+        Path path = Paths.get(rasmgrConf);
+        Charset charset = StandardCharsets.UTF_8;
+
+        String rasmgrConfContent = new String(Files.readAllBytes(path), charset);
+        rasmgrConfContent = rasmgrConfContent.replaceAll("define cache -size .*", "define cache -size " + bytes);
+        Files.write(path, rasmgrConfContent.getBytes(charset));
     }
 }

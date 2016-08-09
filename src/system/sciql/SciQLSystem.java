@@ -5,8 +5,6 @@ import benchmark.DataManager;
 import benchmark.QueryExecutor;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
-import system.rasdaman.RasdamanCachingBenchmarkDataManager;
-import system.rasdaman.RasdamanStorageBenchmarkDataManager;
 import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -41,7 +39,7 @@ public class SciQLSystem extends AdbmsSystem {
         stopSystem();
         startSystem();
     }
-
+    
     private void stopSystem() throws Exception {
         log.debug("Stopping " + systemName);
         SciQLConnection.close();
@@ -90,5 +88,10 @@ public class SciQLSystem extends AdbmsSystem {
         } else {
             throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
         }
+    }
+
+    @Override
+    public void setSystemCacheSize(long bytes) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

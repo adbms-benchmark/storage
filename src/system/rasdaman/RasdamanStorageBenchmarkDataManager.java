@@ -3,6 +3,7 @@ package system.rasdaman;
 import data.RandomDataGenerator;
 import benchmark.DataManager;
 import benchmark.BenchmarkContext;
+import benchmark.storage.StorageBenchmarkContext;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class RasdamanStorageBenchmarkDataManager extends DataManager<RasdamanSys
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchmarkContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        long chunkSize = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getCollTileSize());
+        long chunkSize = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), ((StorageBenchmarkContext)benchmarkContext).getCollTileSize());
         long tileSize = (long) Math.pow(chunkSize + 1l, benchmarkContext.getArrayDimensionality());
 
         dataGenerator = new RandomDataGenerator(fileSize, benchmarkContext.getDataDir());

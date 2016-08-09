@@ -73,7 +73,7 @@ public class StorageBenchmarkDriver extends Driver {
         String datadir = config.getString("datadir");
         int timeout = config.getInt("timeout");
 
-        BenchmarkContext benchmarkContext = new BenchmarkContext(maxSelectSize, tileSize.getFirst(), queries, repeat, datadir, timeout);
+        StorageBenchmarkContext benchmarkContext = new StorageBenchmarkContext(maxSelectSize, tileSize.getFirst(), queries, repeat, datadir, timeout);
         benchmarkContext.setLoadData(config.getBoolean("load"));
         benchmarkContext.setDropData(config.getBoolean("drop"));
         benchmarkContext.setGenerateData(config.getBoolean("generate"));

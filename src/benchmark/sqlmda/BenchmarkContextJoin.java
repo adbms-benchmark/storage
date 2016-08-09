@@ -1,4 +1,6 @@
-package benchmark;
+package benchmark.sqlmda;
+
+import benchmark.BenchmarkContext;
 
 /**
  * @author George Merticariu
@@ -8,7 +10,7 @@ public class BenchmarkContextJoin extends BenchmarkContext {
     private final BenchmarkContext[] benchmarkContexts;
 
     public BenchmarkContextJoin(BenchmarkContext... benchmarkContexts) {
-        super(0, 0, 0, 0, "", 0);
+        super(0, "", 0, TYPE_SQLMDA);
         this.benchmarkContexts = benchmarkContexts;
     }
 

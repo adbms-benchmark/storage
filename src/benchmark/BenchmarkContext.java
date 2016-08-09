@@ -14,37 +14,26 @@ public class BenchmarkContext {
     public static final String TYPE_SQLMDA = "sql/mda";
     public static final String TYPE_CACHING = "caching";
 
-    private String arrayName;
-    private long arraySize;
-    private String arraySizeShort;
-    private int arrayDimensionality;
+    protected String arrayName;
+    protected long arraySize;
+    protected String arraySizeShort;
+    protected int arrayDimensionality;
 
-    private final double maxSelectSizePercent;
-    private final long collTileSize;
-    private final int queryNumber;
-    private final int repeatNumber;
-    private final String dataDir;
-    private final int timeout;
+    protected int repeatNumber;
+    protected String dataDir;
+    protected int timeout;
     
-    private boolean disableBenchmark;
-    private boolean loadData;
-    private boolean dropData;
-    private boolean generateData;
-    private String benchmarkType;
-    private long cacheSize;
+    protected boolean disableBenchmark;
+    protected boolean loadData;
+    protected boolean dropData;
+    protected boolean generateData;
+    protected String benchmarkType;
 
-    private String baseType;
-    private BenchmarkContext join;
-
-    public BenchmarkContext(double maxSelectSizePercent, long collTileSize, int queryNumber, int repeatNumber, String dataDir, int timeout) {
-        this.maxSelectSizePercent = maxSelectSizePercent;
-        this.collTileSize = collTileSize;
-        this.queryNumber = queryNumber;
+    protected BenchmarkContext(int repeatNumber, String dataDir, int timeout, String benchmarkType) {
         this.repeatNumber = repeatNumber;
         this.dataDir = dataDir;
         this.timeout = timeout;
-        this.benchmarkType = TYPE_STORAGE;
-        this.join = null;
+        this.benchmarkType = benchmarkType;
     }
 
     public String getArrayName() {
@@ -57,22 +46,6 @@ public class BenchmarkContext {
 
     public int getArrayDimensionality() {
         return arrayDimensionality;
-    }
-
-    public long getMaxSelectSize() {
-        return (long) (((double) arraySize * maxSelectSizePercent) / 100.0);
-    }
-
-    public double getMaxSelectSizePercent() {
-        return maxSelectSizePercent;
-    }
-
-    public long getCollTileSize() {
-        return collTileSize;
-    }
-
-    public int getQueryNumber() {
-        return queryNumber;
     }
 
     public int getRepeatNumber() {
@@ -162,34 +135,31 @@ public class BenchmarkContext {
     public boolean isCachingBenchmark() {
         return TYPE_CACHING.equalsIgnoreCase(benchmarkType);
     }
-
-    public String getBaseType() {
-        return baseType;
+    
+    /**
+     * Subclasses should override this method in order to get proper csv header 
+     * in the results file for each benchmarked system.
+     * 
+     * @return benchmark header specific for this context (should end with a comma).
+     */
+    public String getBenchmarkSpecificHeader() {
+        return "";
     }
-
-    public void setBaseType(String baseType) {
-        this.baseType = baseType;
-    }
-
-    public BenchmarkContext getJoin() {
-        return join;
-    }
-
-    public void setJoin(BenchmarkContext join) {
-        this.join = join;
-    }
-
-    public long getCacheSize() {
-        return cacheSize;
-    }
-
-    public void setCacheSize(long cacheSize) {
-        this.cacheSize = cacheSize;
+    
+    /**
+     * Subclasses should override this method in order to get proper csv header 
+     * in the results file for each benchmarked system.
+     * 
+     * @param query benchmark query
+     * @return result line for the evaluation of the given query (should end with a comma).
+     */
+    public String getBenchmarkResultLine(BenchmarkQuery query) {
+        return "";
     }
 
     @Override
     public BenchmarkContext clone() {
-        BenchmarkContext ret = new BenchmarkContext(maxSelectSizePercent, collTileSize, queryNumber, repeatNumber, dataDir, timeout);
+        BenchmarkContext ret = new BenchmarkContext(repeatNumber, dataDir, timeout, benchmarkType);
         ret.setArrayDimensionality(arrayDimensionality);
         ret.setArrayName(arrayName);
         ret.setArraySize(arraySize);
@@ -198,23 +168,18 @@ public class BenchmarkContext {
         ret.setLoadData(loadData);
         ret.setDisableBenchmark(disableBenchmark);
         ret.setDropData(dropData);
-        ret.setBaseType(baseType);
-        ret.setJoin(join);
         return ret;
     }
+      
 
     @Override
     public String toString() {
-        return "BenchmarkContext:\n"
-                + " arrayName=" + arrayName
-                + "\n arraySize=" + arraySize
-                + "\n arraySizeShort=" + arraySizeShort
-                + "\n arrayDimensionality=" + arrayDimensionality
-                + "\n maxSelectSize=" + maxSelectSizePercent
-                + "\n collTileSize=" + collTileSize
-                + "\n queryNumber=" + queryNumber
-                + "\n retryNumber=" + repeatNumber
-                + "\n dataDir=" + dataDir;
+        return "BenchmarkContext{" + "arrayName=" + arrayName + ", arraySize=" + 
+                arraySize + ", arraySizeShort=" + arraySizeShort + ", arrayDimensionality=" + 
+                arrayDimensionality + ", repeatNumber=" + repeatNumber + ", dataDir=" + 
+                dataDir + ", timeout=" + timeout + ", disableBenchmark=" + 
+                disableBenchmark + ", loadData=" + loadData + ", dropData=" + 
+                dropData + ", generateData=" + generateData + ", benchmarkType=" + 
+                benchmarkType + '}';
     }
-
 }

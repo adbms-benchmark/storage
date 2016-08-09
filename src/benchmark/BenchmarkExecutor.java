@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.BenchmarkUtil;
 import util.IO;
 
 /**
@@ -81,6 +82,7 @@ public class BenchmarkExecutor {
     private long runBenchmarkSession(BenchmarkSession session, PrintWriter pr) throws Exception {
         pr.println("----------------------------------------------------------------------------");
         pr.println("# Benchmark session: " + session.getDescription());
+        pr.println("System, " + benchmarkContext.getBenchmarkSpecificHeader() + "Mean execution time (ms)");
 
         systemController.restartSystem();
         long msElapsed = 0;
@@ -114,22 +116,15 @@ public class BenchmarkExecutor {
         }
 
         StringBuilder resultLine = new StringBuilder();
-        resultLine.append(String.format("%s, %s, \"%s\", ",
-                systemController.getSystemName(), query.getQueryType().toString(), query.getQueryString()));
+        resultLine.append(String.format("%s, %s",
+                systemController.getSystemName(), benchmarkContext.getBenchmarkResultLine(query)));
         
-        if (benchmarkContext.isCachingBenchmark()) {
-            resultLine.append(benchmarkContext.getCacheSize());
-        } else {
-            resultLine.append(String.format("%d, %d, %d",
-                    query.getDimensionality(), benchmarkContext.getArraySize(), benchmarkContext.getMaxSelectSize()));
-        }
-
         long ret = 0;
         for (Long queryExecutionTime : queryExecutionTimes) {
-            resultLine.append(", ");
             resultLine.append(queryExecutionTime);
-            ret = queryExecutionTime;
+            resultLine.append(", ");
         }
+        resultLine.append(BenchmarkUtil.getBenchmarkMean(queryExecutionTimes));
 
         pr.println(resultLine.toString());
         pr.flush();

@@ -1,5 +1,7 @@
 package benchmark;
 
+import benchmark.sqlmda.BenchmarkContextGenerator;
+import benchmark.sqlmda.BenchmarkContextJoin;
 import data.QueryDomainGenerator;
 import java.util.ArrayList;
 import java.util.List;

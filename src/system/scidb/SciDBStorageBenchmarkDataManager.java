@@ -4,6 +4,7 @@ import data.RandomDataGenerator;
 import benchmark.DataManager;
 import benchmark.QueryExecutor;
 import benchmark.BenchmarkContext;
+import benchmark.storage.StorageBenchmarkContext;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
@@ -39,7 +40,7 @@ public class SciDBStorageBenchmarkDataManager extends DataManager<SciDBSystem> {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchmarkContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        long chunkUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getCollTileSize());
+        long chunkUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), ((StorageBenchmarkContext)benchmarkContext).getCollTileSize());
         long chunkSize = chunkUpperBound + 1l;
         dataGenerator = new RandomDataGenerator(fileSize, benchmarkContext.getDataDir());
         String filePath = dataGenerator.getFilePath();

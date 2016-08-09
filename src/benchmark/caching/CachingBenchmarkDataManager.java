@@ -3,8 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package benchmark;
+package benchmark.caching;
 
+import benchmark.BenchmarkContext;
+import benchmark.DataManager;
+import benchmark.QueryExecutor;
 import data.RandomDataGenerator;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +24,15 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
 
     private static final Logger log = LoggerFactory.getLogger(CachingBenchmarkDataManager.class);
     
-    public static final int MAX_SLICE_NO = 100;
+    public static final int MAX_SLICE_NO = 101;
     public static final int BAND_NO = 11;
     public static final int BAND_WIDTH = 8000;
     public static final int BAND_HEIGHT = 8000;
+    
     public static final long SLICE_SIZE = 8000 * 8000 * 11 * 2;
+    public static final long DATA_SIZE = SLICE_SIZE * MAX_SLICE_NO;
+    public static final String DATA_SIZE_SHORT = "133GB";
+    
     public static final String SLICE_EXT = ".bin";
     
     public CachingBenchmarkDataManager(T systemController, QueryExecutor<T> queryExecutor, BenchmarkContext benchmarkContext) {

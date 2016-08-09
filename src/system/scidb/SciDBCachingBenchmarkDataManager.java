@@ -1,6 +1,6 @@
 package system.scidb;
 
-import benchmark.CachingBenchmarkDataManager;
+import benchmark.caching.CachingBenchmarkDataManager;
 import benchmark.QueryExecutor;
 import benchmark.BenchmarkContext;
 import java.text.MessageFormat;

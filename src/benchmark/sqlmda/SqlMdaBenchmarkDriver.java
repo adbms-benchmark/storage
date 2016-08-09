@@ -36,14 +36,8 @@ public class SqlMdaBenchmarkDriver extends StorageBenchmarkDriver {
                             'b', "sizes", "Data sizes to be tested, as a number followed by B,kB,MB,GB,TB,PB,EB.").setList(true).setListSeparator(','),
                     new FlaggedOption("repeat", JSAP.INTEGER_PARSER, "5", JSAP.REQUIRED,
                             'r', "repeat", "Times to repeat each test query."),
-                    new FlaggedOption("queries", JSAP.INTEGER_PARSER, "6", JSAP.REQUIRED,
-                            'q', "queries", "Number of queries per query category."),
-                    new FlaggedOption("max_select_size", JSAP.DOUBLE_PARSER, "10", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
-                            "max-select-size", "Maximum select size, as percentage of the array size."),
                     new FlaggedOption("timeout", JSAP.INTEGER_PARSER, "-1", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
                             "timout", "Query timeout in seconds; -1 means no query timeout."),
-                    new FlaggedOption("tilesize", JSAP.STRING_PARSER, "4MB", JSAP.REQUIRED,
-                            't', "tile-size", "Tile size, same format as for the --sizes option."),
                     new FlaggedOption("datadir", JSAP.STRING_PARSER, "/tmp", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
                             "datadir", "Data directory, for temporary and permanent data used in ingestion."),
                     new Switch("load", JSAP.NO_SHORTFLAG,
@@ -65,22 +59,16 @@ public class SqlMdaBenchmarkDriver extends StorageBenchmarkDriver {
     protected int runBenchmark(JSAPResult config) throws IOException {
         int exitCode = 0;
 
-        double maxSelectSize = config.getDouble("max_select_size");
-        Pair<Long, String> tileSize = DomainUtil.parseSize(config.getString("tilesize"));
-        int queries = config.getInt("queries");
         int repeat = config.getInt("repeat");
         String datadir = config.getString("datadir");
         int timeout = config.getInt("timeout");
 
-        BenchmarkContext benchmarkContext = new BenchmarkContext(maxSelectSize, tileSize.getFirst(), queries, repeat, datadir, timeout);
+        SqlMdaBenchmarkContext benchmarkContext = new SqlMdaBenchmarkContext(repeat, datadir, timeout);
         benchmarkContext.setLoadData(config.getBoolean("load"));
         benchmarkContext.setDropData(config.getBoolean("drop"));
         benchmarkContext.setGenerateData(config.getBoolean("generate"));
         benchmarkContext.setDisableBenchmark(config.getBoolean("nobenchmark"));
-        benchmarkContext.setBenchmarkType(BenchmarkContext.TYPE_SQLMDA);
-        benchmarkContext.setArrayDimensionality(2);
 
-        String[] benchmarkTypes = config.getStringArray("type");
         String[] systems = config.getStringArray("system");
         String[] configs = config.getStringArray("config");
         if (systems.length != configs.length) {

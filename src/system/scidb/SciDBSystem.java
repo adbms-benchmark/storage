@@ -68,4 +68,9 @@ public class SciDBSystem extends AdbmsSystem {
             throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
         }
     }
+
+    @Override
+    public void setSystemCacheSize(long bytes) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
