@@ -60,7 +60,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         String subsetQuery = "aggregate( between( slice( %s, d0, 0 ), %d, %d, %d, %d ), min(att1) )";
         for (int i = 0; i < 10; i++) {
             int origin = i * 100;
-            lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(
+            lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
                     subsetQuery, benchmarkContext.getArrayName(), origin, 0, 3999 + origin, 3999)));
         }
         ret.add(lowerLeftToLowerRight);
@@ -68,7 +68,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         BenchmarkSession lowerLeftToUpperRight = new BenchmarkSession("tile benchmark session lower left to upper right");
         for (int i = 0; i < 10; i++) {
             int origin = i * 100;
-            lowerLeftToUpperRight.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(
+            lowerLeftToUpperRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
                     subsetQuery, benchmarkContext.getArrayName(), origin, origin, 3999 + origin, 3999 + origin)));
         }
         ret.add(lowerLeftToUpperRight);
@@ -76,7 +76,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         BenchmarkSession zoomIn = new BenchmarkSession("tile benchmark session zoom in");
         for (int i = 0; i < 3; i++) {
             int zoom = i * 500;
-            zoomIn.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(
+            zoomIn.addBenchmarkQuery(new BenchmarkQuery(String.format(
                     subsetQuery, benchmarkContext.getArrayName(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
         }
         ret.add(zoomIn);
@@ -84,7 +84,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         BenchmarkSession zoomOut = new BenchmarkSession("tile benchmark session zoom out");
         for (int i = 2; i >= 0; i--) {
             int zoom = i * 500;
-            zoomOut.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(
+            zoomOut.addBenchmarkQuery(new BenchmarkQuery(String.format(
                     subsetQuery, benchmarkContext.getArrayName(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
         }
         ret.add(zoomOut);
