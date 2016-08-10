@@ -28,20 +28,20 @@ public class SciDBAQLQueryGenerator extends QueryGenerator {
         BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
         
         // compute cloud-free pixel percent, returning a 1D array for all arrays
-        String cloudCoverQuery = String.format("SELECT min_cells(MARRAY i IN [0:1] VALUES "
-                + "((float) count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0)) / 64000000.0) "
+        String cloudCoverQuery = String.format("SELECT MARRAY i IN [0:1] VALUES "
+                + "((float) count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0)) / 64000000.0 "
                 + "FROM %s AS c", benchmarkContext.getArrayName());
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
         
         // run ndvi
-        String ndviQueryFormat = "SELECT min_cells((((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) > 0.2)"
+        String ndviQueryFormat = "SELECT count_cells((((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) > 0.2)"
                 + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.4))"
                 + " FROM {1} AS c";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 0, benchmarkContext.getArrayName())));
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 1, benchmarkContext.getArrayName())));
         
         // run ndvi2
-        String ndviQueryFormat2 = "SELECT min_cells(((((float)c[{0},*:*,*:*].att4 - (float)c[{0},*:*,*:*].att3) / ((float)c[{0},*:*,*:*].att4 + (float)c[{0},*:*,*:*].att3)) > 0.22)"
+        String ndviQueryFormat2 = "SELECT count_cells(((((float)c[{0},*:*,*:*].att4 - (float)c[{0},*:*,*:*].att3) / ((float)c[{0},*:*,*:*].att4 + (float)c[{0},*:*,*:*].att3)) > 0.22)"
                 + " AND (((c[{0},*:*,*:*].att4 - c[{0},*:*,*:*].att3) / (c[{0},*:*,*:*].att4 + c[{0},*:*,*:*].att3)) < 0.45))"
                 + " FROM {1} AS c";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 0, benchmarkContext.getArrayName())));
@@ -59,7 +59,7 @@ public class SciDBAQLQueryGenerator extends QueryGenerator {
         
         
         BenchmarkSession lowerLeftToLowerRight = new BenchmarkSession("tile benchmark session lower left to lower right");
-        String subsetQuery = "SELECT min_cells(c[0,%d:%d,%d:%d]) FROM %s as c";
+        String subsetQuery = "SELECT min_cells(c[0,%d:%d,%d:%d].att1) FROM %s as c";
         for (int i = 0; i < 10; i++) {
             int origin = i * 100;
             lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(String.format(

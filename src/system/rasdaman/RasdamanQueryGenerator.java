@@ -59,7 +59,7 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         
         
         BenchmarkSession lowerLeftToLowerRight = new BenchmarkSession("tile benchmark session lower left to lower right");
-        String subsetQuery = "SELECT min_cells(c[0,%d:%d,%d:%d]) FROM %s as c";
+        String subsetQuery = "SELECT min_cells(c[0,%d:%d,%d:%d].att1) FROM %s as c";
         for (int i = 0; i < 10; i++) {
             int origin = i * 100;
             lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
