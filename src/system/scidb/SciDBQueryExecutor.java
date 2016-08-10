@@ -25,6 +25,7 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBSystem> {
         commandList.add(systemController.getQueryCommand());
         commandList.add("-q");
         commandList.add(query);
+        commandList.add("-a");
         commandList.add("-p");
         commandList.add(String.valueOf(systemController.getPort()));
         Collections.addAll(commandList, args);
