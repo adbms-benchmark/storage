@@ -7,8 +7,14 @@ import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.DomainUtil;
 import util.IO;
 import util.ProcessExecutor;
 
@@ -23,6 +29,8 @@ public class SciDBSystem extends AdbmsSystem {
 
     private static final String SYSTEM_CONTROL_KEY = "bin.system";
     private static final String CLUSTER_NAME_KEY = "cluster.name";
+    
+    private final String configIni;
 
     public SciDBSystem(String propertiesPath) throws FileNotFoundException, IOException {
         super(propertiesPath, "SciDB");
@@ -31,6 +39,7 @@ public class SciDBSystem extends AdbmsSystem {
         String systemControl = getValue(SYSTEM_CONTROL_KEY);
 
         String binDir = IO.concatPaths(installDir, "bin");
+        this.configIni = IO.concatPaths(installDir, "etc/config.ini");
         this.queryCommand = IO.concatPaths(binDir, queryBin);
         this.startCommand = new String[]{IO.concatPaths(binDir, systemControl), startBin, clusterName};
         this.stopCommand = new String[]{IO.concatPaths(binDir, systemControl), stopBin, clusterName};
@@ -71,6 +80,12 @@ public class SciDBSystem extends AdbmsSystem {
 
     @Override
     public void setSystemCacheSize(long bytes) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Path path = Paths.get(configIni);
+        Charset charset = StandardCharsets.UTF_8;
+
+        String configIniContent = new String(Files.readAllBytes(path), charset);
+        long megaBytes = bytes / DomainUtil.SIZE_1MB;
+        configIniContent = configIniContent.replaceAll("mem-array-threshold=.*", "mem-array-threshold=" + megaBytes);
+        Files.write(path, configIniContent.getBytes(charset));
     }
 }

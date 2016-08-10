@@ -20,7 +20,7 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
     public long loadData() throws Exception {
         long totalTime = 0;
         
-        String attributes = getAttributes(BAND_NO);
+        String attributes = SciDBAFLQueryGenerator.getAttributes(BAND_NO, "uint16");
         createColl(attributes);
         
         List<String> sliceFilePaths = getSliceFilePaths(benchmarkContext);
@@ -48,17 +48,6 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
         String createQuery = String.format("CREATE ARRAY %s <%s> [ d0=0:%d,1,0, d1=0:7999,500,0, d2=0:7999,500,0 ]", 
                 benchmarkContext.getArrayName(), attributes, MAX_SLICE_NO);
         queryExecutor.executeTimedQuery(createQuery);
-    }
-    
-    private String getAttributes(int n) {
-        StringBuilder att = new StringBuilder("");
-        for (int i = 0; i < n; i++) {
-            if (i > 0) {
-                att.append(",");
-            }
-            att.append("att").append(i).append(":").append("uint16");
-        }
-        return att.toString();
     }
 
     @Override

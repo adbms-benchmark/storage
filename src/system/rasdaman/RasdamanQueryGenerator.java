@@ -27,9 +27,9 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         
         BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
         
-        // compute cloud-free pixel percent, returning a 1D array for all arrays
+        // count cloud-free pixels, returning a 1D array for all arrays
         String cloudCoverQuery = String.format("SELECT MARRAY i IN [0:1] VALUES "
-                + "((float) count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0)) / 64000000.0 "
+                + "count_cells(c[i[0],*:*,*:*].att2 > 0 and c[i[0],*:*,*:*].att3 > 0 and c[i[0],*:*,*:*].att4 > 0) "
                 + "FROM %s AS c", benchmarkContext.getArrayName());
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
         
