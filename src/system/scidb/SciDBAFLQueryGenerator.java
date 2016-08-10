@@ -57,7 +57,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         ret.add(domainBenchmark);
         
         BenchmarkSession lowerLeftToLowerRight = new BenchmarkSession("tile benchmark session lower left to lower right");
-        String subsetQuery = "aggregate( between( project( {4}, d0, 0 ), {0}, {2}, {1}, {3} ), min(att1) )";
+        String subsetQuery = "aggregate( between( slice( {4}, d0, 0 ), {0}, {2}, {1}, {3} ), min(att1) )";
         for (int i = 0; i < 10; i++) {
             int origin = i * 100;
             lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(
