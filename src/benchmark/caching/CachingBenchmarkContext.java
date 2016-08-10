@@ -31,7 +31,7 @@ public class CachingBenchmarkContext extends BenchmarkContext {
     
     @Override
     public String getBenchmarkSpecificHeader() {
-        return "Cache size, Execution time (ms), ";
+        return "Query, Cache size, Execution time (ms), ";
     }
     
     @Override

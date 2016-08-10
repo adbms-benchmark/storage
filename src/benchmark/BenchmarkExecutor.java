@@ -66,9 +66,13 @@ public class BenchmarkExecutor {
         if (benchmarkContext.isDisableBenchmark()) {
             return false;
         }
+        
+        pr.println("----------------------------------------------------------------------------");
+        pr.println("# Starting benchmark");
+        pr.println("");
 
         Benchmark benchmark = queryGenerator.getBenchmark();
-        long msElapsed = 0;
+        Double msElapsed = 0.0;
         for (BenchmarkSession session : benchmark.getBenchmarkSessions()) {
             msElapsed += runBenchmarkSession(session, pr);
         }
@@ -79,13 +83,15 @@ public class BenchmarkExecutor {
         return true;
     }
 
-    private long runBenchmarkSession(BenchmarkSession session, PrintWriter pr) throws Exception {
+    private Double runBenchmarkSession(BenchmarkSession session, PrintWriter pr) throws Exception {
         pr.println("----------------------------------------------------------------------------");
         pr.println("# Benchmark session: " + session.getDescription());
         pr.println("System, " + benchmarkContext.getBenchmarkSpecificHeader() + "Mean execution time (ms)");
 
         systemController.restartSystem();
-        long msElapsed = 0;
+        BenchmarkUtil.dropSystemCaches();
+        
+        Double msElapsed = 0.0;
         for (BenchmarkQuery query : session.getBenchmarkQueries()) {
             msElapsed += runBenchmarkQuery(query, pr);
         }
@@ -94,7 +100,7 @@ public class BenchmarkExecutor {
         return msElapsed;
     }
 
-    private long runBenchmarkQuery(BenchmarkQuery query, PrintWriter pr) {
+    private Double runBenchmarkQuery(BenchmarkQuery query, PrintWriter pr) {
         log.info("Executing benchmark query: " + query.getQueryString());
         
         List<Long> queryExecutionTimes = new ArrayList<>();
@@ -119,12 +125,12 @@ public class BenchmarkExecutor {
         resultLine.append(String.format("%s, %s",
                 systemController.getSystemName(), benchmarkContext.getBenchmarkResultLine(query)));
         
-        long ret = 0;
         for (Long queryExecutionTime : queryExecutionTimes) {
             resultLine.append(queryExecutionTime);
             resultLine.append(", ");
         }
-        resultLine.append(BenchmarkUtil.getBenchmarkMean(queryExecutionTimes));
+        Double ret = BenchmarkUtil.getBenchmarkMean(queryExecutionTimes);
+        resultLine.append(ret);
 
         pr.println(resultLine.toString());
         pr.flush();

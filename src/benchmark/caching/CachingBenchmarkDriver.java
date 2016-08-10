@@ -74,6 +74,7 @@ public class CachingBenchmarkDriver extends Driver {
             for (long cacheSize : cacheSizes) {
                 benchmarkContext.setCacheSize(cacheSize);
                 adbmsSystem.setSystemCacheSize(cacheSize);
+                log.info("Cache size set to " + cacheSize + " bytes in " + adbmsSystem.getSystemName() + ".");
                 exitCode += runBenchmark(benchmarkContext, adbmsSystem);
             }
         }

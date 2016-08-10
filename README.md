@@ -10,73 +10,61 @@ Currently the following systems are supported:
 * rasdaman (http://www.rasdaman.org/)
 * SciDB (http://www.scidb.org/)
 * SciQL (https://www.monetdb.org, unreleased branch SciQL-2 at http://dev.monetdb.org/hg/MonetDB/branches)
+* ASQLDB (https://github.com/misev/asqldb)
 
 Contributions for further systems are welcome.
 
 Getting started
 ===============
 * `cp -r conf.in conf`, and adapt properties files in conf
+* `sudo cp drop_caches.sh /root && chown root: /root/drop_caches.sh`
+ * `visudo`, and add a line `USER ALL=NOPASSWD: /root/drop_caches.sh`, where USER is the system user running the benchmark.
 * Build code: `ant jar`
 * Execute with `./run.sh [OPTIONS]`
 * Benchmark results are written in CSV format in `$HOME/results`
 
 Command-line usage help
 -----------------------
-`./run.sh --help`
+`./run.sh TYPE --help`, where TYPE can be one of storage, caching or sqlmda.
+
+E.g. `./run.sh caching --help`
 ```
 Usage:
-  classes [--help] (-s|--systems) system1,system2,...,systemN  --system-configs
-  config1,config2,...,configN  (-d|--dimensions)
-  dimension1,dimension2,...,dimensionN  (-b|--sizes) size1,size2,...,sizeN 
-  (-r|--repeat) <repeat> (-q|--queries) <queries> --max-select-size
-  <max_select_size> --timout <timeout> (-t|--tile-size) <tilesize> --datadir
-  <datadir> [-c|--create] [--drop] [--disable-benchmark] [-v|--verbose]
+  run.sh [--help] (-s|--systems) system1,system2,...,systemN  --system-configs
+  config1,config2,...,configN  --cache-sizes
+  cacheSizes1,cacheSizes2,...,cacheSizesN  --datadir <datadir> [--load] [--drop]
+  [--generate] [--disable-benchmark] [-v|--verbose]
 
-Benchmark storage management in Array Databases. Currently supported systems:
-rasdaman, SciDB, SciQL.
+Benchmark caching behaviour in Array Databases. Currently supported systems:
+rasdaman, SciDB.
 
 
   [--help]
         Prints this help message.
 
   (-s|--systems) system1,system2,...,systemN 
-        Array DBMS to target in this run. (default: rasdaman,scidb,sciql)
+        Array DBMS to target in this run. (default: rasdaman,scidb)
 
   --system-configs config1,config2,...,configN 
         System configuration (connection details, directories, etc). (default:
-        conf/rasdaman.properties,conf/scidb.properties,conf/sciql.properties)
+        conf/rasdaman.properties,conf/scidb.properties)
 
-  (-d|--dimensions) dimension1,dimension2,...,dimensionN 
-        Data dimensionality to be tested. (default: 1,2,3,4,5,6)
-
-  (-b|--sizes) size1,size2,...,sizeN 
-        Data sizes to be tested, as a number followed by B,kB,MB,GB,TB,PB,EB.
-        (default: 1kB,100kB,1MB,100MB,1GB)
-
-  (-r|--repeat) <repeat>
-        Times to repeat each test query. (default: 5)
-
-  (-q|--queries) <queries>
-        Number of queries per query category. (default: 6)
-
-  --max-select-size <max_select_size>
-        Maximum select size, as percentage of the array size. (default: 10)
-
-  --timout <timeout>
-        Query timeout in seconds; -1 means no query timeout. (default: -1)
-
-  (-t|--tile-size) <tilesize>
-        Tile size, same format as for the --sizes option. (default: 4MB)
+  --cache-sizes cacheSizes1,cacheSizes2,...,cacheSizesN 
+        Cache sizes (in bytes) to benchmark. (default:
+        1073741824,2147483648,3221225472,4294967296,8589934592)
 
   --datadir <datadir>
         Data directory, for temporary and permanent data used in ingestion.
         (default: /tmp)
 
-  [-c|--create]
-        Create data.
+  [--load]
+        Load data.
 
   [--drop]
         Drop data.
+
+  [--generate]
+        Generate benchmark data.
 
   [--disable-benchmark]
         Do not run benchmark, just create or drop data.
@@ -87,6 +75,6 @@ rasdaman, SciDB, SciQL.
 
 Copyright and license
 =====================
-Copyright (c) 2014-2015 George Merticariu, Dimitar Misev, Peter Baumann.
+Copyright (c) 2014-2016 George Merticariu, Dimitar Misev, Peter Baumann.
 
 Code released under [the MIT license] (https://raw.githubusercontent.com/adbms-benchmark/storage/master/LICENSE).

@@ -45,4 +45,8 @@ public class BenchmarkUtil {
         ret /= list.size();
         return ret;
     }
+    
+    public static void dropSystemCaches() {
+        ProcessExecutor.executeShellCommand("sudo", "/root/drop_caches.sh");
+    }
 }
