@@ -27,7 +27,7 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
             String createArray = String.format("CREATE ARRAY %s <v%d:float> [ d1=0:%d,%d,0, d2=0:%d,%d,0 ]",
                     arrayName, i, BAND_WIDTH - 1, TILE_WIDTH, BAND_HEIGHT - 1, TILE_HEIGHT);
             queryExecutor.executeTimedQuery(createArray);
-            String insertDataQuery = MessageFormat.format("INSERT( INPUT({0}, ''{1}'', 0, ''(float)''), {0});",
+            String insertDataQuery = MessageFormat.format("LOAD({0}, ''{1}'', 0, ''(float)'');",
                     arrayName, sliceFilePaths.get(i));
 
             totalTime += queryExecutor.executeTimedQuery(insertDataQuery);
