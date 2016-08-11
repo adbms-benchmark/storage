@@ -42,7 +42,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         
         // calculate SAVI on a spatial subset
         // savi = ((NIR-R) / (NIR + R + L)) * (1+L)
-        String saviQueryFormat = "aggregate( project( apply( join(%s, %s), v2, ((v0 - v1) / (v0 + v1 + 0.5)) * 1.5 ), v2 ), min(v2));";
+        String saviQueryFormat = "aggregate( apply( join(%s, %s), v2, ((v0 - v1) / (v0 + v1 + 0.5)) * 1.5 ), min(v2));";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(saviQueryFormat,
                 benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1())));
         
@@ -82,7 +82,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         ret.add(zoomOut);
         
         BenchmarkSession sqrt = new BenchmarkSession("repeated square root");
-        String sqrtQuery = "aggregate( apply( %s, %s, v1 ), min(v1) );";
+        String sqrtQuery = "aggregate( apply( %s, v1, %s ), min(v1) );";
         String sqrtExpr = "abs(v0)";
         for (int i = 0; i < 10; i++) {
             sqrt.addBenchmarkQuery(new BenchmarkQuery(String.format(sqrtQuery, benchmarkContext.getArrayName0(), sqrtExpr)));
