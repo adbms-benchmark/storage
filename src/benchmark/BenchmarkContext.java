@@ -170,7 +170,22 @@ public class BenchmarkContext {
         ret.setDropData(dropData);
         return ret;
     }
-      
+    
+    public String getArrayName0() {
+        return getArrayNameN(0);
+    }
+    
+    public String getArrayName1() {
+        return getArrayNameN(1);
+    }
+    
+    public String getArrayName2() {
+        return getArrayNameN(2);
+    }
+    
+    public String getArrayNameN(int n) {
+        return arrayName + "_" + n;
+    }
 
     @Override
     public String toString() {

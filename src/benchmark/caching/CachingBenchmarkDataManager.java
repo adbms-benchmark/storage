@@ -24,15 +24,19 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
 
     private static final Logger log = LoggerFactory.getLogger(CachingBenchmarkDataManager.class);
     
-    public static final int MAX_SLICE_NO = 101;
-    public static final int BAND_NO = 11;
-    public static final int BAND_WIDTH = 8000;
-    public static final int BAND_HEIGHT = 8000;
+    public static final int CELL_TYPE_SIZE = 4;
     
-    public static final long SLICE_SIZE = 8000 * 8000 * 11 * 2;
-    public static final long DATA_SIZE = SLICE_SIZE * MAX_SLICE_NO;
-    public static final String DATA_SIZE_SHORT = "133GB";
+    public static final int BAND_WIDTH = 16000;
+    public static final int BAND_HEIGHT = 16000;
+    public static final int ARRAY_SIZE = BAND_WIDTH * BAND_HEIGHT * CELL_TYPE_SIZE;
     
+    public static final int TILE_WIDTH = 2000;
+    public static final int TILE_HEIGHT = 2000;
+    public static final int TILE_SIZE = TILE_WIDTH * TILE_HEIGHT * CELL_TYPE_SIZE;
+    
+    public static final String ARRAY_SIZE_SHORT = "1GB";
+    
+    public static final int ARRAY_NO = 2;
     public static final String SLICE_EXT = ".bin";
     
     public CachingBenchmarkDataManager(T systemController, QueryExecutor<T> queryExecutor, BenchmarkContext benchmarkContext) {
@@ -42,9 +46,9 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
     @Override
     public void generateData() throws Exception {
         if (benchmarkContext.isGenerateData()) {
-            for (int i = 0; i <= MAX_SLICE_NO; i++) {
-                String fileName = i + SLICE_EXT;
-                RandomDataGenerator dataGen = new RandomDataGenerator(SLICE_SIZE, fileName);
+            for (int i = 0; i < ARRAY_NO; i++) {
+                String fileName = benchmarkContext.getArrayNameN(i);
+                RandomDataGenerator dataGen = new RandomDataGenerator(ARRAY_SIZE, benchmarkContext.getDataDir(), fileName);
                 String filePath = dataGen.getFilePath();
                 log.debug("Generated benchmark data slice: " + filePath);
             }
@@ -53,9 +57,9 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
     
     protected List<String> getSliceFilePaths(BenchmarkContext benchmarkContext) {
         List<String> ret = new ArrayList<>();
-        for (int i = 0; i <= MAX_SLICE_NO; i++) {
-            String sliceFileName = i + SLICE_EXT;
-            String sliceFilePath = IO.concatPaths(benchmarkContext.getDataDir(), sliceFileName);
+        for (int i = 0; i < ARRAY_NO; i++) {
+            String fileName = benchmarkContext.getArrayNameN(i);
+            String sliceFilePath = IO.concatPaths(benchmarkContext.getDataDir(), fileName);
             if (!IO.fileExists(sliceFilePath)) {
                 break;
             }

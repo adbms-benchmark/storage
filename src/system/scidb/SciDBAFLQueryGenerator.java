@@ -5,7 +5,6 @@ import benchmark.BenchmarkQuery;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
 import benchmark.BenchmarkSession;
-import benchmark.caching.CachingBenchmarkDataManager;
 import util.Pair;
 
 import java.text.MessageFormat;
@@ -28,48 +27,41 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
         
         // count cloud-free pixels, returning a 1D array for all arrays
-        String cloudCoverQuery = MessageFormat.format("aggregate( filter( project( between( {0}, 0, 0, 0, 1, null, null), "
-                + "att2, att3, att4), att2 > 0 and att3 > 0 and att4 > 0), count(*), d0 );", benchmarkContext.getArrayName());
+        String cloudCoverQuery = MessageFormat.format("aggregate( filter( join({0}, {1}) ), v0 > 0 and v1 > 0), count(*) );",
+                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1());
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
         
         // run ndvi
-        String ndviQueryFormat = "aggregate( filter( cast( project( slice( {1}, d0, {0} ), att3, att4 ), "
-                + "<att3:float, att4:float>[a=0:7999,500,0, b=0:7999,500,0] ), "
-                + "((att4 - att3) / (att4 + att3)) > 0.2 and ((att4 - att3) / (att4 + att3)) < 0.4), count(*));";
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 0, benchmarkContext.getArrayName())));
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat, 1, benchmarkContext.getArrayName())));
-        
-        // run ndvi2
-        String ndviQueryFormat2 = "aggregate( filter( cast( project( slice( {1}, d0, {0} ), att3, att4 ), "
-                + "<att3:float, att4:float>[a=0:7999,500,0, b=0:7999,500,0] ), "
-                + "((att4 - att3) / (att4 + att3)) > 0.22 and ((att4 - att3) / (att4 + att3)) < 0.45), count(*));";
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 0, benchmarkContext.getArrayName())));
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(ndviQueryFormat2, 1, benchmarkContext.getArrayName())));
+        String ndviQueryFormat = "aggregate( filter( join(%s, %s), ((v0 - v1) / (v0 + v1)) > %d and ((v0 - v1) / (v0 + v1)) < %d), count(*));";
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
+                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.2, 0.4)));
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
+                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.22, 0.45)));
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
+                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.21, 0.38)));
         
         // calculate SAVI on a spatial subset
         // savi = ((NIR-R) / (NIR + R + L)) * (1+L)
-        String saviQueryFormat = "aggregate( project( apply( between( cast( project( slice( {1}, d0, {0} ), att3, att4 ), "
-                + "<att3:float, att4:float>[a=0:7999,500,0, b=0:7999,500,0] ), null, 500, 2999, 2999 ), "
-                + "att5, ((att4 - att3) / (att4 + att3 + 0.5)) * 1.5 ), att5 ), min(att5));";
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(saviQueryFormat, 0, benchmarkContext.getArrayName())));
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(saviQueryFormat, 1, benchmarkContext.getArrayName())));
+        String saviQueryFormat = "aggregate( project( apply( join(%s, %s), v2, ((v0 - v1) / (v0 + v1 + 0.5)) * 1.5 ), v2 ), min(v2));";
+        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(saviQueryFormat,
+                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1())));
         
         ret.add(domainBenchmark);
         
         BenchmarkSession lowerLeftToLowerRight = new BenchmarkSession("tile benchmark session lower left to lower right");
-        String subsetQuery = "aggregate( between( slice( %s, d0, 0 ), %d, %d, %d, %d ), min(att1) )";
-        for (int i = 0; i < 10; i++) {
-            int origin = i * 100;
+        String subsetQuery = "aggregate( between( %s, %d, %d, %d, %d ), min(v0) )";
+        for (int i = 0; i < 5; i++) {
+            int origin = i * 500;
             lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName(), origin, 0, 3999 + origin, 3999)));
+                    subsetQuery, benchmarkContext.getArrayName0(), origin, 0, 3999 + origin, 3999)));
         }
         ret.add(lowerLeftToLowerRight);
         
         BenchmarkSession lowerLeftToUpperRight = new BenchmarkSession("tile benchmark session lower left to upper right");
-        for (int i = 0; i < 10; i++) {
-            int origin = i * 100;
+        for (int i = 0; i < 5; i++) {
+            int origin = i * 500;
             lowerLeftToUpperRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName(), origin, origin, 3999 + origin, 3999 + origin)));
+                    subsetQuery, benchmarkContext.getArrayName0(), origin, origin, 3999 + origin, 3999 + origin)));
         }
         ret.add(lowerLeftToUpperRight);
         
@@ -77,7 +69,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         for (int i = 0; i < 3; i++) {
             int zoom = i * 500;
             zoomIn.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
+                    subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
         }
         ret.add(zoomIn);
         
@@ -85,9 +77,18 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         for (int i = 2; i >= 0; i--) {
             int zoom = i * 500;
             zoomOut.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
+                    subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
         }
         ret.add(zoomOut);
+        
+        BenchmarkSession sqrt = new BenchmarkSession("repeated square root");
+        String sqrtQuery = "aggregate( apply( %s, %s, v1 ), min(v1) );";
+        String sqrtExpr = benchmarkContext.getArrayName0();
+        for (int i = 0; i < 10; i++) {
+            sqrt.addBenchmarkQuery(new BenchmarkQuery(String.format(sqrtQuery, benchmarkContext.getArrayName0(), sqrtExpr)));
+            sqrtExpr = "sqrt(" + sqrtExpr + ")";
+        }
+        ret.add(sqrt);
         
         return ret;
     }
