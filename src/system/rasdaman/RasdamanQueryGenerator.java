@@ -85,7 +85,7 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         
         BenchmarkSession sqrt = new BenchmarkSession("repeated square root");
         String sqrtQuery = "SELECT min_cells(%s) FROM %s AS c";
-        String sqrtExpr = "c";
+        String sqrtExpr = "abs(c)";
         for (int i = 0; i < 10; i++) {
             sqrt.addBenchmarkQuery(new BenchmarkQuery(String.format(sqrtQuery, sqrtExpr, benchmarkContext.getArrayName0())));
             sqrtExpr = "sqrt(" + sqrtExpr + ")";

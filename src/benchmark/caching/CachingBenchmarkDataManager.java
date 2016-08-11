@@ -37,7 +37,6 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
     public static final String ARRAY_SIZE_SHORT = "1GB";
     
     public static final int ARRAY_NO = 2;
-    public static final String SLICE_EXT = ".bin";
     
     public CachingBenchmarkDataManager(T systemController, QueryExecutor<T> queryExecutor, BenchmarkContext benchmarkContext) {
         super(systemController, queryExecutor, benchmarkContext);

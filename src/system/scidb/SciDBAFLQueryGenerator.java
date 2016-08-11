@@ -83,7 +83,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         
         BenchmarkSession sqrt = new BenchmarkSession("repeated square root");
         String sqrtQuery = "aggregate( apply( %s, %s, v1 ), min(v1) );";
-        String sqrtExpr = benchmarkContext.getArrayName0();
+        String sqrtExpr = "abs(" + benchmarkContext.getArrayName0() + ")";
         for (int i = 0; i < 10; i++) {
             sqrt.addBenchmarkQuery(new BenchmarkQuery(String.format(sqrtQuery, benchmarkContext.getArrayName0(), sqrtExpr)));
             sqrtExpr = "sqrt(" + sqrtExpr + ")";
