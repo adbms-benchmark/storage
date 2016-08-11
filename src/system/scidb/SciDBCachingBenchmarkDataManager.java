@@ -42,7 +42,7 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
         
         for (int i = 0; i < ARRAY_NO; i++) {
             String arrayName = benchmarkContext.getArrayNameN(i);
-            String dropCollectionQuery = MessageFormat.format("DROP ARRAY {0}", arrayName);
+            String dropCollectionQuery = MessageFormat.format("remove({0});", arrayName);
             totalTime += queryExecutor.executeTimedQuery(dropCollectionQuery);
         }
         
