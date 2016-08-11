@@ -140,6 +140,10 @@ public class BenchmarkExecutor {
     private boolean loadData(PrintWriter pr) throws Exception {
         if (benchmarkContext.isLoadData()) {
             systemController.restartSystem();
+            if (benchmarkContext.isGenerateData()) {
+                log.debug("Generating data...");
+                dataManager.generateData();
+            }
             long msElapsed = dataManager.loadData();
             if (pr != null) {
                 pr.println("Loaded benchmark data in (ms): " + msElapsed);
