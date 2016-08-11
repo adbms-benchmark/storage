@@ -27,7 +27,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
         
         // count cloud-free pixels, returning a 1D array for all arrays
-        String cloudCoverQuery = MessageFormat.format("aggregate( filter( join({0}, {1}) ), v0 > 0 and v1 > 0), count(*) );",
+        String cloudCoverQuery = MessageFormat.format("aggregate( filter( join({0}, {1}), v0 > 0 and v1 > 0), count(*) );",
                 benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1());
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
         
