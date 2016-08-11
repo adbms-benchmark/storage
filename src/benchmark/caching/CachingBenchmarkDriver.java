@@ -71,11 +71,15 @@ public class CachingBenchmarkDriver extends Driver {
         for (String system : systems) {
             String configFile = configs[configInd++];
             AdbmsSystem adbmsSystem = AdbmsSystem.getAdbmsSystem(system, configFile);
-            for (long cacheSize : cacheSizes) {
-                benchmarkContext.setCacheSize(cacheSize);
-                adbmsSystem.setSystemCacheSize(cacheSize);
-                log.info("Cache size set to " + cacheSize + " bytes in " + adbmsSystem.getSystemName() + ".");
+            if (benchmarkContext.isDisableBenchmark()) {
                 exitCode += runBenchmark(benchmarkContext, adbmsSystem);
+            } else {
+                for (long cacheSize : cacheSizes) {
+                    benchmarkContext.setCacheSize(cacheSize);
+                    adbmsSystem.setSystemCacheSize(cacheSize);
+                    log.info("Cache size set to " + cacheSize + " bytes in " + adbmsSystem.getSystemName() + ".");
+                    exitCode += runBenchmark(benchmarkContext, adbmsSystem);
+                }
             }
         }
 
