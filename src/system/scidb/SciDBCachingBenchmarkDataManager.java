@@ -30,7 +30,7 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
             String insertDataQuery = MessageFormat.format("INSERT( INPUT({0}, ''{1}'', 0, ''(float)''), {0});",
                     arrayName, sliceFilePaths.get(i));
 
-            totalTime += queryExecutor.executeTimedQuery(insertDataQuery, "-n", "-a");
+            totalTime += queryExecutor.executeTimedQuery(insertDataQuery);
         }
         
         return totalTime;

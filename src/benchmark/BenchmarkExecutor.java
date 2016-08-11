@@ -47,7 +47,8 @@ public class BenchmarkExecutor {
         boolean alreadyDropped = false;
 
         File resultsDir = IO.getResultsDir();
-        File resultsFile = new File(resultsDir.getAbsolutePath(), systemController.getSystemName() + "_benchmark_results.csv");
+        String resultsFilename = systemController.getSystemName() + "_benchmark_results. " + System.currentTimeMillis() + ".csv";
+        File resultsFile = new File(resultsDir.getAbsolutePath(), resultsFilename);
 
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {
             loadData(pr);
