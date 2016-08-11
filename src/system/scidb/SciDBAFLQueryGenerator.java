@@ -32,7 +32,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
         
         // run ndvi
-        String ndviQueryFormat = "aggregate( filter( join(%s, %s), ((v0 - v1) / (v0 + v1)) > %d and ((v0 - v1) / (v0 + v1)) < %d), count(*));";
+        String ndviQueryFormat = "aggregate( filter( join(%s, %s), ((v0 - v1) / (v0 + v1)) > %f and ((v0 - v1) / (v0 + v1)) < %f), count(*));";
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
                 benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.2, 0.4)));
         domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
