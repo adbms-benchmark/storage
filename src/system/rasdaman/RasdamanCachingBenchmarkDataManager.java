@@ -28,7 +28,7 @@ public class RasdamanCachingBenchmarkDataManager extends CachingBenchmarkDataMan
             
             queryExecutor.executeTimedQuery(String.format("CREATE COLLECTION %s FloatSet", arrayName));
             
-            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize());
+            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize() / 4);
             String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d",
                     arrayName, tileUpperBound, tileUpperBound, tileUpperBound * tileUpperBound * 4);
             String mddDomain = String.format("[0:%d,0:%d]", BAND_WIDTH - 1, BAND_HEIGHT - 1);

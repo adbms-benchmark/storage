@@ -25,7 +25,7 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
         for (int i = 0; i < sliceFilePaths.size(); i++) {
             String arrayName = benchmarkContext.getArrayNameN(i);
             
-            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize());
+            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize() / 4);
             String createArray = String.format("CREATE ARRAY %s <v%d:float> [ d1=0:%d,%d,0, d2=0:%d,%d,0 ]",
                     arrayName, i, BAND_WIDTH - 1, tileUpperBound + 1, BAND_HEIGHT - 1, tileUpperBound + 1);
             queryExecutor.executeTimedQuery(createArray);
