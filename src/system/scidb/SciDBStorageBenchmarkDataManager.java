@@ -40,7 +40,7 @@ public class SciDBStorageBenchmarkDataManager extends DataManager<SciDBSystem> {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchmarkContext.getArraySize());
         long fileSize = domainGenerator.getFileSize(domainBoundaries);
 
-        long chunkUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), ((StorageBenchmarkContext)benchmarkContext).getCollTileSize());
+        long chunkUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize());
         long chunkSize = chunkUpperBound + 1l;
         dataGenerator = new RandomDataGenerator(fileSize, benchmarkContext.getDataDir());
         String filePath = dataGenerator.getFilePath();

@@ -30,10 +30,6 @@ public abstract class CachingBenchmarkDataManager<T> extends DataManager<T> {
     public static final int BAND_HEIGHT = 16000;
     public static final int ARRAY_SIZE = BAND_WIDTH * BAND_HEIGHT * CELL_TYPE_SIZE;
     
-    public static final int TILE_WIDTH = 2000;
-    public static final int TILE_HEIGHT = 2000;
-    public static final int TILE_SIZE = TILE_WIDTH * TILE_HEIGHT * CELL_TYPE_SIZE;
-    
     public static final String ARRAY_SIZE_SHORT = "1GB";
     
     public static final int ARRAY_NO = 2;

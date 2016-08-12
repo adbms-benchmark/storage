@@ -15,7 +15,7 @@ public class CachingBenchmarkContext extends BenchmarkContext {
     
     public CachingBenchmarkContext(String dataDir) {
         super(REPEAT_QUERIES_ONCE, dataDir, -1, TYPE_CACHING);
-        arrayDimensionality = 3;
+        arrayDimensionality = 2;
         arraySize = CachingBenchmarkDataManager.ARRAY_SIZE;
         arraySizeShort = CachingBenchmarkDataManager.ARRAY_SIZE_SHORT;
         updateArrayName();

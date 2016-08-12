@@ -5,6 +5,7 @@ import benchmark.BenchmarkContext;
 import benchmark.caching.CachingBenchmarkContext;
 import java.text.MessageFormat;
 import java.util.List;
+import util.DomainUtil;
 import util.Pair;
 
 /**
@@ -27,8 +28,9 @@ public class RasdamanCachingBenchmarkDataManager extends CachingBenchmarkDataMan
             
             queryExecutor.executeTimedQuery(String.format("CREATE COLLECTION %s FloatSet", arrayName));
             
+            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize());
             String insertQuery = String.format("INSERT INTO %s VALUES $1 TILING REGULAR [0:%d,0:%d] TILE SIZE %d",
-                    arrayName, TILE_WIDTH - 1, TILE_HEIGHT - 1, TILE_SIZE);
+                    arrayName, tileUpperBound, tileUpperBound, tileUpperBound * tileUpperBound * 4);
             String mddDomain = String.format("[0:%d,0:%d]", BAND_WIDTH - 1, BAND_HEIGHT - 1);
             totalTime += queryExecutor.executeTimedQuery(insertQuery,
                     "-f", sliceFilePaths.get(i),

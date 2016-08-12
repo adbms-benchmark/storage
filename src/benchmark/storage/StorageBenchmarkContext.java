@@ -10,13 +10,12 @@ import benchmark.BenchmarkQuery;
 public class StorageBenchmarkContext extends BenchmarkContext {
     
     protected final double maxSelectSizePercent;
-    protected final long collTileSize;
     protected final int queryNumber;
     
-    public StorageBenchmarkContext(double maxSelectSizePercent, long collTileSize, int queryNumber, int repeatNumber, String dataDir, int timeout) {
+    public StorageBenchmarkContext(double maxSelectSizePercent, long tileSize, int queryNumber, int repeatNumber, String dataDir, int timeout) {
         super(repeatNumber, dataDir, timeout, TYPE_STORAGE);
         this.maxSelectSizePercent = maxSelectSizePercent;
-        this.collTileSize = collTileSize;
+        this.tileSize = tileSize;
         this.queryNumber = queryNumber;
     }
     
@@ -26,10 +25,6 @@ public class StorageBenchmarkContext extends BenchmarkContext {
 
     public double getMaxSelectSizePercent() {
         return maxSelectSizePercent;
-    }
-
-    public long getCollTileSize() {
-        return collTileSize;
     }
 
     public int getQueryNumber() {

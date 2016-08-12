@@ -64,7 +64,7 @@ public class QueryDomainGenerator {
         List<List<Pair<Long, Long>>> result = new ArrayList<>();
 
         long tileDimensionUpperBound = DomainUtil.getDimensionUpperBound(noOfDimensions, 
-                ((StorageBenchmarkContext)benchContext).getCollTileSize());
+                ((StorageBenchmarkContext)benchContext).getTileSize());
         long tileDimensionInsideTilePosition = tileDimensionUpperBound / 2;
 
         for (int i = 0; i < noOfDimensions + 1; ++i) {

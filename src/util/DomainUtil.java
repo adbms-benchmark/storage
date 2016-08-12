@@ -23,7 +23,7 @@ public class DomainUtil {
 
         return chunkSizePerDim;
     }
-
+    
     public static Pair<Long, String>[] parseSizes(String[] sizes) {
         Pair<Long, String>[] ret = new Pair[sizes.length];
         for (int i = 0; i < sizes.length; i++) {
@@ -91,5 +91,6 @@ public class DomainUtil {
         System.out.println(parseSize("12"));
         System.out.println(parseSize("12B"));
         System.out.println(parseSize("12MB"));
+        System.out.println(getDimensionUpperBound(2, 16000000));
     }
 }

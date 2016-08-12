@@ -13,11 +13,14 @@ public class BenchmarkContext {
     public static final String TYPE_STORAGE = "storage";
     public static final String TYPE_SQLMDA = "sql/mda";
     public static final String TYPE_CACHING = "caching";
+    
+    public static final long DEFAULT_TILE_SIZE = 16000000;
 
     protected String arrayName;
     protected long arraySize;
     protected String arraySizeShort;
     protected int arrayDimensionality;
+    protected long tileSize;
 
     protected int repeatNumber;
     protected String dataDir;
@@ -35,6 +38,7 @@ public class BenchmarkContext {
         this.dataDir = dataDir;
         this.timeout = timeout;
         this.benchmarkType = benchmarkType;
+        this.tileSize = DEFAULT_TILE_SIZE;
     }
 
     public String getArrayName() {
@@ -83,6 +87,14 @@ public class BenchmarkContext {
 
     public int getTimeout() {
         return timeout;
+    }
+
+    public long getTileSize() {
+        return tileSize;
+    }
+
+    public void setTileSize(long tileSize) {
+        this.tileSize = tileSize;
     }
 
     public boolean isDisableBenchmark() {
