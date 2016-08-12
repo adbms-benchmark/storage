@@ -48,6 +48,8 @@ public class SqlMdaBenchmarkDriver extends StorageBenchmarkDriver {
                             "generate", "Generate benchmark data."),
                     new Switch("nobenchmark", JSAP.NO_SHORTFLAG,
                             "disable-benchmark", "Do not run benchmark, just create or drop data."),
+                    new Switch("norestart", JSAP.NO_SHORTFLAG,
+                            "disable-restart", "Do not restart the benchmarked systems."),
                     new Switch("verbose",
                             'v', "verbose", "Print extra information.")
                 }
@@ -68,6 +70,7 @@ public class SqlMdaBenchmarkDriver extends StorageBenchmarkDriver {
         benchmarkContext.setDropData(config.getBoolean("drop"));
         benchmarkContext.setGenerateData(config.getBoolean("generate"));
         benchmarkContext.setDisableBenchmark(config.getBoolean("nobenchmark"));
+        benchmarkContext.setDisableSystemRestart(config.getBoolean("norestart"));
 
         String[] systems = config.getStringArray("system");
         String[] configs = config.getStringArray("config");
@@ -80,7 +83,7 @@ public class SqlMdaBenchmarkDriver extends StorageBenchmarkDriver {
 
         for (String system : systems) {
             String configFile = configs[configInd++];
-            AdbmsSystem adbmsSystem = AdbmsSystem.getAdbmsSystem(system, configFile);
+            AdbmsSystem adbmsSystem = AdbmsSystem.getAdbmsSystem(system, configFile, benchmarkContext);
 
             int sizeInd = 0;
             for (Pair<Long, String> size : sizes) {

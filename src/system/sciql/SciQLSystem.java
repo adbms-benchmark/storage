@@ -25,8 +25,8 @@ public class SciQLSystem extends AdbmsSystem {
     protected String sciqlMclientPath;
     protected String merovingianLockFile;
 
-    public SciQLSystem(String propertiesPath) throws IOException {
-        super(propertiesPath, "SciQL");
+    public SciQLSystem(String propertiesPath, BenchmarkContext benchmarkContext) throws IOException {
+        super(propertiesPath, "SciQL", benchmarkContext);
         this.sciqlBinDir = IO.concatPaths(installDir, "bin");
         this.sciqlMclientPath = IO.concatPaths(sciqlBinDir, "mclient");
         this.startCommand = new String[]{IO.concatPaths(sciqlBinDir, "monetdbd"), "start", dataDir};
@@ -36,8 +36,10 @@ public class SciQLSystem extends AdbmsSystem {
 
     @Override
     public void restartSystem() throws Exception {
-        stopSystem();
-        startSystem();
+        if (!benchmarkContext.isDisableSystemRestart()) {
+            stopSystem();
+            startSystem();
+        }
     }
     
     private void stopSystem() throws Exception {

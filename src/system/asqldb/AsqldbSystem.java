@@ -15,17 +15,19 @@ import org.asqldb.util.AsqldbConnection;
  */
 public class AsqldbSystem extends RasdamanSystem {
 
-    public AsqldbSystem(String propertiesPath) throws IOException {
-        super(propertiesPath);
+    public AsqldbSystem(String propertiesPath, BenchmarkContext benchmarkContext) throws IOException {
+        super(propertiesPath, benchmarkContext);
         systemName = "ASQLDB";
     }
 
     @Override
     public void restartSystem() throws Exception {
-        super.restartSystem();
-        AsqldbConnection.close();
-        // nop
-        AsqldbConnection.open(getUrl());
+        if (!benchmarkContext.isDisableSystemRestart()) {
+            super.restartSystem();
+            AsqldbConnection.close();
+            // nop
+            AsqldbConnection.open(getUrl());
+        }
     }
 
     @Override

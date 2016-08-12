@@ -27,8 +27,8 @@ public class RasdamanSystem extends AdbmsSystem {
     
     private final String rasmgrConf;
 
-    public RasdamanSystem(String propertiesPath) throws IOException {
-        super(propertiesPath, RASDAMAN_SYSTEM_NAME);
+    public RasdamanSystem(String propertiesPath, BenchmarkContext benchmarkContext) throws IOException {
+        super(propertiesPath, RASDAMAN_SYSTEM_NAME, benchmarkContext);
         String binDir = IO.concatPaths(installDir, "bin");
         this.rasmgrConf = IO.concatPaths(installDir, "etc/rasmgr.conf");
         this.queryCommand = IO.concatPaths(binDir, queryBin);
@@ -38,13 +38,15 @@ public class RasdamanSystem extends AdbmsSystem {
 
     @Override
     public void restartSystem() throws Exception {
-        log.debug("restarting " + systemName);
-        if (ProcessExecutor.executeShellCommand(stopCommand) != 0) {
-            throw new Exception("Failed to stop the system.");
-        }
+        if (!benchmarkContext.isDisableSystemRestart()) {
+            log.debug("restarting " + systemName);
+            if (ProcessExecutor.executeShellCommand(stopCommand) != 0) {
+                throw new Exception("Failed to stop the system.");
+            }
 
-        if (ProcessExecutor.executeShellCommand(startCommand) != 0) {
-            throw new Exception("Failed to start the system.");
+            if (ProcessExecutor.executeShellCommand(startCommand) != 0) {
+                throw new Exception("Failed to start the system.");
+            }
         }
     }
 

@@ -28,19 +28,22 @@ public abstract class AdbmsSystem extends SystemContext {
     public static final String ASQLDB_SYSTEM_NAME = "asqldb";
 
     protected String systemName;
+    protected final BenchmarkContext benchmarkContext;
 
-    public AdbmsSystem(String propertiesPath, String systemName) throws FileNotFoundException, IOException {
+    public AdbmsSystem(String propertiesPath, String systemName, BenchmarkContext benchmarkContext) throws FileNotFoundException, IOException {
         super(propertiesPath);
         this.systemName = systemName;
         this.startCommand = new String[]{startBin};
         this.stopCommand = new String[]{stopBin};
+        this.benchmarkContext = benchmarkContext;
     }
 
-    protected AdbmsSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String systemName) throws IOException {
+    protected AdbmsSystem(String propertiesPath, String[] startSystemCommand, String[] stopSystemCommand, String systemName, BenchmarkContext benchmarkContext) throws IOException {
         super(propertiesPath);
         this.startCommand = startSystemCommand;
         this.stopCommand = stopSystemCommand;
         this.systemName = systemName;
+        this.benchmarkContext = benchmarkContext;
     }
 
     public abstract void restartSystem() throws Exception;
@@ -60,16 +63,16 @@ public abstract class AdbmsSystem extends SystemContext {
      * @return the concrete ADBMS controller
      * @throws IOException if reading the config file fails.
      */
-    public static AdbmsSystem getAdbmsSystem(String system, String configFile) throws IOException {
+    public static AdbmsSystem getAdbmsSystem(String system, String configFile, BenchmarkContext benchmarkContext) throws IOException {
         switch (system) {
             case RASDAMAN_SYSTEM_NAME:
-                return new RasdamanSystem(configFile);
+                return new RasdamanSystem(configFile, benchmarkContext);
             case SCIQL_SYSTEM_NAME:
-                return new SciQLSystem(configFile);
+                return new SciQLSystem(configFile, benchmarkContext);
             case SCIDB_SYSTEM_NAME:
-                return new SciDBSystem(configFile);
+                return new SciDBSystem(configFile, benchmarkContext);
             case ASQLDB_SYSTEM_NAME:
-                return new AsqldbSystem(configFile);
+                return new AsqldbSystem(configFile, benchmarkContext);
             default:
                 throw new IllegalArgumentException("System " + system + " not supported.");
         }

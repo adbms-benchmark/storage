@@ -32,8 +32,8 @@ public class SciDBSystem extends AdbmsSystem {
     
     private final String configIni;
 
-    public SciDBSystem(String propertiesPath) throws FileNotFoundException, IOException {
-        super(propertiesPath, "SciDB");
+    public SciDBSystem(String propertiesPath, BenchmarkContext benchmarkContext) throws FileNotFoundException, IOException {
+        super(propertiesPath, "SciDB", benchmarkContext);
 
         String clusterName = getValue(CLUSTER_NAME_KEY);
         String systemControl = getValue(SYSTEM_CONTROL_KEY);
@@ -47,13 +47,15 @@ public class SciDBSystem extends AdbmsSystem {
 
     @Override
     public void restartSystem() throws Exception {
-        log.debug("restarting " + systemName);
-        if (ProcessExecutor.executeShellCommand(stopCommand) != 0) {
-            throw new Exception("Failed to stop the system.");
-        }
+        if (!benchmarkContext.isDisableSystemRestart()) {
+            log.debug("restarting " + systemName);
+            if (ProcessExecutor.executeShellCommand(stopCommand) != 0) {
+                throw new Exception("Failed to stop the system.");
+            }
 
-        if (ProcessExecutor.executeShellCommand(startCommand) != 0) {
-            throw new Exception("Failed to start the system.");
+            if (ProcessExecutor.executeShellCommand(startCommand) != 0) {
+                throw new Exception("Failed to start the system.");
+            }
         }
     }
 

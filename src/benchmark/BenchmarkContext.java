@@ -23,6 +23,7 @@ public class BenchmarkContext {
     protected String dataDir;
     protected int timeout;
     
+    protected boolean disableSystemRestart;
     protected boolean disableBenchmark;
     protected boolean loadData;
     protected boolean dropData;
@@ -185,6 +186,14 @@ public class BenchmarkContext {
     
     public String getArrayNameN(int n) {
         return arrayName + "_" + n;
+    }
+
+    public boolean isDisableSystemRestart() {
+        return disableSystemRestart;
+    }
+
+    public void setDisableSystemRestart(boolean disableSystemRestart) {
+        this.disableSystemRestart = disableSystemRestart;
     }
 
     @Override

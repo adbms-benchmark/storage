@@ -42,6 +42,8 @@ public class CachingBenchmarkDriver extends Driver {
                             "generate", "Generate benchmark data."),
                     new Switch("nobenchmark", JSAP.NO_SHORTFLAG,
                             "disable-benchmark", "Do not run benchmark, just create or drop data."),
+                    new Switch("norestart", JSAP.NO_SHORTFLAG,
+                            "disable-restart", "Do not restart the benchmarked systems."),
                     new Switch("verbose",
                             'v', "verbose", "Print extra information.")
                 }
@@ -58,6 +60,7 @@ public class CachingBenchmarkDriver extends Driver {
         benchmarkContext.setDropData(config.getBoolean("drop"));
         benchmarkContext.setGenerateData(config.getBoolean("generate"));
         benchmarkContext.setDisableBenchmark(config.getBoolean("nobenchmark"));
+        benchmarkContext.setDisableSystemRestart(config.getBoolean("norestart"));
 
         String[] systems = config.getStringArray("system");
         String[] configs = config.getStringArray("config");
@@ -70,7 +73,7 @@ public class CachingBenchmarkDriver extends Driver {
         int configInd = 0;
         for (String system : systems) {
             String configFile = configs[configInd++];
-            AdbmsSystem adbmsSystem = AdbmsSystem.getAdbmsSystem(system, configFile);
+            AdbmsSystem adbmsSystem = AdbmsSystem.getAdbmsSystem(system, configFile, benchmarkContext);
             if (benchmarkContext.isDisableBenchmark()) {
                 exitCode += runBenchmark(benchmarkContext, adbmsSystem);
             } else {
