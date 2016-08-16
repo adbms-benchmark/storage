@@ -34,7 +34,7 @@ public class CachingBenchmarkDriver extends Driver {
                             "cache-sizes", "Cache sizes (in bytes) to benchmark.").setList(true).setListSeparator(','),
                     new FlaggedOption("datadir", JSAP.STRING_PARSER, "/tmp", JSAP.REQUIRED, JSAP.NO_SHORTFLAG,
                             "datadir", "Data directory, for temporary and permanent data used in ingestion."),
-                    new FlaggedOption("tilesize", JSAP.STRING_PARSER, String.valueOf(BenchmarkContext.DEFAULT_TILE_SIZE), JSAP.REQUIRED,
+                    new FlaggedOption("tilesize", JSAP.LONG_PARSER, String.valueOf(BenchmarkContext.DEFAULT_TILE_SIZE), JSAP.REQUIRED,
                             't', "tile-size", "Tile size in bytes."),
                     new Switch("load", JSAP.NO_SHORTFLAG,
                             "load", "Load data."),

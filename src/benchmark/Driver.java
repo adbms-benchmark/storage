@@ -29,7 +29,7 @@ public abstract class Driver {
         if (jsap.messagePrinted()) {
             System.exit(1);
         }
-        driver.setupLogger(config.getBoolean("verbose"), StorageBenchmarkDriver.class);
+        driver.setupLogger(config.getBoolean("verbose"), Driver.class);
         return driver.runBenchmark(config);
     }
     
