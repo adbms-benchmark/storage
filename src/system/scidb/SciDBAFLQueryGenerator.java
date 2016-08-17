@@ -95,7 +95,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
             String query = "aggregate( apply( %s, v1, %s ), min(v1) );";
             String expr = "v0";
             for (int i = 0; i < 10; i++) {
-                benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, benchmarkContext.getArrayName0())), expr);
+                benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, benchmarkContext.getArrayName0(), expr)));
                 expr = expr + " * v0";
             }
             ret.add(benchmarkSession);
