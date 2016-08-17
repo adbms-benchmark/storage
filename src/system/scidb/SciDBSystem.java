@@ -87,7 +87,8 @@ public class SciDBSystem extends AdbmsSystem {
 
         String configIniContent = new String(Files.readAllBytes(path), charset);
         long megaBytes = bytes / DomainUtil.SIZE_1MB;
-        configIniContent = configIniContent.replaceAll("mem-array-threshold=.*", "mem-array-threshold=" + megaBytes);
+        configIniContent = configIniContent.replaceAll("mem-array-threshold=.*", "mem-array-threshold=" + megaBytes / 2);
+        configIniContent = configIniContent.replaceAll("smgr-cache-size=.*", "smgr-cache-size=" + megaBytes / 2);
         Files.write(path, configIniContent.getBytes(charset));
     }
 }
