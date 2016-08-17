@@ -92,6 +92,17 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         }
         ret.add(sqrt);
         
+        {
+            BenchmarkSession benchmarkSession = new BenchmarkSession("repeated multiplication");
+            String query = "SELECT min_cells(%s) FROM %s AS c";
+            String expr = "c";
+            for (int i = 0; i < 10; i++) {
+                benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
+                expr = expr + " * c";
+            }
+            ret.add(benchmarkSession);
+        }
+        
         return ret;
     }
 
