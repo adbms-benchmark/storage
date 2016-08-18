@@ -23,11 +23,10 @@ def get_csv_fields(filepath, row_ind_begin, row_ind_end, data_label_field_ind, d
     data = []
     data_label = ""
     with open(filepath) as f_obj:
-        reader = csv.reader(f_obj, delimiter=',')
+        reader = csv.reader(f_obj, delimiter=',', skipinitialspace=True)
 
         row_ind = 0
         for row in reader:
-            row_ind += 1
             if row_ind_begin == ALL_LINES or (row_ind >= row_ind_begin and row_ind <= row_ind_end):
                 data_field = 0.0
                 if data_label == "":
@@ -38,6 +37,7 @@ def get_csv_fields(filepath, row_ind_begin, row_ind_end, data_label_field_ind, d
                 if data_field_ind != INVALID_FIELD:
                     data_field = float(row[data_field_ind])
                 data.append(data_field)
+            row_ind += 1
 
     return (data, data_label)
 
@@ -53,12 +53,27 @@ def plot_data(files, lines, multi, data_label_field_ind, data_field_ind, data_la
         x.set_fontsize(fontsize)
 
     plt.figure(figsize=(12,8))
+
+    data1 = []
+    data2 = []
     ind = 0
     for f in files:
         (row_ind_begin, row_ind_end) = lines[ind]
-        (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_labels[ind])
-        plt.plot(data, label=data_label, marker='x')
+        if not multi:
+            (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_labels[ind])
+            plt.plot(data, label=data_label, marker='x')
+        else:
+            (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_begin, data_label_field_ind, data_field_ind, data_labels[0])
+            data1.append(data[0])
+            if len(data_labels) > 1 and row_ind_end != row_ind_begin:
+                (data, data_label) = get_csv_fields(f, row_ind_end, row_ind_end, data_label_field_ind, data_field_ind, data_labels[1])
+                data2.append(data[0])
         ind += 1
+
+    if multi:
+        plt.plot(data1, label=data_labels[0], marker='x')
+        if len(data2) > 0:
+            plt.plot(data2, label=data_labels[1], marker='x')
 
     correct_font(plt.xlabel(xlabel))
     correct_font(plt.ylabel(ylabel))

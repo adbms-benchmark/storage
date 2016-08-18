@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.BenchmarkUtil;
@@ -112,6 +113,14 @@ public class BenchmarkExecutor {
             long time = -1;
             for (int retryIndex = 0; retryIndex < MAX_RETRY && failed; ++retryIndex) {
                 try {
+                    if (benchmarkContext.isCleanQuery()) {
+                        systemController.restartSystem();
+                        BenchmarkUtil.dropSystemCaches();
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                    }
                     time = queryExecutor.executeTimedQuery(query.getQueryString());
                     log.debug(" -> " + time + "ms");
                     failed = false;

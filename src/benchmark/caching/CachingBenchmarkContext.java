@@ -18,6 +18,7 @@ public class CachingBenchmarkContext extends BenchmarkContext {
         arrayDimensionality = 2;
         arraySize = CachingBenchmarkDataManager.ARRAY_SIZE;
         arraySizeShort = CachingBenchmarkDataManager.ARRAY_SIZE_SHORT;
+        cleanQuery = false;
         updateArrayName();
     }
 

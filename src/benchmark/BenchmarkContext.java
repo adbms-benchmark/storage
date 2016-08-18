@@ -26,6 +26,7 @@ public class BenchmarkContext {
     protected String dataDir;
     protected int timeout;
     
+    protected boolean cleanQuery;
     protected boolean disableSystemRestart;
     protected boolean disableBenchmark;
     protected boolean loadData;
@@ -170,6 +171,14 @@ public class BenchmarkContext {
         return "";
     }
 
+    public boolean isCleanQuery() {
+        return cleanQuery;
+    }
+
+    public void setCleanQuery(boolean cleanQuery) {
+        this.cleanQuery = cleanQuery;
+    }
+
     @Override
     public BenchmarkContext clone() {
         BenchmarkContext ret = new BenchmarkContext(repeatNumber, dataDir, timeout, benchmarkType);
@@ -181,6 +190,7 @@ public class BenchmarkContext {
         ret.setLoadData(loadData);
         ret.setDisableBenchmark(disableBenchmark);
         ret.setDropData(dropData);
+        ret.setCleanQuery(cleanQuery);
         return ret;
     }
     
