@@ -44,4 +44,8 @@ public class Benchmark {
         this.sessions.add(session);
     }
     
+    public void clear() {
+        this.sessions.clear();
+    }
+    
 }
