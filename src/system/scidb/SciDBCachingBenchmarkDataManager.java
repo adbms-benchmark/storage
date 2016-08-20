@@ -11,6 +11,9 @@ import util.DomainUtil;
  * @author Dimitar Misev <misev@rasdaman.com>
  */
 public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManager<SciDBSystem> {
+    
+    private static final int TYPE_SIZE = 8;
+    private static final String TYPE_BASE = "double";
 
     public SciDBCachingBenchmarkDataManager(SciDBSystem systemController, 
             QueryExecutor<SciDBSystem> queryExecutor, BenchmarkContext benchmarkContext) {
@@ -25,12 +28,12 @@ public class SciDBCachingBenchmarkDataManager extends CachingBenchmarkDataManage
         for (int i = 0; i < sliceFilePaths.size(); i++) {
             String arrayName = benchmarkContext.getArrayNameN(i);
             
-            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize() / 4);
-            String createArray = String.format("CREATE ARRAY %s <v%d:float> [ d1=0:%d,%d,0, d2=0:%d,%d,0 ]",
-                    arrayName, i, BAND_WIDTH - 1, tileUpperBound + 1, BAND_HEIGHT - 1, tileUpperBound + 1);
+            long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize() / TYPE_SIZE);
+            String createArray = String.format("CREATE ARRAY %s <v%d:%s> [ d1=0:%d,%d,0, d2=0:%d,%d,0 ]",
+                    arrayName, i, TYPE_BASE, BAND_WIDTH - 1, tileUpperBound, BAND_HEIGHT - 1, tileUpperBound);
             queryExecutor.executeTimedQuery(createArray);
-            String insertDataQuery = MessageFormat.format("LOAD({0}, ''{1}'', 0, ''(float)'');",
-                    arrayName, sliceFilePaths.get(i));
+            String insertDataQuery = MessageFormat.format("LOAD({0}, ''{1}'', 0, ''({2})'');",
+                    arrayName, sliceFilePaths.get(i), TYPE_BASE);
 
             totalTime += queryExecutor.executeTimedQuery(insertDataQuery);
         }

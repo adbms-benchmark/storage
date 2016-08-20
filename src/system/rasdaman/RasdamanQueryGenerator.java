@@ -82,6 +82,7 @@ public class RasdamanQueryGenerator extends QueryGenerator {
                     subsetQuery, zoom, 3999 - zoom, zoom, 3999 - zoom, benchmarkContext.getArrayName0())));
         }
         ret.add(zoomOut);
+        ret.clear();
         
         BenchmarkSession sqrt = new BenchmarkSession("repeated square root");
         String sqrtQuery = "SELECT min_cells(%s) FROM %s AS c";
@@ -102,6 +103,16 @@ public class RasdamanQueryGenerator extends QueryGenerator {
             }
             ret.add(benchmarkSession);
         }
+        
+//        {
+//            BenchmarkSession benchmarkSession = new BenchmarkSession("repeated multiplication");
+//            String query = "SELECT min_cells(pow(c, %d)) FROM %s AS c";
+//            String expr = "power";
+//            for (int i = 1; i < 11; i++) {
+//                benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, i, benchmarkContext.getArrayName0())));
+//            }
+//            ret.add(benchmarkSession);
+//        }
         
         return ret;
     }
