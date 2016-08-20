@@ -24,81 +24,150 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
     public Benchmark getCachingBenchmark() {
         Benchmark ret = new Benchmark();
         
-        BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
-        
-        // count cloud-free pixels, returning a 1D array for all arrays
-        String cloudCoverQuery = MessageFormat.format("aggregate( filter( join({0}, {1}), v0 > 0 and v1 > 0), count(*) );",
-                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1());
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
-        
-        // run ndvi
-        String ndviQueryFormat = "aggregate( filter( join(%s, %s), ((v0 - v1) / (v0 + v1)) > %f and ((v0 - v1) / (v0 + v1)) < %f), count(*));";
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
-                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.2, 0.4)));
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
-                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.22, 0.45)));
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
-                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.21, 0.38)));
-        
-        // calculate SAVI on a spatial subset
-        // savi = ((NIR-R) / (NIR + R + L)) * (1+L)
-        String saviQueryFormat = "aggregate( apply( join(%s, %s), v2, ((v0 - v1) / (v0 + v1 + 0.5)) * 1.5 ), min(v2));";
-        domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(saviQueryFormat,
-                benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1())));
-        
-        ret.add(domainBenchmark);
-        
-        BenchmarkSession lowerLeftToLowerRight = new BenchmarkSession("tile benchmark session lower left to lower right");
-        String subsetQuery = "aggregate( between( %s, %d, %d, %d, %d ), min(v0) )";
-        for (int i = 0; i < 5; i++) {
-            int origin = i * 500;
-            lowerLeftToLowerRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName0(), origin, 0, 3999 + origin, 3999)));
+        {
+            BenchmarkSession domainBenchmark = new BenchmarkSession("domain benchmark session");
+            // count cloud-free pixels, returning a 1D array for all arrays
+            String cloudCoverQuery = MessageFormat.format("aggregate( filter( join({0}, {1}), v0 > 0 and v1 > 0), count(*) );",
+                    benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1());
+            domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(cloudCoverQuery));
+            // run ndvi
+            String ndviQueryFormat = "aggregate( filter( join(%s, %s), ((v0 - v1) / (v0 + v1)) > %f and ((v0 - v1) / (v0 + v1)) < %f), count(*));";
+            domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
+                    benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.2, 0.4)));
+            domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
+                    benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.22, 0.45)));
+            domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(ndviQueryFormat,
+                    benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1(), 0.21, 0.38)));
+            // calculate SAVI on a spatial subset
+            // savi = ((NIR-R) / (NIR + R + L)) * (1+L)
+            String saviQueryFormat = "aggregate( apply( join(%s, %s), v2, ((v0 - v1) / (v0 + v1 + 0.5)) * 1.5 ), min(v2));";
+            domainBenchmark.addBenchmarkQuery(new BenchmarkQuery(String.format(saviQueryFormat,
+                    benchmarkContext.getArrayName0(), benchmarkContext.getArrayName1())));
+//            ret.add(domainBenchmark);
         }
-        ret.add(lowerLeftToLowerRight);
-        
-        BenchmarkSession lowerLeftToUpperRight = new BenchmarkSession("tile benchmark session lower left to upper right");
-        for (int i = 0; i < 5; i++) {
-            int origin = i * 500;
-            lowerLeftToUpperRight.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName0(), origin, origin, 3999 + origin, 3999 + origin)));
-        }
-        ret.add(lowerLeftToUpperRight);
-        
-        BenchmarkSession zoomIn = new BenchmarkSession("tile benchmark session zoom in");
-        for (int i = 0; i < 3; i++) {
-            int zoom = i * 500;
-            zoomIn.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
-        }
-        ret.add(zoomIn);
-        
-        BenchmarkSession zoomOut = new BenchmarkSession("tile benchmark session zoom out");
-        for (int i = 2; i >= 0; i--) {
-            int zoom = i * 500;
-            zoomOut.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                    subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
-        }
-        ret.add(zoomOut);
-        
-        BenchmarkSession sqrt = new BenchmarkSession("repeated square root");
-        String sqrtQuery = "aggregate( apply( %s, v1, %s ), min(v1) );";
-        String sqrtExpr = "abs(v0)";
-        for (int i = 0; i < 10; i++) {
-            sqrt.addBenchmarkQuery(new BenchmarkQuery(String.format(sqrtQuery, benchmarkContext.getArrayName0(), sqrtExpr)));
-            sqrtExpr = "sqrt(" + sqrtExpr + ")";
-        }
-        ret.add(sqrt);
         
         {
-            BenchmarkSession benchmarkSession = new BenchmarkSession("repeated multiplication");
-            String query = "aggregate( apply( %s, v1, %s ), min(v1) );";
-            String expr = "v0";
-            for (int i = 0; i < 10; i++) {
-                benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, benchmarkContext.getArrayName0(), expr)));
-                expr = expr + " * v0";
+            String[] aggregateFuncs = {"min", "max", "sum", "avg"};
+            for (String aggregateFunc : aggregateFuncs) {
+                String subsetQuery = "aggregate( between( %s, %d, %d, %d, %d ), " + aggregateFunc + "(v0) )";
+                BenchmarkSession benchmarkSession = new BenchmarkSession("subset window lower left to lower right, " + aggregateFunc);
+                for (int i = 0; i < 5; i++) {
+                    int origin = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), origin, 0, 3999 + origin, 3999)));
+                }
+                ret.add(benchmarkSession);
+                benchmarkSession = new BenchmarkSession("subset window lower left to upper right, " + aggregateFunc);
+                for (int i = 0; i < 5; i++) {
+                    int origin = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), origin, origin, 3999 + origin, 3999 + origin)));
+                }
+                ret.add(benchmarkSession);
+                benchmarkSession = new BenchmarkSession("subset window zoom in, " + aggregateFunc);
+                for (int i = 0; i < 3; i++) {
+                    int zoom = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
+                }
+                ret.add(benchmarkSession);
+                benchmarkSession = new BenchmarkSession("subset window zoom out, " + aggregateFunc);
+                for (int i = 2; i >= 0; i--) {
+                    int zoom = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
+                }
+                ret.add(benchmarkSession);
             }
-            ret.add(benchmarkSession);
+        }
+        
+        {
+            String[] aggregateFuncs = {"count", "min", "max"};
+            for (String aggregateFunc : aggregateFuncs) {
+                String subsetQuery = "aggregate( filter( between( %s, %d, %d, %d, %d ), v0 > 0.0 and v0 < 100.0), " + aggregateFunc + "(v0) )";
+                BenchmarkSession benchmarkSession = new BenchmarkSession("subset window lower left to lower right, " + aggregateFunc);
+                for (int i = 0; i < 5; i++) {
+                    int origin = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), origin, 0, 3999 + origin, 3999)));
+                }
+                ret.add(benchmarkSession);
+                benchmarkSession = new BenchmarkSession("subset window lower left to upper right, " + aggregateFunc);
+                for (int i = 0; i < 5; i++) {
+                    int origin = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), origin, origin, 3999 + origin, 3999 + origin)));
+                }
+                ret.add(benchmarkSession);
+                benchmarkSession = new BenchmarkSession("subset window zoom in, " + aggregateFunc);
+                for (int i = 0; i < 3; i++) {
+                    int zoom = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
+                }
+                ret.add(benchmarkSession);
+                benchmarkSession = new BenchmarkSession("subset window zoom out, " + aggregateFunc);
+                for (int i = 2; i >= 0; i--) {
+                    int zoom = i * 500;
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
+                            subsetQuery, benchmarkContext.getArrayName0(), zoom, zoom, 3999 - zoom, 3999 - zoom)));
+                }
+                ret.add(benchmarkSession);
+            }
+        }
+        
+        {
+            String[] booleanOps = {"and", "or", "xor"};
+            String[][] comparisonFuncs = {{"less than", "<"}, {"greater than", ">"}, {"less than or equal to", "<="}, 
+                {"greater than or equal to", ">="}, {"equal to", "="}, {"not equal to", "!="}};
+            for (String booleanOp : booleanOps) {
+                for (String[] comparisonFunc : comparisonFuncs) {
+                    BenchmarkSession benchmarkSession = new BenchmarkSession(comparisonFunc[0] + " with " + booleanOp);
+                    String query = "aggregate( filter( %s, %s ), count(*) );";
+                    String expr = "";
+                    String op = comparisonFunc[1];
+                    for (int i = 0; i < 10; i++) {
+                        String currExpr = "(v0" + op + i + ")";
+                        if (expr.isEmpty()) {
+                            expr = currExpr;
+                        } else {
+                            expr = expr + " " + booleanOp + " " + currExpr;
+                        }
+                        benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, benchmarkContext.getArrayName0(), expr)));
+                    }
+                    ret.add(benchmarkSession);
+                }
+            }
+        }
+        
+        {
+            String[][] unaryFuncs = {{"sqrt", "abs(c)"}, {"sin", "c"}, {"cos", "c"}};
+            for (String[] unaryFunc : unaryFuncs) {
+                String func = unaryFunc[0];
+                BenchmarkSession benchmarkSession = new BenchmarkSession(func);
+                String query = "aggregate( apply( %s, v1, %s ), min(v1) );";
+                String expr = unaryFunc[1];
+                for (int i = 0; i < 10; i++) {
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, benchmarkContext.getArrayName0(), expr)));
+                    expr = func + "(" + expr + ")";
+                }
+                ret.add(benchmarkSession);
+            }
+        }
+        
+        {
+            String[][] binaryFuncs = {{"multiplication", "*"}, {"division", "/"}, {"addition", "+"}, {"subtraction", "-"}};
+            for (String[] binaryFunc : binaryFuncs) {
+                BenchmarkSession benchmarkSession = new BenchmarkSession(binaryFunc[0]);
+                String query = "aggregate( apply( %s, v1, %s ), min(v1) );";
+                String expr = "v0";
+                String op = binaryFunc[1];
+                for (int i = 0; i < 10; i++) {
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, benchmarkContext.getArrayName0(), expr)));
+                    expr = expr + op + "v0";
+                }
+                ret.add(benchmarkSession);
+            }
         }
         
         return ret;

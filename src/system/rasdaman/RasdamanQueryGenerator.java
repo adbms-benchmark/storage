@@ -133,7 +133,7 @@ public class RasdamanQueryGenerator extends QueryGenerator {
                         if (expr.isEmpty()) {
                             expr = currExpr;
                         } else {
-                            expr = expr + booleanOp + currExpr;
+                            expr = expr + " " + booleanOp + " " + currExpr;
                         }
                         benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
                     }
@@ -143,7 +143,7 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         }
         
         {
-            String[][] unaryFuncs = {{"sqrt", "abs(c)"}, {"log", "abs(c)"}, {"sin", "c"}, {"cos", "c"}};
+            String[][] unaryFuncs = {{"sqrt", "abs(c)"}, {"sin", "c"}, {"cos", "c"}};
             for (String[] unaryFunc : unaryFuncs) {
                 String func = unaryFunc[0];
                 BenchmarkSession benchmarkSession = new BenchmarkSession(func);
