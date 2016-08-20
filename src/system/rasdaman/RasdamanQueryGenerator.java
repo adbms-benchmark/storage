@@ -142,17 +142,35 @@ public class RasdamanQueryGenerator extends QueryGenerator {
             }
         }
         
-        String[][] unaryFuncs = {{"sqrt", "abs(c)"}, {"log", "abs(c)"}, {"sin", "c"}, {"cos", "c"}};
-        for (String[] unaryFunc : unaryFuncs) {
-            String func = unaryFunc[0];
-            BenchmarkSession benchmarkSession = new BenchmarkSession(func);
-            String query = "SELECT min_cells(%s) FROM %s AS c";
-            String expr = unaryFunc[1];
-            for (int i = 0; i < 10; i++) {
-                benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
-                expr = func + "(" + expr + ")";
+        {
+            String[][] unaryFuncs = {{"sqrt", "abs(c)"}, {"log", "abs(c)"}, {"sin", "c"}, {"cos", "c"}};
+            for (String[] unaryFunc : unaryFuncs) {
+                String func = unaryFunc[0];
+                BenchmarkSession benchmarkSession = new BenchmarkSession(func);
+                String query = "SELECT min_cells(%s) FROM %s AS c";
+                String expr = unaryFunc[1];
+                for (int i = 0; i < 10; i++) {
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
+                    expr = func + "(" + expr + ")";
+                }
+                ret.add(benchmarkSession);
             }
-            ret.add(benchmarkSession);
+        }
+        
+        {
+            ret.clear();
+            String[][] binaryFuncs = {{"multiplication", "*"}, {"division", "/"}, {"addition", "+"}, {"subtraction", "-"}};
+            for (String[] binaryFunc : binaryFuncs) {
+                BenchmarkSession benchmarkSession = new BenchmarkSession(binaryFunc[0]);
+                String query = "SELECT min_cells(%s) FROM %s AS c";
+                String expr = "c";
+                String op = binaryFunc[1];
+                for (int i = 0; i < 10; i++) {
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
+                    expr = expr + op + "c";
+                }
+                ret.add(benchmarkSession);
+            }
         }
         
         return ret;
