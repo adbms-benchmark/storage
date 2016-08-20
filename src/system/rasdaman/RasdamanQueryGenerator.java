@@ -158,7 +158,6 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         }
         
         {
-            ret.clear();
             String[][] binaryFuncs = {{"multiplication", "*"}, {"division", "/"}, {"addition", "+"}, {"subtraction", "-"}};
             for (String[] binaryFunc : binaryFuncs) {
                 BenchmarkSession benchmarkSession = new BenchmarkSession(binaryFunc[0]);
