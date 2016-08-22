@@ -6,6 +6,7 @@ to the given parameters.
 """
 
 from matplotlib import pyplot as plt
+from matplotlib import gridspec
 from os import listdir
 from os.path import isfile, join
 import matplotlib
@@ -14,6 +15,7 @@ import csv
 
 ALL_LINES=-1
 INVALID_FIELD=-1
+COLORS = ['black', 'red', 'gold', 'green', 'blue', 'magenta', 'cyan', 'gray', 'darkorange', 'navy', 'violet', 'lime', 'pink']
 
 def get_csv_fields(filepath, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_label_input):
     """
@@ -42,50 +44,48 @@ def get_csv_fields(filepath, row_ind_begin, row_ind_end, data_label_field_ind, d
     return (data, data_label)
 
 
-def plot_data(files, lines, multi, data_label_field_ind, data_field_ind, data_labels, xlabel, ylabel, title, xtick_labels, out_file, legend_title):
+def plot_data(files, lines, data_label_field_ind, data_field_ind, data_labels,
+              xlabel, ylabel, title, xtick_labels, out_file, legend_title, xtick_legend):
     """
     Generate plot.
     """
-    fontname = 'cmr10'
-    fontsize = 20
+    fontname = 'Arial'
+    fontsize = 16
     def correct_font(x, fontsize=fontsize):
-        x.set_fontname(fontname)
+        #x.set_fontname(fontname)
         x.set_fontsize(fontsize)
 
-    plt.figure(figsize=(12,8))
+    axes = plt
+    if xtick_legend:
+        plt.figure(figsize=(12,12))
+        gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
+        axes = plt.subplot(gs[1])
+    else:
+        plt.figure(figsize=(12,8))
 
-    data1 = []
-    data2 = []
     ind = 0
     for f in files:
         (row_ind_begin, row_ind_end) = lines[ind]
-        if not multi:
-            (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_labels[ind])
-            plt.plot(data, label=data_label, marker='x')
-        else:
-            (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_begin, data_label_field_ind, data_field_ind, data_labels[0])
-            data1.append(data[0])
-            if len(data_labels) > 1 and row_ind_end != row_ind_begin:
-                (data, data_label) = get_csv_fields(f, row_ind_end, row_ind_end, data_label_field_ind, data_field_ind, data_labels[1])
-                data2.append(data[0])
+        (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_labels[ind])
+        axes.plot(data, label=data_label, marker='x', lw=1.0, mew=1.0, color=COLORS[ind])
         ind += 1
-
-    if multi:
-        plt.plot(data1, label=data_labels[0], marker='x')
-        if len(data2) > 0:
-            plt.plot(data2, label=data_labels[1], marker='x')
 
     correct_font(plt.xlabel(xlabel))
     correct_font(plt.ylabel(ylabel))
     correct_font(plt.title(title), int(1.2 * fontsize))
+    if xtick_legend:
+        xtick_legend = xtick_legend.replace(";", "\n")
+        correct_font(plt.figtext(0.04,0.72,xtick_legend), 14)
+        plt.draw()
 
     plt.xticks(range(len(xtick_labels)), xtick_labels)
     plt.legend(loc='best', ncol=2, title=legend_title)
     plt.tight_layout()
     plt.grid(True)
     if out_file is not None:
-        plt.savefig(out_file)
-    plt.show()
+        plt.savefig(out_file, bbox_inches='tight')
+    else:
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -94,13 +94,13 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--files", help="comma-separated list of CSV files, e.g. file1,file2,...")
     parser.add_argument("-d", "--dir", help="load all .csv files from a specified directory.")
     parser.add_argument("--lines", help="comma-separated start-end line number for each file, e.g. 0-10,12-30,.. If the start-end are same for all files, only one can be specified.")
-    parser.add_argument("--multi", help="combine values from multiple files into a single plot.", action="store_true")
     parser.add_argument("--data-field", help="get data values for the plot from the given field in the CSV file (0-index).")
     parser.add_argument("--data-label-field", help="get labels for the legend from a column in the CSV file (0-index).", type=int, default=INVALID_FIELD)
     parser.add_argument("--data-labels", help="manually list the labels for the legend, separated by ','.")
     parser.add_argument("--xlabel", help="x axis label.")
     parser.add_argument("--ylabel", help="x axis label.", default="Execution time (ms)")
     parser.add_argument("--xtick-labels", help="custom tick labels for the X axis, comma-separated.")
+    parser.add_argument("--xtick-legend", help="legend for the X axis ticks, as ';' separated strings.")
     parser.add_argument("--title", help="plot title.")
     parser.add_argument("--legend-title", help="legend title.")
     parser.add_argument("-o", "--outfile", help="file name for saving the plot.", default="plot.png")
@@ -141,5 +141,5 @@ if __name__ == "__main__":
         else:
             xtick_labels = ["Q" + str(i+1) for i in range(len(files))]
 
-        plot_data(files, lines, args.multi, args.data_label_field, int(args.data_field), 
-            data_labels, args.xlabel, args.ylabel, args.title, xtick_labels, args.outfile, args.legend_title)
+        plot_data(files, lines, args.data_label_field, int(args.data_field), 
+            data_labels, args.xlabel, args.ylabel, args.title, xtick_labels, args.outfile, args.legend_title, args.xtick_legend)
