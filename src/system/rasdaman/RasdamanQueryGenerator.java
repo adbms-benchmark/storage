@@ -52,31 +52,31 @@ public class RasdamanQueryGenerator extends QueryGenerator {
             for (String aggregateFunc : aggregateFuncs) {
                 String subsetQuery = "SELECT " + aggregateFunc + "(c[%d:%d,%d:%d]) FROM %s as c";
                 BenchmarkSession benchmarkSession = new BenchmarkSession("subset window lower left to lower right, " + aggregateFunc);
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 8; i++) {
                     int origin = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
                             subsetQuery, origin, 3999 + origin, 0, 3999, benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
                 benchmarkSession = new BenchmarkSession("subset window lower left to upper right, " + aggregateFunc);
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 8; i++) {
                     int origin = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
                             subsetQuery, origin, 3999 + origin, origin, 3999 + origin, benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
                 benchmarkSession = new BenchmarkSession("subset window zoom in, " + aggregateFunc);
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 8; i++) {
                     int zoom = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                            subsetQuery, zoom, 3999 - zoom, zoom, 3999 - zoom, benchmarkContext.getArrayName0())));
+                            subsetQuery, zoom, 7999 - zoom, zoom, 7999 - zoom, benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
                 benchmarkSession = new BenchmarkSession("subset window zoom out, " + aggregateFunc);
-                for (int i = 2; i >= 0; i--) {
+                for (int i = 7; i >= 0; i--) {
                     int zoom = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(
-                            subsetQuery, zoom, 3999 - zoom, zoom, 3999 - zoom, benchmarkContext.getArrayName0())));
+                            subsetQuery, zoom, 7999 - zoom, zoom, 7999 - zoom, benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
             }
@@ -88,57 +88,54 @@ public class RasdamanQueryGenerator extends QueryGenerator {
                 String subsetExpr = "c[%d:%d,%d:%d]";
                 String subsetQuery = "SELECT " + aggregateFunc + "({0} > 0.0 and {0} < 100.0) FROM {1} as c";
                 BenchmarkSession benchmarkSession = new BenchmarkSession("subset window lower left to lower right, " + aggregateFunc);
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 8; i++) {
                     int origin = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(subsetQuery,
                             String.format(subsetExpr, origin, 3999 + origin, 0, 3999), benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
                 benchmarkSession = new BenchmarkSession("subset window lower left to upper right, " + aggregateFunc);
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 8; i++) {
                     int origin = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(subsetQuery,
                             String.format(subsetExpr, origin, 3999 + origin, origin, 3999 + origin), benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
                 benchmarkSession = new BenchmarkSession("subset window zoom in, " + aggregateFunc);
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 8; i++) {
                     int zoom = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(subsetQuery,
-                            String.format(subsetExpr, zoom, 3999 - zoom, zoom, 3999 - zoom), benchmarkContext.getArrayName0())));
+                            String.format(subsetExpr, zoom, 7999 - zoom, zoom, 7999 - zoom), benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
                 benchmarkSession = new BenchmarkSession("subset window zoom out, " + aggregateFunc);
-                for (int i = 2; i >= 0; i--) {
+                for (int i = 7; i >= 0; i--) {
                     int zoom = i * 500;
                     benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(MessageFormat.format(subsetQuery,
-                            String.format(subsetExpr, zoom, 3999 - zoom, zoom, 3999 - zoom), benchmarkContext.getArrayName0())));
+                            String.format(subsetExpr, zoom, 7999 - zoom, zoom, 7999 - zoom), benchmarkContext.getArrayName0())));
                 }
                 ret.add(benchmarkSession);
             }
         }
         
         {
-            String[] booleanOps = {"and", "or", "xor"};
             String[][] comparisonFuncs = {{"less than", "<"}, {"greater than", ">"}, {"less than or equal to", "<="}, 
-                {"greater than or equal to", ">="}, {"equal to", "="}, {"not equal to", "!="}};
-            for (String booleanOp : booleanOps) {
-                for (String[] comparisonFunc : comparisonFuncs) {
-                    BenchmarkSession benchmarkSession = new BenchmarkSession(comparisonFunc[0] + " with " + booleanOp);
-                    String query = "SELECT count_cells(%s) FROM %s AS c";
-                    String expr = "";
-                    String op = comparisonFunc[1];
-                    for (int i = 0; i < 10; i++) {
-                        String currExpr = "(c" + op + i + ")";
-                        if (expr.isEmpty()) {
-                            expr = currExpr;
-                        } else {
-                            expr = expr + " " + booleanOp + " " + currExpr;
-                        }
-                        benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
+            {"greater than or equal to", ">="}, {"equal to", "="}, {"not equal to", "!="}};
+            for (String[] comparisonFunc : comparisonFuncs) {
+                BenchmarkSession benchmarkSession = new BenchmarkSession(comparisonFunc[0]);
+                String query = "SELECT count_cells(%s) FROM %s AS c";
+                String expr = "";
+                String op = comparisonFunc[1];
+                for (int i = 0; i < 10; i++) {
+                    String currExpr = "(c" + op + i + ")";
+                    if (expr.isEmpty()) {
+                        expr = currExpr;
+                    } else {
+                        expr = expr + " and " + currExpr;
                     }
-                    ret.add(benchmarkSession);
+                    benchmarkSession.addBenchmarkQuery(new BenchmarkQuery(String.format(query, expr, benchmarkContext.getArrayName0())));
                 }
+                ret.add(benchmarkSession);
             }
         }
         
