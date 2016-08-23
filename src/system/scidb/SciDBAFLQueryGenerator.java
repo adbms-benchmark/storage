@@ -138,7 +138,7 @@ public class SciDBAFLQueryGenerator extends QueryGenerator {
         }
         
         {
-            String[][] unaryFuncs = {{"sqrt", "abs(c)"}, {"sin", "c"}, {"cos", "c"}};
+            String[][] unaryFuncs = {{"sqrt", "abs(v0)"}, {"sin", "v0"}, {"cos", "v0"}};
             for (String[] unaryFunc : unaryFuncs) {
                 String func = unaryFunc[0];
                 BenchmarkSession benchmarkSession = new BenchmarkSession(func);

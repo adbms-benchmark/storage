@@ -30,6 +30,8 @@ def get_csv_fields(filepath, row_ind_begin, row_ind_end, data_label_field_ind, d
         row_ind = 0
         for row in reader:
             if row_ind_begin == ALL_LINES or (row_ind >= row_ind_begin and row_ind <= row_ind_end):
+                if len(row) == 0:
+                    continue
                 data_field = 0.0
                 if data_label == "":
                     if data_label_field_ind != INVALID_FIELD:
@@ -44,45 +46,122 @@ def get_csv_fields(filepath, row_ind_begin, row_ind_end, data_label_field_ind, d
     return (data, data_label)
 
 
-def plot_data(files, lines, data_label_field_ind, data_field_ind, data_labels,
+def plot_data(files, lines, split, data_label_field_ind, data_field_ind, data_labels,
               xlabel, ylabel, title, xtick_labels, out_file, legend_title, xtick_legend):
     """
     Generate plot.
     """
-    fontname = 'Arial'
     fontsize = 16
     def correct_font(x, fontsize=fontsize):
-        #x.set_fontname(fontname)
         x.set_fontsize(fontsize)
 
-    axes = plt
-    if xtick_legend:
-        plt.figure(figsize=(12,12))
-        gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
-        axes = plt.subplot(gs[1])
-    else:
-        plt.figure(figsize=(12,8))
-
+    # load data into alldata
+    alldata = []
+    data_lbls = []
+    maxdata = []
+    mindata = []
     ind = 0
     for f in files:
         (row_ind_begin, row_ind_end) = lines[ind]
-        (data, data_label) = get_csv_fields(f, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_labels[ind])
-        axes.plot(data, label=data_label, marker='x', lw=1.0, mew=1.0, color=COLORS[ind])
+        (data, lbl) = get_csv_fields(f, row_ind_begin, row_ind_end, data_label_field_ind, data_field_ind, data_labels[ind])
+        alldata.append(data)
+        data_lbls.append(lbl)
+
+        if ind == 0:
+            for v in data:
+                maxdata.append(v)
+                mindata.append(v)
+        else:
+            for j in range(len(data)):
+                if data[j] > maxdata[j]:
+                    maxdata[j] = data[j]
+                if data[j] < mindata[j]:
+                    mindata[j] = data[j]
         ind += 1
 
+    # find out highest and second highest values (ymax and ymax2), lowest (ymin) and lowest at same index as ymax (ymaxmin)
+    ymax = 0
+    ymaxmin = 100000000
+    ymax2 = 0
+    ymin = 1000000000
+    for i in range(len(maxdata)):
+        if maxdata[i] > ymax:
+            ymax2 = ymax
+            ymax = maxdata[i]
+            ymaxmin = mindata[i]
+        if maxdata[i] > ymax2 and maxdata[i] < ymax:
+            ymax2 = maxdata[i]
+        if mindata[i] < ymin:
+            ymin = mindata[i]
+    if ymaxmin < ymax2:
+        ymaxmin = ymax
+
+    # do not split if the two highest values are closer to each other than threshold %
+    data_range = ymax - ymin
+    data_range_ymax = ymax - ymax2
+    threshold = 0.3
+    if data_range_ymax / data_range < threshold:
+        split = False
+
+    # plot data
+    ax1 = None
+    ax2 = None
+    if split:
+        f, (ax0, ax1, ax2) = plt.subplots(3, 1, sharex=True, figsize=(12,12))
+        f.delaxes(ax0)
+    else:
+        f, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(12,10))
+        f.delaxes(ax1)
+        ax1 = plt
+    for i in range(len(alldata)):
+        ax1.plot(alldata[i], label=data_lbls[i], marker='x', lw=1.0, mew=1.0, color=COLORS[i])
+        if split:
+            ax2.plot(alldata[i], label=data_lbls[i], marker='x', lw=1.0, mew=1.0, color=COLORS[i])
+
+    # set labels, title and legend
     correct_font(plt.xlabel(xlabel))
     correct_font(plt.ylabel(ylabel))
+    if split:
+        ax1 = plt.axes(ax1)
     correct_font(plt.title(title), int(1.2 * fontsize))
+    if split:
+        ax2 = plt.axes(ax2)
     if xtick_legend:
         xtick_legend = xtick_legend.replace(";", "\n")
-        correct_font(plt.figtext(0.04,0.72,xtick_legend), 14)
-        plt.draw()
-
+        yoffset = 0.72
+        if not split:
+            yoffset = 0.6
+        correct_font(plt.figtext(0.04, yoffset, xtick_legend), 12)
+    ax1.legend(loc='best', ncol=2, title=legend_title)
     plt.xticks(range(len(xtick_labels)), xtick_labels)
-    plt.legend(loc='best', ncol=2, title=legend_title)
+    ax1.grid(True)
+
+    # split plot if requested
+    if split:
+        # zoom to outlier part on the top plot, and to the data on the bottom plot
+        (ylow,yhigh) = ax1.get_ylim()
+        ax1.set_ylim(ymaxmin * 0.9, ymax * 1.05)
+        ax2.set_ylim(ymin * 0.95, ymax2 * 1.05)
+
+        # hide the spines between ax1 and ax2
+        ax1.spines['bottom'].set_visible(False)
+        ax2.spines['top'].set_visible(False)
+        ax1.xaxis.tick_top()
+        ax1.tick_params(labeltop='off') # don't put tick labels at the top
+        ax2.xaxis.tick_bottom()
+
+        d = .015  # how big to make the diagonal lines in axes coordinates
+        # arguments to pass to plot, just so we don't keep repeating them
+        kwargs = dict(transform=ax1.transAxes, color='k', clip_on=False)
+        ax1.plot((-d, +d), (-d, +d), **kwargs)        # top-left diagonal
+        ax1.plot((1 - d, 1 + d), (-d, +d), **kwargs) # top-right diagonal
+        kwargs.update(transform=ax2.transAxes)  # switch to the bottom axes
+        ax2.plot((-d, +d), (1 - d, 1 + d), **kwargs)  # bottom-left diagonal
+        ax2.plot((1 - d, 1 + d), (1 - d, 1 + d), **kwargs) # bottom-right diagonal
+        ax2.grid(True)
+
     plt.tight_layout()
-    plt.grid(True)
-    if out_file is not None:
+    if out_file:
         plt.savefig(out_file, bbox_inches='tight')
     else:
         plt.show()
@@ -93,6 +172,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-f", "--files", help="comma-separated list of CSV files, e.g. file1,file2,...")
     parser.add_argument("-d", "--dir", help="load all .csv files from a specified directory.")
+    parser.add_argument("-s", "--split", help="split plot in two for separately plotting the outlier.", action='store_true', default=False)
     parser.add_argument("--lines", help="comma-separated start-end line number for each file, e.g. 0-10,12-30,.. If the start-end are same for all files, only one can be specified.")
     parser.add_argument("--data-field", help="get data values for the plot from the given field in the CSV file (0-index).")
     parser.add_argument("--data-label-field", help="get labels for the legend from a column in the CSV file (0-index).", type=int, default=INVALID_FIELD)
@@ -141,5 +221,5 @@ if __name__ == "__main__":
         else:
             xtick_labels = ["Q" + str(i+1) for i in range(len(files))]
 
-        plot_data(files, lines, args.data_label_field, int(args.data_field), 
+        plot_data(files, lines, args.split, args.data_label_field, int(args.data_field), 
             data_labels, args.xlabel, args.ylabel, args.title, xtick_labels, args.outfile, args.legend_title, args.xtick_legend)
