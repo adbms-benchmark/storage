@@ -51,9 +51,14 @@ def plot_data(files, lines, split, data_label_field_ind, data_field_ind, data_la
     """
     Generate plot.
     """
-    fontsize = 16
+    fontname = "cmr10"
+    fontsize = 22
+    font = {'family' : fontname,
+            'size'   : 20}
+    matplotlib.rc('font', **font)
     def correct_font(x, fontsize=fontsize):
         x.set_fontsize(fontsize)
+        x.set_fontname(fontname)
 
     # load data into alldata
     alldata = []
@@ -107,23 +112,25 @@ def plot_data(files, lines, split, data_label_field_ind, data_field_ind, data_la
     ax1 = None
     ax2 = None
     if split:
-        f, (ax0, ax1, ax2) = plt.subplots(3, 1, sharex=True, figsize=(12,12))
+        f, (ax0, ax1, ax2) = plt.subplots(3, 1, sharex=True, figsize=(8,12))
         f.delaxes(ax0)
     else:
-        f, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(12,10))
+        f, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,10))
         f.delaxes(ax1)
         ax1 = plt
     for i in range(len(alldata)):
-        ax1.plot(alldata[i], label=data_lbls[i], marker='x', lw=1.0, mew=1.0, color=COLORS[i])
+        ax1.plot(alldata[i], label=data_lbls[i], marker='^', lw=1.0, markersize=9, color=COLORS[i], linestyle='-')
         if split:
-            ax2.plot(alldata[i], label=data_lbls[i], marker='x', lw=1.0, mew=1.0, color=COLORS[i])
+            ax2.plot(alldata[i], label=data_lbls[i], marker='^', lw=1.0, markersize=9, color=COLORS[i], linestyle='-')
 
+    
     # set labels, title and legend
     correct_font(plt.xlabel(xlabel))
     correct_font(plt.ylabel(ylabel))
     if split:
         ax1 = plt.axes(ax1)
-    correct_font(plt.title(title), int(1.2 * fontsize))
+    if title:
+        correct_font(plt.title(title), int(1.2 * fontsize))
     if split:
         ax2 = plt.axes(ax2)
     if xtick_legend:
@@ -178,7 +185,7 @@ if __name__ == "__main__":
     parser.add_argument("--data-label-field", help="get labels for the legend from a column in the CSV file (0-index).", type=int, default=INVALID_FIELD)
     parser.add_argument("--data-labels", help="manually list the labels for the legend, separated by ','.")
     parser.add_argument("--xlabel", help="x axis label.")
-    parser.add_argument("--ylabel", help="x axis label.", default="Execution time (ms)")
+    parser.add_argument("--ylabel", help="x axis label.", default="Processing time (ms)")
     parser.add_argument("--xtick-labels", help="custom tick labels for the X axis, comma-separated.")
     parser.add_argument("--xtick-legend", help="legend for the X axis ticks, as ';' separated strings.")
     parser.add_argument("--title", help="plot title.")
