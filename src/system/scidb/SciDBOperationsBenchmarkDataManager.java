@@ -10,7 +10,7 @@ import util.IO;
 import java.text.MessageFormat;
 
 /**
- * Created by danut on 25.04.17.
+ * Created by Danut Rusu on 25.04.17.
  */
 public class SciDBOperationsBenchmarkDataManager extends OperationsBenchmarkDataManager<SciDBSystem> {
 
@@ -23,19 +23,14 @@ public class SciDBOperationsBenchmarkDataManager extends OperationsBenchmarkData
     }
 
     String createArrayQuery(String arrayName, int arrayDimensionality, long bound, String dataType) {
-//        long bound = 500000;
         String createArray;
 
         String dimensions = "";
         for (int i = 0; i < arrayDimensionality; ++i) {
             if (i == 0) {
-//                dimensions += String.format("d%d=0:%d,%d,0", i + 1, BAND_WIDTH - 1, bound);
                 dimensions += String.format("d%d", i + 1);
-
             } else {
-//                dimensions += ", " + String.format("d%d=0:%d,%d,0", i + 1, BAND_WIDTH - 1, bound);
                 dimensions += ", " + String.format("d%d", i + 1);
-
             }
         }
 
@@ -61,12 +56,9 @@ public class SciDBOperationsBenchmarkDataManager extends OperationsBenchmarkData
         long tileUpperBound = DomainUtil.getDimensionUpperBound(benchmarkContext.getArrayDimensionality(), benchmarkContext.getTileSize() / domainGenerator.getBytes(dataType));
         System.out.println(tileUpperBound);
 
-//        String createArray = String.format("CREATE ARRAY %s<v:%s>[d1=0:%d,%d,0, d2=0:%d,%d,0];",
-//                arrayName, TYPE_BASE, BAND_WIDTH - 1, tileUpperBound, BAND_HEIGHT - 1, tileUpperBound);
         String createArray = createArrayQuery(arrayName, arrayDimensionality, tileUpperBound, dataType);
 
         queryExecutor.executeTimedQuery(createArray);
-//        String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'', 0, ''({2})'');",
         String insertDataQuery = MessageFormat.format("LOAD {0} FROM ''{1}'' AS ''({2})'';", arrayName, sliceFilePath, dataType );
 
         totalTime += queryExecutor.executeTimedQuery(insertDataQuery);

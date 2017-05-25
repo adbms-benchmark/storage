@@ -1,11 +1,16 @@
 package system.scidb;
 
-import benchmark.*;
+import benchmark.Benchmark;
+import benchmark.BenchmarkQuery;
+import benchmark.QueryGenerator;
+import benchmark.BenchmarkContext;
+import benchmark.BenchmarkSession;
 import benchmark.operations.OperationsBenchmarkContext;
-import util.Pair;
 
 import java.text.MessageFormat;
 import java.util.List;
+
+import util.Pair;
 
 /**
  * @author George Merticariu

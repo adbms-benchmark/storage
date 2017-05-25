@@ -5,12 +5,17 @@
  */
 package benchmark;
 
-import com.martiansoftware.jsap.*;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Parameter;
+import com.martiansoftware.jsap.SimpleJSAP;
+import com.martiansoftware.jsap.Switch;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
-
-import java.io.IOException;
 
 /**
  * Entry point class.

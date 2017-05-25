@@ -1,13 +1,17 @@
 package system.rasdaman;
 
 
-import benchmark.*;
+import benchmark.Benchmark;
+import benchmark.BenchmarkQuery;
+import benchmark.BenchmarkSession;
+import benchmark.QueryGenerator;
+import benchmark.BenchmarkContext;
 import benchmark.operations.OperationsBenchmarkContext;
 import data.DomainGenerator;
-import util.Pair;
 
 import java.text.MessageFormat;
 import java.util.List;
+import util.Pair;
 
 /**
  * @author George Merticariu
@@ -19,29 +23,6 @@ public class RasdamanQueryGenerator extends QueryGenerator {
 
     public RasdamanQueryGenerator(BenchmarkContext benchmarkContext) {
         super(benchmarkContext);
-    }
-
-    String getMArrayQuery(int arrayDimensionality, int dimension, long boundary, String arrayName, String operation) {
-        String query;
-        String dim = "*:*";
-
-        String using = "";
-        for (int i = 0; i < arrayDimensionality; ++i) {
-            if (i == dimension) {
-                if (using.isEmpty())
-                    using += "x[0]";
-                else
-                    using += ",x[0]";
-            } else {
-                if (using.isEmpty())
-                    using += dim;
-                else
-                    using += "," + dim;
-            }
-        }
-
-        query = String.format("SELECT marray x in [0:%d] values %s(c[%s]) FROM %s AS c", boundary, operation, using, arrayName);
-        return query;
     }
 
     @Override
@@ -60,9 +41,6 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         List<Pair<Long, Long>> domainBoundaries = domainGenerator.getDomainBoundaries(benchmarkContext.getArraySize(), ((OperationsBenchmarkContext) benchmarkContext).getDataType());
         long upperBoundary = domainBoundaries.get(0).getSecond();
         String dataType = ((OperationsBenchmarkContext)benchmarkContext).getDataType();
-
-
-        System.out.println(arrayDimensionality + " " + upperBoundary);
 
         {
             BenchmarkSession benchmarkSession = new BenchmarkSession(String.format("SELECT (%dD)", arrayDimensionality));
@@ -417,6 +395,28 @@ public class RasdamanQueryGenerator extends QueryGenerator {
         return rasdamanDomain.toString();
     }
 
+    String getMArrayQuery(int arrayDimensionality, int dimension, long boundary, String arrayName, String operation) {
+        String query;
+        String dim = "*:*";
+
+        String using = "";
+        for (int i = 0; i < arrayDimensionality; ++i) {
+            if (i == dimension) {
+                if (using.isEmpty())
+                    using += "x[0]";
+                else
+                    using += ",x[0]";
+            } else {
+                if (using.isEmpty())
+                    using += dim;
+                else
+                    using += "," + dim;
+            }
+        }
+
+        query = String.format("SELECT marray x in [0:%d] values %s(c[%s]) FROM %s AS c", boundary, operation, using, arrayName);
+        return query;
+    }
 
     private String generateMultiDomainQuery(List<Pair<Long, Long>> domain1, List<Pair<Long, Long>> domain2) {
         return MessageFormat.format("SELECT count_cells({0}{1} >= 0) + count_cells({0}{2} >= 0) FROM {0}", 

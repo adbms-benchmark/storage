@@ -40,9 +40,6 @@ public class RasdamanOperationsBenchmarkDataManager extends OperationsBenchmarkD
 
         String tileBoundaries = domainGenerator.getTileDomainBoundariesOperations();
 
-
-        System.out.println(fileSize);
-
         long tileSize = ( benchmarkContext.getArraySize() * domainGenerator.getBytes(dataType))  / 100;
 
         dataGenerator = new RandomDataGenerator(fileSize, benchmarkContext.getDataDir());

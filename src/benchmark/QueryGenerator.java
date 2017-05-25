@@ -3,10 +3,9 @@ package benchmark;
 import benchmark.sqlmda.BenchmarkContextGenerator;
 import benchmark.sqlmda.BenchmarkContextJoin;
 import data.QueryDomainGenerator;
-import util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
+import util.Pair;
 
 /**
  * Generate benchmark sessions. Subclasses override it with details for specific

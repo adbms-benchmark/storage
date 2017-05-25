@@ -1,9 +1,8 @@
 package data;
 
-import util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
+import util.Pair;
 
 /**
  *
@@ -50,10 +49,10 @@ public class DomainGenerator {
         return result;
     }
 
+    //output: for dim = 3, output = [0:*,0:*,0:*]
     public String getTileDomainBoundariesOperations() {
 
         String boundary = "0:*";
-//        List<Pair<Long, Long>> result = new ArrayList<>();
         String result = "";
         for (int i = 0; i < noOfDimensions; ++i) {
             if (i == 0) {

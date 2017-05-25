@@ -5,9 +5,8 @@
  */
 package system.rasdaman;
 
-import util.Pair;
-
 import java.text.MessageFormat;
+import util.Pair;
 import java.util.Date;
 
 /**
@@ -18,8 +17,6 @@ import java.util.Date;
 public class RasdamanTypeManager {
     
     private final RasdamanQueryExecutor queryExecutor;
-    private static int SET_TYPE = 0;
-    private static int MDD_TYPE = 0;
 
     public RasdamanTypeManager(RasdamanQueryExecutor queryExecutor) {
         this.queryExecutor = queryExecutor;
@@ -95,17 +92,6 @@ public class RasdamanTypeManager {
         return Pair.of(mddTypeName, setTypeName);
     }
 
-
-
-
-//    public String createOperationsBaseType(String... baseTypes) throws Exception {
-//        String baseTypeName = getBaseTypeName(baseTypes);
-//        if (baseTypes.length > 0) {
-//            String baseTypeDefinition = MessageFormat.format("create type {0} as ({1})", baseTypeName, getBands(baseTypes));
-//            queryExecutor.executeTimedQuery(baseTypeDefinition);
-//        }
-//        return baseTypeName;
-//    }
     public String getOperationsMddTypeName(int noOfDimensions, String baseTypeName) {
         Date d = new Date();
         String mddTypeName = String.format("B_MDD_%s_%d_%d", baseTypeName, noOfDimensions, d.getTime());
@@ -122,7 +108,6 @@ public class RasdamanTypeManager {
     public String getOperationsSetTypeName(int noOfDimensions, String baseTypeName) {
         Date d = new Date();
         String setTypeName = String.format("B_SET_%s_%d_%s", baseTypeName, noOfDimensions, d.getTime());
-//        SET_TYPE++;
         return setTypeName;
     }
 

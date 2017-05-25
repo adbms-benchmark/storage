@@ -35,7 +35,7 @@ public class OperationsBenchmarkContext extends BenchmarkContext {
 
     public long getDataSize() {
             return dataSize;
-        }
+    }
 
     public long getMaxSelectSize() {
         return (long) (((double) arraySize * maxSelectSizePercent) / 100.0);
@@ -46,8 +46,8 @@ public class OperationsBenchmarkContext extends BenchmarkContext {
     }
 
     public int getQueryNumber() {
-    return queryNumber;
-}
+        return queryNumber;
+    }
 
 
     public void setDataSize(long dataSize) {

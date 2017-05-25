@@ -1,15 +1,16 @@
 package benchmark;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import util.BenchmarkUtil;
-import util.IO;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.BenchmarkUtil;
+import util.IO;
+
 
 /**
  * Runs a benchmark, considering all the given ingredients (context, ADBMS
