@@ -25,7 +25,7 @@ Getting started
 
 Command-line usage help
 -----------------------
-`./run.sh TYPE --help`, where TYPE can be one of storage, caching or sqlmda.
+`./run.sh TYPE --help`, where TYPE can be one of storage, caching, operations or sqlmda.
 
 E.g. `./run.sh caching --help`
 ```
@@ -75,7 +75,7 @@ rasdaman, SciDB.
 
 Copyright and license
 =====================
-Copyright (c) 2014-2016 George Merticariu, Dimitar Misev, Peter Baumann.
+Copyright (c) 2014-2016 George Merticariu, Dimitar Misev, Danut Rusu, Peter Baumann.
 
 Code released under [the MIT license] (https://raw.githubusercontent.com/adbms-benchmark/storage/master/LICENSE).
 
