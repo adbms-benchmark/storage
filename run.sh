@@ -5,7 +5,7 @@ readonly MYNAME=$(basename $0)
 
 unexpected_type_param() {
     echo "Unexpected argument: $1"
-    echo "The first argument must be the benchmark type: 'storage', 'caching' or 'sqlmda'."
+    echo "The first argument must be the benchmark type: 'storage', 'caching', 'sqlmda' or 'operations'."
     echo "Example: $MYNAME caching --help"
     exit 1
 }
@@ -19,6 +19,7 @@ case "$1" in
     storage) driver="benchmark.storage.StorageBenchmarkDriver";;
     caching) driver="benchmark.caching.CachingBenchmarkDriver";;
     sqlmda)  driver="benchmark.sqlmda.SqlMdaBenchmarkDriver";;
+    operations)  driver="benchmark.operations.OperationsBenchmarkDriver";;
     *) unexpected_type_param "$1";;
 esac
 

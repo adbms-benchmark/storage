@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import util.BenchmarkUtil;
 import util.IO;
 
+
 /**
  * Runs a benchmark, considering all the given ingredients (context, ADBMS
  * system, query generator).
@@ -48,7 +49,8 @@ public class BenchmarkExecutor {
         boolean alreadyDropped = false;
 
         File resultsDir = IO.getResultsDir();
-        String resultsFilename = systemController.getSystemName() + "_benchmark_results." + System.currentTimeMillis() + ".csv";
+        String queryName = systemController.getSystemName() + benchmarkContext.getArrayDimensionality() + "D-size" + benchmarkContext.getArraySize() + "B";
+        String resultsFilename = systemController.getSystemName() + "_benchmark_results." + System.currentTimeMillis() + "." + queryName + ".csv";
         File resultsFile = new File(resultsDir.getAbsolutePath(), resultsFilename);
 
         try (PrintWriter pr = new PrintWriter(new FileWriter(resultsFile, true))) {

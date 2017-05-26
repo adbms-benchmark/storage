@@ -5,6 +5,7 @@ import benchmark.DataManager;
 import benchmark.QueryExecutor;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -66,6 +67,8 @@ public class RasdamanSystem extends AdbmsSystem {
             return new RasdamanCachingBenchmarkDataManager(this, (RasdamanQueryExecutor) queryExecutor, benchmarkContext);
         } else if (benchmarkContext.isStorageBenchmark()) {
             return new RasdamanStorageBenchmarkDataManager(this, (RasdamanQueryExecutor) queryExecutor, benchmarkContext);
+        } else if (benchmarkContext.isOperationsBenchmark()) {
+            return new RasdamanOperationsBenchmarkDataManager(this, (RasdamanQueryExecutor) queryExecutor, benchmarkContext);
         } else {
             throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
         }

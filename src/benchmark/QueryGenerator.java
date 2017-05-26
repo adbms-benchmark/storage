@@ -52,11 +52,17 @@ public abstract class QueryGenerator {
             return getStorageBenchmark();
         } else if (this.benchmarkContext.isCachingBenchmark()) {
             return getCachingBenchmark();
+        } else if (this.benchmarkContext.isOperationsBenchmark()) {
+            return getOperationsBenchmark();
         } else {
             throw new RuntimeException("unknown benchmark type: " + this.benchmarkContext.getBenchmarkType());
         }
     }
-    
+
+    public Benchmark getOperationsBenchmark() {
+        throw new UnsupportedOperationException("must be implemented by the subclass");
+    }
+
     public Benchmark getStorageBenchmark() {
         throw new UnsupportedOperationException("must be implemented by the subclass");
     }

@@ -13,6 +13,7 @@ public class BenchmarkContext {
     public static final String TYPE_STORAGE = "storage";
     public static final String TYPE_SQLMDA = "sql/mda";
     public static final String TYPE_CACHING = "caching";
+    public static final String TYPE_OPERATIONS = "operations";
     
     public static final long DEFAULT_TILE_SIZE = 16000000;
 
@@ -148,6 +149,10 @@ public class BenchmarkContext {
 
     public boolean isCachingBenchmark() {
         return TYPE_CACHING.equalsIgnoreCase(benchmarkType);
+    }
+
+    public boolean isOperationsBenchmark() {
+        return TYPE_OPERATIONS.equalsIgnoreCase(benchmarkType);
     }
     
     /**

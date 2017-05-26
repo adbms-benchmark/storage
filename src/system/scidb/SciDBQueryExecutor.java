@@ -2,6 +2,7 @@ package system.scidb;
 
 import benchmark.QueryExecutor;
 import benchmark.BenchmarkContext;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +26,8 @@ public class SciDBQueryExecutor extends QueryExecutor<SciDBSystem> {
         commandList.add(systemController.getQueryCommand());
         commandList.add("-q");
         commandList.add(query);
-        commandList.add("-a");
+//        commandList.add("-a"); //only if AFL
+        commandList.add("-n");
         commandList.add("-p");
         commandList.add(String.valueOf(systemController.getPort()));
         Collections.addAll(commandList, args);

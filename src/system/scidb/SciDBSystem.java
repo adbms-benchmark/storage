@@ -5,6 +5,7 @@ import benchmark.DataManager;
 import benchmark.QueryExecutor;
 import benchmark.QueryGenerator;
 import benchmark.BenchmarkContext;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -61,7 +62,7 @@ public class SciDBSystem extends AdbmsSystem {
 
     @Override
     public QueryGenerator getQueryGenerator(BenchmarkContext benchmarkContext) {
-        return new SciDBAFLQueryGenerator(benchmarkContext);
+        return new SciDBAQLQueryGenerator(benchmarkContext);
     }
 
     @Override
@@ -75,6 +76,8 @@ public class SciDBSystem extends AdbmsSystem {
             return new SciDBCachingBenchmarkDataManager(this, queryExecutor, benchmarkContext);
         } else if (benchmarkContext.isStorageBenchmark()) {
             return new SciDBStorageBenchmarkDataManager(this, queryExecutor, benchmarkContext);
+        } else if (benchmarkContext.isOperationsBenchmark()) {
+            return new SciDBOperationsBenchmarkDataManager(this, queryExecutor, benchmarkContext);
         } else {
             throw new UnsupportedOperationException("Unsupported benchmark type '" + benchmarkContext.getBenchmarkType() + "'.");
         }

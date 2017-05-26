@@ -6,6 +6,7 @@
 package util;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,7 +17,8 @@ import java.util.List;
 public class BenchmarkUtil {
 
     public static String getArrayName(int dimension, String size) {
-        return "colD" + dimension + "S" + size;
+        Date d = new Date();
+        return "colD" + dimension + "S" + size + d.getTime();
     }
 
     public static String getAsqldbCollectionNameInRasdaman(String tableName, String columnName) {

@@ -7,7 +7,7 @@ package util;
  */
 public class DomainUtil {
 
-    public static final long SIZE_1B = 1024l;
+    public static final long SIZE_1B = 1l;
     public static final long SIZE_1KB = 1024l;
     public static final long SIZE_1MB = 1048576l;
     public static final long SIZE_1GB = 1073741824l;

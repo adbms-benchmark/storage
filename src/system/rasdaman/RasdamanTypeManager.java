@@ -7,6 +7,7 @@ package system.rasdaman;
 
 import java.text.MessageFormat;
 import util.Pair;
+import java.util.Date;
 
 /**
  * Create/drop types in rasdaman.
@@ -71,7 +72,7 @@ public class RasdamanTypeManager {
         queryExecutor.executeTimedQuery(mddTypeDefinition);
         return mddTypeName;
     }
-    
+
     public String getSetTypeName(int noOfDimensions, String baseTypeName) {
         String setTypeName = MessageFormat.format("B_SET_{0}_{1}", baseTypeName, noOfDimensions);
         return setTypeName;
@@ -88,6 +89,44 @@ public class RasdamanTypeManager {
         String baseTypeName = createBaseType(baseTypes);
         String mddTypeName = createMddType(noOfDimensions, baseTypeName);
         String setTypeName = createSetType(noOfDimensions, baseTypeName, mddTypeName);
+        return Pair.of(mddTypeName, setTypeName);
+    }
+
+    public String getOperationsMddTypeName(int noOfDimensions, String baseTypeName) {
+        Date d = new Date();
+        String mddTypeName = String.format("B_MDD_%s_%d_%d", baseTypeName, noOfDimensions, d.getTime());
+        return mddTypeName;
+    }
+
+    public String createOperationsMddType(int noOfDimensions, String baseTypeName) throws Exception {
+        String mddTypeName = getOperationsMddTypeName(noOfDimensions, baseTypeName);
+        String mddTypeDefinition = MessageFormat.format("create type {0} as {1} mdarray [ {2} ]", mddTypeName, baseTypeName, getDimNames(noOfDimensions));
+        queryExecutor.executeTimedQuery(mddTypeDefinition);
+        return mddTypeName;
+    }
+
+    public String getOperationsSetTypeName(int noOfDimensions, String baseTypeName) {
+        Date d = new Date();
+        String setTypeName = String.format("B_SET_%s_%d_%s", baseTypeName, noOfDimensions, d.getTime());
+        return setTypeName;
+    }
+
+    public String createOperationsSetType(int noOfDimensions, String baseTypeName, String mddTypeName) throws Exception {
+        String setTypeName = getOperationsSetTypeName(noOfDimensions, baseTypeName);
+        String setTypeDefinition = MessageFormat.format("create type {0} as set ({1})", setTypeName, mddTypeName);
+        queryExecutor.executeTimedQuery(setTypeDefinition);
+        return setTypeName;
+    }
+
+    public Pair<String, String> createOperationsType(int noOfDimensions, String... baseTypes) throws Exception {
+        String baseTypeName;
+        if(baseTypes.length > 1) {
+            baseTypeName = createBaseType(baseTypes);
+        }  else {
+            baseTypeName = baseTypes[0];
+        }
+        String mddTypeName = createOperationsMddType(noOfDimensions, baseTypeName);
+        String setTypeName = createOperationsSetType(noOfDimensions, baseTypeName, mddTypeName);
         return Pair.of(mddTypeName, setTypeName);
     }
 
