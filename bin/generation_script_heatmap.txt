@@ -1,0 +1,47 @@
+import plotly.offline as py
+import plotly.figure_factory as ff
+
+# z=[[125, 116, 122], [123, 123, 126] , [123, 122, 128], [124, 125, 120], [124, 124, 127]]
+# x=['char', 'int32', 'double']
+# y=['1D', '2D', '3D', '4D', '5D']
+# #SELECT OPERATION rasdaman
+
+# z=[[122, 127, 123], [129, 118, 127] , [127, 124, 128], [127, 130, 128], [127, 127, 126]]
+# x=['char', 'int32', 'double']
+# y=['1D', '2D', '3D', '4D', '5D']
+# # # # #CASTING OPERATION rasdaman
+
+# z=[[8802, 7102, 7088] , [8238, 6722, 6981], [7942, 6762, 6932], [8468, 6711, 6936]]
+# x=['char', 'int32', 'double']
+# y=['2D', '3D', '4D', '5D']
+# # # # # #AGGREGATE OPERATIONS
+
+# z=[[789, 783, 771], [773, 773, 764] , [778, 786, 798], [777, 784, 788], [772, 800, 786]]
+# x=['char', 'int32', 'double']
+# y=['1D', '2D', '3D', '4D', '5D']
+# # # # # #ALGEBRAIIC OPERATIONS
+
+# z=[[252, 251, 254], [253, 251, 247] , [247, 258, 256], [263, 256, 253], [257, 259, 253]]
+# x=['char', 'int32', 'double']
+# y=['1D', '2D', '3D', '4D', '5D']
+# # # # # #LOGICAL OPERATIONS
+
+# z=[[752, 738, 731], [753, 753, 747] , [756, 745, 744], [753, 760, 758], [758, 772, 742]]
+# x=['char', 'int32', 'double']
+# y=['1D', '2D', '3D', '4D', '5D']
+# # # # # #COMPARISON OPERATIONS
+
+
+# z=[[499, 503, 512], [506, 497, 495] , [509, 496, 502], [503, 506, 493], [503, 517, 503]]
+# x=['char', 'int32', 'double']
+# y=['1D', '2D', '3D', '4D', '5D']
+# # # # # #TRIGONOMETRIC OPERATIONS
+
+
+z=[[5281, 5218, 5235], [5352, 5252, 5308] ,[5364, 5280, 5314], [5496, 5327, 5273], [5408, 5370, 5333]]
+x=['char', 'int32', 'double']
+y=['1D', '2D', '3D', '4D', '5D']
+# # # # # #STACK ALGEBRAIC OPERATIONS
+
+fig = ff.create_annotated_heatmap(z, x=x, y=y)
+py.plot(fig, filename='annotated_heatmap_text')
